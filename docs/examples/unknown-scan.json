@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 1,
+  "provider": "claude-code",
+  "scope": "tracked-project-rule-policy",
+  "command": "scan",
+  "revisions": [
+    "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3"
+  ],
+  "complete": false,
+  "findings": [
+    {
+      "kind": "permission",
+      "tool": "Bash",
+      "witness": "x",
+      "severity": "INFO",
+      "before": {
+        "decision": "UNKNOWN",
+        "reason": "Unmodeled configuration affects this tool",
+        "evidence": [
+          {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/hooks"
+          },
+          {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/sandbox"
+          },
+          {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/permissions/deny/0"
+          }
+        ]
+      },
+      "after": {
+        "decision": "UNKNOWN",
+        "reason": "Unmodeled configuration affects this tool",
+        "evidence": [
+          {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/hooks"
+          },
+          {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/sandbox"
+          },
+          {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/permissions/deny/0"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "permission",
+      "tool": "WebSearch",
+      "witness": "*",
+      "severity": "INFO",
+      "before": {
+        "decision": "UNKNOWN",
+        "reason": "Unmodeled configuration affects this tool",
+        "evidence": [
+          {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/hooks"
+          },
+          {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/sandbox"
+          },
+          {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/permissions/deny/0"
+          }
+        ]
+      },
+      "after": {
+        "decision": "UNKNOWN",
+        "reason": "Unmodeled configuration affects this tool",
+        "evidence": [
+          {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/hooks"
+          },
+          {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/sandbox"
+          },
+          {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/permissions/deny/0"
+          }
+        ]
+      }
+    }
+  ],
+  "policies": [
+    {
+      "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+      "rules": [
+        {
+          "tool": "Bash",
+          "pattern": "git push *",
+          "decision": "DENY",
+          "evidence": {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/permissions/deny/1",
+            "rule": "Bash(git push *)"
+          }
+        },
+        {
+          "tool": "Bash",
+          "pattern": "git push",
+          "decision": "DENY",
+          "evidence": {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/permissions/deny/1",
+            "rule": "Bash(git push *)"
+          }
+        },
+        {
+          "tool": "Bash",
+          "pattern": "npm test",
+          "decision": "ALLOW",
+          "evidence": {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/permissions/allow/0",
+            "rule": "Bash(npm test)"
+          }
+        },
+        {
+          "tool": "Bash",
+          "pattern": "npm run build",
+          "decision": "ALLOW",
+          "evidence": {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/permissions/allow/1",
+            "rule": "Bash(npm run build)"
+          }
+        }
+      ],
+      "issues": [
+        {
+          "message": "Unmodeled top-level setting: hooks",
+          "evidence": {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/hooks"
+          },
+          "tool": null,
+          "fingerprint": "8902462d89796ce87e8914ad41dc78e9d883e44b125dad850e44a2469fcbcc36"
+        },
+        {
+          "message": "Unmodeled top-level setting: sandbox",
+          "evidence": {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/sandbox"
+          },
+          "tool": null,
+          "fingerprint": "26b3426b2593763c96d0890b4a77a0bbf66d13fc512b0c6b138a23c290f30a2a"
+        },
+        {
+          "message": "Unmodeled tool: Read",
+          "evidence": {
+            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
+            "file": ".claude/settings.json",
+            "pointer": "/permissions/deny/0"
+          },
+          "tool": null,
+          "fingerprint": "d32001d08b7e0990e2ef5732ac51425f931e5ceedaff77f3c92d7d13db4ec72b"
+        }
+      ],
+      "files": [
+        ".claude/settings.json"
+      ]
+    }
+  ]
+}

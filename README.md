@@ -6,6 +6,8 @@ It compares decisions after rule precedence and wildcard matching, rather than r
 
 **MVP scope:** tracked, root-level `.claude/settings.json` and `.claude/settings.local.json`; Bash rule matching and bare WebSearch permissions. This is a partial model of the configuration rule layer, not a Claude Code runtime emulator or an assurance that an operation can execute. Every report has `complete: false`. Review coverage diagnostics alongside findings.
 
+The first GitHub release should be labeled **experimental**. See the [release checklist](docs/release-readiness.md) for verification, repository settings, and remaining blockers. No npm publication is implied.
+
 ## Requirements and local use
 
 Node.js 24 and Git with `--no-lazy-fetch` support (documented in Git 2.47 and later). Older Git fails closed. There are no runtime npm dependencies, network requests, AI API calls, or telemetry in the CLI/library.
@@ -28,16 +30,49 @@ Exit codes: `0` means a report was produced (including findings or incomplete co
 Before:
 
 ```json
-{ "permissions": { "ask": ["Bash"], "allow": ["Bash(npm test)"] } }
+{
+  "permissions": {
+    "defaultMode": "default",
+    "allow": ["Bash(npm test)"],
+    "ask": ["Bash(npm run build)"],
+    "deny": ["Bash(git push *)"]
+  }
+}
 ```
 
 After:
 
 ```json
-{ "permissions": { "ask": ["Bash(npm test)"], "allow": ["Bash(npm *)"] } }
+{
+  "permissions": {
+    "defaultMode": "default",
+    "allow": ["Bash(npm test)", "Bash(npm run build)"],
+    "ask": [],
+    "deny": ["Bash(git push *)"]
+  }
+}
 ```
 
-The broad ask originally masks the allow. Afterward, another matching command such as `npm run build` changes from `ASK` to `ALLOW` (`HIGH`). The report supplies a deterministic representative witness, plus the before/after commit, file, JSON pointer, and determining rule(s). The witness may differ from this example and is never executed. Witnesses are abstract rule-input strings, not recommended shell commands or proof that a command exists.
+These are `.claude/settings.json` snapshots. Both commits also contain a tracked `.claude/settings.local.json` allowing `Bash(npm run lint)`. The build approval changes from `ASK` to `ALLOW`; the existing test/lint grants and push denial are unchanged.
+
+Actual installed-CLI output from the deterministic disposable example repository, running `agent-permission-diff compare HEAD~1 HEAD`:
+
+```text
+AgentPermissionDiff — Claude Code
+Scope: tracked-project-rule-policy; runtime authorization is not established.
+Revisions: "004faef35fab1f677974ed183fa0f8ee40f97ebc" → "0126081ca8f2348bc0ccdc0862f5dd73827bd9ee"
+Coverage: partial (see README for assumptions and unsupported runtime semantics)
+
+[HIGH] permission "Bash" "npm run build": ASK → ALLOW
+  Before: "004faef35fab":".claude/settings.json"#"/permissions/ask/0" "Bash(npm run build)"; Matching ask rule(s) in deny > ask > allow order
+  After:  "0126081ca8f2":".claude/settings.json"#"/permissions/allow/1" "Bash(npm run build)"; Matching allow rule(s) in deny > ask > allow order
+```
+
+`compare HEAD~1 HEAD --json` produces the [complete JSON report](docs/examples/compare.json), including both policies, full commit IDs, `schemaVersion: 1`, and `complete: false`. `scan HEAD` inventories decisions rather than transitions: [human](docs/examples/scan.txt), [JSON](docs/examples/scan.json). The example commit IDs belong to disposable test repositories, not this project's Git history.
+
+A second realistic fixture contains a hook, sandbox settings, and an unsupported Read rule. Adding a Bash grant beneath those unchanged unknown settings reports `MEDIUM` coverage with `UNKNOWN → UNKNOWN`, rather than claiming unchanged permissions: [human compare](docs/examples/unknown-compare.txt), [JSON compare](docs/examples/unknown-compare.json), [human scan](docs/examples/unknown-scan.txt), [JSON scan](docs/examples/unknown-scan.json). Hooks and commands in these fixtures are never executed.
+
+The [package smoke suite](https://github.com/vlovers/agent-permission-diff/blob/main/test/package-smoke.test.mjs) creates these repositories, installs a local tarball offline, and verifies all eight captured reports against the installed CLI. Witnesses are abstract rule-input strings, not recommended commands or proof that a command exists. To intentionally refresh captures after reviewed output changes, run `npm run build` then `APD_UPDATE_EXAMPLES=1 npm run test:package` and review the example/README diffs.
 
 ## Supported semantics
 
@@ -120,9 +155,11 @@ npm ci --ignore-scripts --no-audit --no-fund
 npm run typecheck
 npm test
 npm run build
+npm run test:package
 npm run format:check
+npm pack --dry-run
 ```
 
-Tests cover precedence, list merging, wildcards/boundaries, unknown semantics, unchanged effective permissions, evidence replay, all severity transitions, an independent glob oracle, Git/CLI behavior, symlink rejection, non-execution, and checkout/index preservation. CI runs these checks on Node.js 24 with read-only repository permissions. Dependabot maintains development dependencies and GitHub Actions.
+The 28 source tests cover precedence, list merging, wildcards/boundaries, unknown semantics, unchanged effective permissions, evidence replay, all severity transitions, independent glob oracles, Git/CLI behavior, symlink rejection, non-execution, and checkout/index preservation. Seven additional package tests verify dry-run/actual tarball contents, offline installation, executable bin, ESM exports, TypeScript declarations, realistic compiled-CLI scenarios, and reproducible documentation. CI runs both suites on Node.js 24 with read-only repository permissions. `prepack` builds artifacts before ordinary packing; the package smoke suite uses `--ignore-scripts` to test exactly the artifacts built by CI. Dependabot maintains development dependencies and GitHub Actions.
 
 See [research and source notes](docs/research.md), [contributing](CONTRIBUTING.md), [security](SECURITY.md), and the [MIT license](LICENSE).

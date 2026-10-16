@@ -4,6 +4,14 @@
   "description": "Offline effective permission policy comparison for AI coding agents",
   "type": "module",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vlovers/agent-permission-diff.git"
+  },
+  "homepage": "https://github.com/vlovers/agent-permission-diff#readme",
+  "bugs": {
+    "url": "https://github.com/vlovers/agent-permission-diff/issues"
+  },
   "engines": {
     "node": ">=24 <25"
   },
@@ -20,12 +28,16 @@
     "dist",
     "README.md",
     "LICENSE",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
     "docs"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test test/*.test.ts",
+    "test:package": "node --test test/package-smoke.test.mjs",
+    "prepack": "npm run build",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

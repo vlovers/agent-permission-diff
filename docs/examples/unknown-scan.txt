@@ -1,0 +1,15 @@
+AgentPermissionDiff — Claude Code
+Scope: tracked-project-rule-policy; runtime authorization is not established.
+Revisions: "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3"
+Coverage: partial (see README for assumptions and unsupported runtime semantics)
+
+[INFO] permission "Bash" "x": UNKNOWN → UNKNOWN
+  Before: "22aaa8a94e30":".claude/settings.json"#"/hooks"; "22aaa8a94e30":".claude/settings.json"#"/sandbox"; "22aaa8a94e30":".claude/settings.json"#"/permissions/deny/0"; Unmodeled configuration affects this tool
+  After:  "22aaa8a94e30":".claude/settings.json"#"/hooks"; "22aaa8a94e30":".claude/settings.json"#"/sandbox"; "22aaa8a94e30":".claude/settings.json"#"/permissions/deny/0"; Unmodeled configuration affects this tool
+
+[INFO] permission "WebSearch" "*": UNKNOWN → UNKNOWN
+  Before: "22aaa8a94e30":".claude/settings.json"#"/hooks"; "22aaa8a94e30":".claude/settings.json"#"/sandbox"; "22aaa8a94e30":".claude/settings.json"#"/permissions/deny/0"; Unmodeled configuration affects this tool
+  After:  "22aaa8a94e30":".claude/settings.json"#"/hooks"; "22aaa8a94e30":".claude/settings.json"#"/sandbox"; "22aaa8a94e30":".claude/settings.json"#"/permissions/deny/0"; Unmodeled configuration affects this tool
+Coverage issue "22aaa8a94e30":".claude/settings.json"#"/hooks": "Unmodeled top-level setting: hooks"
+Coverage issue "22aaa8a94e30":".claude/settings.json"#"/sandbox": "Unmodeled top-level setting: sandbox"
+Coverage issue "22aaa8a94e30":".claude/settings.json"#"/permissions/deny/0": "Unmodeled tool: Read"

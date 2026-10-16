@@ -2,3 +2,6 @@ node_modules/
 dist/
 package-lock.json
 .apd-test-*/
+.idea/
+# Preserve byte-for-byte captured CLI JSON output.
+docs/examples/*.json

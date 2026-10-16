@@ -1,0 +1,8 @@
+AgentPermissionDiff — Claude Code
+Scope: tracked-project-rule-policy; runtime authorization is not established.
+Revisions: "004faef35fab1f677974ed183fa0f8ee40f97ebc" → "0126081ca8f2348bc0ccdc0862f5dd73827bd9ee"
+Coverage: partial (see README for assumptions and unsupported runtime semantics)
+
+[HIGH] permission "Bash" "npm run build": ASK → ALLOW
+  Before: "004faef35fab":".claude/settings.json"#"/permissions/ask/0" "Bash(npm run build)"; Matching ask rule(s) in deny > ask > allow order
+  After:  "0126081ca8f2":".claude/settings.json"#"/permissions/allow/1" "Bash(npm run build)"; Matching allow rule(s) in deny > ask > allow order

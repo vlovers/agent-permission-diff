@@ -1,0 +1,28 @@
+AgentPermissionDiff — Claude Code
+Scope: tracked-project-rule-policy; runtime authorization is not established.
+Revisions: "0126081ca8f2348bc0ccdc0862f5dd73827bd9ee"
+Coverage: partial (see README for assumptions and unsupported runtime semantics)
+
+[INFO] permission "Bash" "x": UNKNOWN → UNKNOWN
+  Before: No determining rule; No matching rule; Bash built-in approvals and runtime checks are not modeled
+  After:  No determining rule; No matching rule; Bash built-in approvals and runtime checks are not modeled
+
+[INFO] permission "Bash" "git push": DENY → DENY
+  Before: "0126081ca8f2":".claude/settings.json"#"/permissions/deny/0" "Bash(git push *)"; Matching deny rule(s) in deny > ask > allow order
+  After:  "0126081ca8f2":".claude/settings.json"#"/permissions/deny/0" "Bash(git push *)"; Matching deny rule(s) in deny > ask > allow order
+
+[INFO] permission "Bash" "npm test": ALLOW → ALLOW
+  Before: "0126081ca8f2":".claude/settings.json"#"/permissions/allow/0" "Bash(npm test)"; Matching allow rule(s) in deny > ask > allow order
+  After:  "0126081ca8f2":".claude/settings.json"#"/permissions/allow/0" "Bash(npm test)"; Matching allow rule(s) in deny > ask > allow order
+
+[INFO] permission "Bash" "npm run lint": ALLOW → ALLOW
+  Before: "0126081ca8f2":".claude/settings.local.json"#"/permissions/allow/0" "Bash(npm run lint)"; Matching allow rule(s) in deny > ask > allow order
+  After:  "0126081ca8f2":".claude/settings.local.json"#"/permissions/allow/0" "Bash(npm run lint)"; Matching allow rule(s) in deny > ask > allow order
+
+[INFO] permission "Bash" "npm run build": ALLOW → ALLOW
+  Before: "0126081ca8f2":".claude/settings.json"#"/permissions/allow/1" "Bash(npm run build)"; Matching allow rule(s) in deny > ask > allow order
+  After:  "0126081ca8f2":".claude/settings.json"#"/permissions/allow/1" "Bash(npm run build)"; Matching allow rule(s) in deny > ask > allow order
+
+[INFO] permission "WebSearch" "*": ASK → ASK
+  Before: No determining rule; Manual-mode WebSearch default requires approval
+  After:  No determining rule; Manual-mode WebSearch default requires approval
