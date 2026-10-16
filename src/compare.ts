@@ -1,5 +1,5 @@
 import { regions } from "./glob.ts";
-import { evaluate } from "./policy.ts";
+import { evaluate, relevantIssues } from "./policy.ts";
 import type {
   Decision,
   Evaluation,
@@ -49,6 +49,41 @@ export function comparePolicies(before: Policy, after: Policy): Report {
         after: right,
       });
     }
+    // UNKNOWN is missing knowledge, not a semantic equivalence class. A
+    // stable hook/mode/unsupported rule must not hide changed known rules.
+    const ruleKeys = (policy: Policy): string[] =>
+      [
+        ...new Set(
+          policy.rules
+            .filter((rule) => rule.tool === tool)
+            .map((rule) => JSON.stringify([rule.pattern, rule.decision])),
+        ),
+      ].sort();
+    if (
+      (relevantIssues(before, tool).length ||
+        relevantIssues(after, tool).length) &&
+      JSON.stringify(ruleKeys(before)) !== JSON.stringify(ruleKeys(after))
+    ) {
+      const unresolved = (policy: Policy): Evaluation => ({
+        decision: "UNKNOWN",
+        reason:
+          "Supported rules changed under unresolved configuration; unchanged behavior cannot be established",
+        evidence: [
+          ...relevantIssues(policy, tool).map((issue) => issue.evidence),
+          ...policy.rules
+            .filter((rule) => rule.tool === tool)
+            .map((rule) => rule.evidence),
+        ],
+      });
+      findings.push({
+        kind: "coverage",
+        tool,
+        witness: "Supported rules changed under unresolved configuration",
+        severity: "MEDIUM",
+        before: unresolved(before),
+        after: unresolved(after),
+      });
+    }
   }
   const issueKeys = (policy: Policy): string[] =>
     [
@@ -56,7 +91,10 @@ export function comparePolicies(before: Policy, after: Policy): Report {
         policy.issues.map((issue) =>
           JSON.stringify([
             issue.evidence.file,
-            issue.evidence.pointer.replace(/\/\d+$/, ""),
+            issue.evidence.pointer.replace(
+              /^(\/permissions\/(?:allow|ask|deny))\/\d+$/,
+              "$1",
+            ),
             issue.tool,
             issue.fingerprint,
           ]),

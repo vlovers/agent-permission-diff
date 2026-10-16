@@ -2,6 +2,8 @@
 
 Reviewed 2026-10-16. Documentation evolves independently of this project; this MVP models only the subset listed in the README. It has not been validated against a running Claude Code installation and does not pin a compatible Claude Code release range.
 
+The [v0.1 audit](audit-v0.1.md) rechecks these sources, records reproduced bugs, and documents conservative support restrictions and remaining release blockers.
+
 ## Primary documentation
 
 - [Claude Code permissions](https://code.claude.com/docs/en/permissions): documents deny/ask/allow ordering, tool/specifier rules, Bash wildcard boundaries and the legacy prefix suffix. It also describes shell parsing, wrapper removal, built-in read-only approvals, modes, path protections, MCP and hooks. These extra runtime layers motivate explicit unknowns rather than assuming every unmatched request prompts.

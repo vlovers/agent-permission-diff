@@ -21,7 +21,11 @@ export function matches(pattern: string, input: string): boolean {
   for (const char of input) states = step(pattern, states, char);
   return states.includes(pattern.length);
 }
-export function regions(patterns: string[], limit = 20_000): string[] {
+export function regions(
+  patterns: string[],
+  limit = 20_000,
+  workLimit = 2_000_000,
+): string[] {
   if (patterns.length > 128 || patterns.join("").length > 8192) {
     throw new Error(
       "Symbolic analysis input limit exceeded (128 patterns / 8192 characters)",
@@ -38,6 +42,7 @@ export function regions(patterns: string[], limit = 20_000): string[] {
   const seen = new Set([JSON.stringify(initial) + ":empty"]);
   const signatures = new Set<string>();
   const witnesses: string[] = [];
+  let work = 0;
   for (let cursor = 0; cursor < queue.length; cursor++) {
     const { states, witness } = queue[cursor]!;
     const signature = patterns
@@ -48,6 +53,11 @@ export function regions(patterns: string[], limit = 20_000): string[] {
       witnesses.push(witness);
     }
     for (const char of alphabet) {
+      work += states.reduce((sum, active) => sum + active.length + 1, 0);
+      if (work > workLimit)
+        throw new Error(
+          `Symbolic analysis exceeds ${workLimit} work units; narrow the policy`,
+        );
       const next = patterns.map((p, i) => step(p, states[i]!, char));
       const key = JSON.stringify(next) + ":nonempty";
       if (seen.has(key)) continue;

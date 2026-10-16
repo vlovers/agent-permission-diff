@@ -9,14 +9,24 @@ export const SETTINGS_FILES = [
 const lists = { deny: "DENY", ask: "ASK", allow: "ALLOW" } as const;
 const object = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
-function canonical(value: unknown): string {
-  if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
+function canonical(value: unknown, depth = 0): string {
+  if (depth > 64)
+    throw new Error("Unsupported configuration exceeds 64 levels of nesting");
+  // JSON.parse can produce Infinity from a valid exponent; JSON.stringify
+  // would collapse it to null. Keep overflow and signed zero distinguishable.
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) return `number:${String(value)}`;
+    if (Object.is(value, -0)) return "-0";
+  }
+  if (Array.isArray(value))
+    return `[${value.map((item) => canonical(item, depth + 1)).join(",")}]`;
   if (object(value))
-    return JSON.stringify(
-      Object.keys(value)
-        .sort()
-        .map((key) => [key, canonical(value[key])]),
-    );
+    return `{${Object.keys(value)
+      .sort()
+      .map(
+        (key) => `${JSON.stringify(key)}:${canonical(value[key], depth + 1)}`,
+      )
+      .join(",")}}`;
   return JSON.stringify(value) ?? "undefined";
 }
 export function parsePolicy(
@@ -30,6 +40,8 @@ export function parsePolicy(
     files: Object.keys(files).sort(),
   };
   for (const file of policy.files) {
+    if (Buffer.byteLength(files[file]!, "utf8") > 2 * 1024 * 1024)
+      throw new Error("Settings input exceeds 2 MiB");
     const evidence = (pointer: string): Evidence => ({
       revision,
       file,
@@ -62,7 +74,10 @@ export function parsePolicy(
       continue;
     }
     for (const [key, value] of Object.entries(document)) {
-      if (["permissions", "$schema", "model", "effortLevel"].includes(key))
+      if (
+        key === "permissions" ||
+        (key === "$schema" && typeof value === "string")
+      )
         continue;
       issue(
         `/${escapePointer(key)}`,
@@ -121,6 +136,20 @@ export function parsePolicy(
           continue;
         }
         if (tool === "Bash") {
+          // In ask/deny, a single identifier followed by ':' may name a
+          // scalar input parameter. Do not erase that ambiguity as ':*'.
+          if (
+            key !== "allow" &&
+            /^\s*[A-Za-z_][A-Za-z0-9_]*\s*:/.test(pattern)
+          ) {
+            issue(
+              location,
+              raw,
+              "Ambiguous Bash parameter or legacy prefix rule is not modeled",
+              tool,
+            );
+            continue;
+          }
           if (pattern.endsWith(":*")) pattern = pattern.slice(0, -2) + " *";
           if (
             !pattern ||
@@ -131,6 +160,21 @@ export function parsePolicy(
               location,
               raw,
               "Complex Bash or parameter rule is not modeled",
+              tool,
+            );
+            continue;
+          }
+          // These literal command forms interact with wrapper removal or
+          // exact-vs-wildcard runtime approvals; raw glob inclusion is unsound.
+          if (
+            /^\s*(?:watch|setsid|ionice|flock|find|timeout|time|nice|nohup|stdbuf|command|builtin|noglob|xargs)(?:\s|$)/.test(
+              pattern,
+            )
+          ) {
+            issue(
+              location,
+              raw,
+              "Bash wrapper/find runtime semantics are not modeled",
               tool,
             );
             continue;

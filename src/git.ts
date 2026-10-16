@@ -13,7 +13,7 @@ export function readPolicy(repository: string, ref: string): Policy {
   )
     throw new Error("Invalid Git revision");
   const env = Object.fromEntries(
-    Object.entries(process.env).filter(([key]) => !key.startsWith("GIT_")),
+    Object.entries(process.env).filter(([key]) => !/^GIT_/i.test(key)),
   );
   Object.assign(env, {
     GIT_CONFIG_NOSYSTEM: "1",
@@ -22,28 +22,39 @@ export function readPolicy(repository: string, ref: string): Policy {
     GIT_NO_REPLACE_OBJECTS: "1",
     GIT_NO_LAZY_FETCH: "1",
     GIT_TERMINAL_PROMPT: "0",
+    GIT_ALLOW_PROTOCOL: "",
   });
   const git = (args: string[]): string => {
     try {
-      return execFileSync(
+      const output = execFileSync(
         "git",
-        ["--no-pager", "--no-optional-locks", "-C", repository, ...args],
+        [
+          "--no-pager",
+          "--no-optional-locks",
+          "--no-lazy-fetch",
+          "-C",
+          repository,
+          ...args,
+        ],
         {
           env,
-          encoding: "utf8",
           maxBuffer: 2 * 1024 * 1024,
           timeout: 10_000,
           stdio: ["ignore", "pipe", "pipe"],
         },
       );
+      return new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(
+        output,
+      );
     } catch {
       throw new Error(
-        `Read-only Git operation failed (${args[0]}); check revision, repository, and 2 MiB input limit`,
+        `Read-only Git operation failed (${args[0]}); check revision, repository, UTF-8 input, Git --no-lazy-fetch support, and 2 MiB input limit`,
       );
     }
   };
-  const root = git(["rev-parse", "--show-prefix"]).trim();
-  if (root) throw new Error("Run from the repository root");
+  const root = git(["rev-parse", "--show-prefix"]);
+  if (root !== "\n" && root !== "\r\n")
+    throw new Error("Run from the repository root");
   const revision = git([
     "rev-parse",
     "--verify",
