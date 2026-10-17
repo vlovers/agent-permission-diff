@@ -2,7 +2,7 @@
 
 **Semantic Permission Diff for AI Coding Agents**
 
-[![RuleWitness CI](https://github.com/vlovers/agent-permission-diff/actions/workflows/ci.yml/badge.svg?branch=feat%2Frulewitness-v0.2)](https://github.com/vlovers/agent-permission-diff/actions/workflows/ci.yml?query=branch%3Afeat%2Frulewitness-v0.2)
+[![RuleWitness CI](https://github.com/vlovers/rulewitness/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/vlovers/rulewitness/actions/workflows/ci.yml?query=branch%3Amain)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Detect, explain, and test Claude Code permission changes across Git revisions.
@@ -11,7 +11,7 @@ RuleWitness is an experimental, offline TypeScript CLI and library for reviewing
 
 **This is not a runtime authorization engine.** `ALLOW` means the supported configured rules allow that input in this model. It does not guarantee Claude Code will execute it. Every report retains `complete: false`. Unsupported settings and uncertain changes remain visible. Only Claude Code's documented subset below is supported; other agents are not advertised.
 
-This is the v0.2 evolution of AgentPermissionDiff. The repository stays [vlovers/agent-permission-diff](https://github.com/vlovers/agent-permission-diff); the new candidate package is `rulewitness@0.2.0`. See [migration notes](docs/migration-v0.2.md) and [release preparation](docs/release-v0.2.0.md).
+This is the v0.2 evolution of AgentPermissionDiff. The repository stays [vlovers/agent-permission-diff](https://github.com/vlovers/rulewitness); the new candidate package is `rulewitness@0.2.0`. See [migration notes](docs/migration-v0.2.md) and [release preparation](docs/release-v0.2.0.md).
 
 ## Installation and quick start
 
