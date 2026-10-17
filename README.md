@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![npm version](https://img.shields.io/npm/v/rulewitness.svg)](https://www.npmjs.com/package/rulewitness)
 
-Detect, explain, and test Claude Code permission changes across Git revisions.
+**Did a pull request change what Claude Code can do?** RuleWitness compares supported permission rules between Git revisions, shows a concrete command when a modeled decision changes, and explains which rules caused it. It also detects modeled no-ops and supports policy assertions — offline, without executing the commands.
 
 ![RuleWitness CLI demonstration](assets/rulewitness-demo.gif)
 
@@ -14,7 +14,7 @@ RuleWitness is an experimental, offline TypeScript CLI and library for reviewing
 
 **This is not a runtime authorization engine.** `ALLOW` means the supported configured rules allow that input in this model. It does not guarantee Claude Code will execute it. Every report retains `complete: false`. Unsupported settings and uncertain changes remain visible. Only Claude Code's documented subset below is supported; other agents are not advertised.
 
-This is the v0.2 evolution of AgentPermissionDiff. The repository is [vlovers/rulewitness](https://github.com/vlovers/rulewitness), and `rulewitness@0.2.0` is [published on npm](https://www.npmjs.com/package/rulewitness/v/0.2.0). See [migration notes](docs/migration-v0.2.md) and [release preparation](docs/release-v0.2.0.md).
+This is the v0.2 evolution of AgentPermissionDiff. The repository is [vlovers/rulewitness](https://github.com/vlovers/rulewitness), and `rulewitness@0.2.0` is [published on npm](https://www.npmjs.com/package/rulewitness/v/0.2.0). See [migration notes](docs/migration-v0.2.md), the [v0.2.0 release](https://github.com/vlovers/rulewitness/releases/tag/v0.2.0), and the [historical release preparation notes](docs/release-v0.2.0.md).
 
 ## Installation and quick start
 
@@ -315,6 +315,6 @@ To deliberately refresh captures after a reviewed output change, build and run `
 
 ## Contributing and security
 
-Contributions should extend the documented model conservatively, include primary sources and regression tests, and preserve coverage diagnostics. See [CONTRIBUTING](CONTRIBUTING.md), the MIT [LICENSE](LICENSE), [SECURITY](SECURITY.md), and [publishing checklist](docs/release-v0.2.0.md). The [GitHub metadata and rename checklist](docs/github-rename.md) records the migration from the former repository name; current product links use `vlovers/rulewitness`. Historical v0.1 audit/release documents are retained as historical records of AgentPermissionDiff, not retroactive claims about RuleWitness.
+Contributions should extend the documented model conservatively, include primary sources and regression tests, and preserve coverage diagnostics. See [CONTRIBUTING](CONTRIBUTING.md), the MIT [LICENSE](LICENSE), [SECURITY](SECURITY.md), and [npm publishing instructions](docs/npm-publishing.md). The [GitHub metadata and rename checklist](docs/github-rename.md) records the migration from the former repository name; current product links use `vlovers/rulewitness`. Historical v0.1 audit/release documents are retained as historical records of AgentPermissionDiff, not retroactive claims about RuleWitness.
 
 Use the repository's private vulnerability reporting form when enabled; never post secrets or exploits in a public issue. Maintainers should regularly verify the private reporting channel and security-notification ownership. The package remains experimental; see the scope and limitations above.
