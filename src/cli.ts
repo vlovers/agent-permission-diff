@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import {
   comparePolicies,
-  comparisonExitCode,
+  assessComparisonGate,
   formatHuman,
   formatMarkdown,
   readPolicy,
@@ -64,10 +64,13 @@ try {
         readPolicy(process.cwd(), refs[0]!),
         readPolicy(process.cwd(), refs[1]!),
       );
-      process.exitCode = comparisonExitCode(
-        report,
-        threshold as SeverityThreshold | undefined,
-      );
+      if (threshold) {
+        report.gate = assessComparisonGate(
+          report,
+          threshold as SeverityThreshold,
+        );
+        process.exitCode = report.gate.exitCode;
+      }
     } else if (command === "test" && refs.length === 0) {
       const policy = readPolicy(process.cwd(), options.get("--rev") ?? "HEAD");
       report = runPolicyTests(

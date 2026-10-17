@@ -48,6 +48,15 @@ export interface Explanation {
 export type ComparisonOutcome =
   "modeled-change" | "modeled-no-op" | "uncertain";
 export type SeverityThreshold = "high" | "medium" | "low" | "info";
+export interface ComparisonGate {
+  threshold: SeverityThreshold;
+  thresholdExceeded: boolean;
+  uncertain: boolean;
+  /** Indices into report.findings, restricted to known-to-known transitions. */
+  violations: number[];
+  /** Uncertainty takes precedence over a threshold violation. */
+  exitCode: 0 | 1 | 3;
+}
 export interface PolicyTestCase {
   name: string;
   tool: string;
@@ -82,4 +91,6 @@ export interface Report {
   complete: boolean;
   findings: Finding[];
   policies: Policy[];
+  /** Additive JSON v1 field, included only for an explicitly requested gate. */
+  gate?: ComparisonGate;
 }

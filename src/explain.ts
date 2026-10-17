@@ -1,5 +1,6 @@
 import type {
   ComparisonOutcome,
+  ComparisonGate,
   Explanation,
   Finding,
   Policy,
@@ -75,19 +76,35 @@ export function comparisonExitCode(
   threshold?: SeverityThreshold,
 ): 0 | 1 | 3 {
   if (threshold === undefined) return 0;
+  return assessComparisonGate(report, threshold).exitCode;
+}
+
+/** Calculate both facts before applying exit precedence; neither hides the other. */
+export function assessComparisonGate(
+  report: Report,
+  threshold: SeverityThreshold,
+): ComparisonGate {
   if (report.command !== "compare")
     throw new Error("Severity thresholds apply only to compare");
   if (!["high", "medium", "low", "info"].includes(threshold))
     throw new Error("Invalid severity threshold");
-  if (hasUncertainty(report)) return 3;
   const rank = { HIGH: 3, MEDIUM: 2, LOW: 1, INFO: 0 } as const;
-  return report.findings.some(
-    (finding) =>
-      finding.kind === "permission" &&
-      finding.before.decision !== finding.after.decision &&
-      rank[finding.severity] >=
-        rank[threshold.toUpperCase() as keyof typeof rank],
-  )
-    ? 1
-    : 0;
+  const violations = report.findings.flatMap((finding, index) =>
+    finding.kind === "permission" &&
+    finding.before.decision !== finding.after.decision &&
+    finding.before.decision !== "UNKNOWN" &&
+    finding.after.decision !== "UNKNOWN" &&
+    rank[finding.severity] >= rank[threshold.toUpperCase() as keyof typeof rank]
+      ? [index]
+      : [],
+  );
+  const uncertain = hasUncertainty(report);
+  const thresholdExceeded = violations.length > 0;
+  return {
+    threshold,
+    thresholdExceeded,
+    uncertain,
+    violations,
+    exitCode: uncertain ? 3 : thresholdExceeded ? 1 : 0,
+  };
 }

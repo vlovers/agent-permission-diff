@@ -54,6 +54,10 @@ export function formatHuman(report: Report | PolicyTestReport): string {
       lines.push(
         `Outcome: ${comparisonOutcome(report)} (within the inspected model only)`,
       );
+    if (report.gate)
+      lines.push(
+        `Gate: threshold=${report.gate.threshold}; thresholdExceeded=${report.gate.thresholdExceeded}; uncertain=${report.gate.uncertain}; exitCode=${report.gate.exitCode}`,
+      );
     if (!report.findings.length)
       lines.push(
         report.policies.some((p) => p.issues.length)

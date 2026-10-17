@@ -11,6 +11,7 @@ import test from "node:test";
 import {
   comparePolicies,
   comparisonExitCode,
+  assessComparisonGate,
   comparisonOutcome,
   evaluate,
   explainFinding,
@@ -157,6 +158,60 @@ test("severity gates distinguish threshold, uncertainty and legacy report-only b
     () => comparisonExitCode(scanPolicy(policy({})), "high"),
     /only to compare/,
   );
+});
+
+test("gates expose threshold violations independently of uncertainty, with documented precedence", () => {
+  for (const [before, after, threshold, exceeded, uncertain, code] of [
+    ["ASK", "ALLOW", "high", true, false, 1],
+    ["DENY", "ASK", "high", false, false, 0],
+    ["DENY", "ASK", "medium", true, false, 1],
+    ["ASK", "ALLOW", "high", true, true, 3],
+    ["DENY", "ASK", "high", false, true, 3],
+    ["DENY", "ASK", "medium", true, true, 3],
+    ["ASK", "ASK", "high", false, true, 3],
+    ["ASK", "ASK", "high", false, false, 0],
+  ] as const) {
+    const make = (decision: string) =>
+      policy({
+        [decision.toLowerCase()]: ["WebSearch"],
+        ...(uncertain
+          ? {
+              allow: [
+                ...(decision === "ALLOW" ? ["WebSearch"] : []),
+                "Bash(echo 'unsupported')",
+              ],
+            }
+          : {}),
+      });
+    const report = comparePolicies(make(before), make(after));
+    const gate = assessComparisonGate(report, threshold);
+    assert.equal(gate.thresholdExceeded, exceeded);
+    assert.equal(gate.uncertain, uncertain);
+    assert.equal(gate.exitCode, code);
+    assert.equal(comparisonExitCode(report, threshold), code);
+    assert.equal(gate.violations.length > 0, exceeded);
+    for (const index of gate.violations) {
+      const finding = report.findings[index]!;
+      assert.equal(finding.tool, "WebSearch");
+      assert.notEqual(finding.before.decision, "UNKNOWN");
+      assert.notEqual(finding.after.decision, "UNKNOWN");
+    }
+    report.gate = gate;
+    assert.match(
+      formatHuman(report),
+      new RegExp(
+        `thresholdExceeded=${exceeded}; uncertain=${uncertain}; exitCode=${code}`,
+      ),
+    );
+  }
+  const unknown = comparePolicies(policy({}), policy({ allow: ["Bash"] }));
+  assert.deepEqual(assessComparisonGate(unknown, "medium"), {
+    threshold: "medium",
+    thresholdExceeded: false,
+    uncertain: true,
+    violations: [],
+    exitCode: 3,
+  });
 });
 
 test("policy-test parser validates every field, duplicate names and schema bounds", () => {

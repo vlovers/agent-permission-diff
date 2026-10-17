@@ -13,6 +13,7 @@ export {
   validateWitness,
   comparisonOutcome,
   comparisonExitCode,
+  assessComparisonGate,
   hasUncertainty,
   LIMITATIONS,
 } from "./explain.ts";
