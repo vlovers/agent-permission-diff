@@ -1,0 +1,66 @@
+name: Publish RuleWitness to npm
+on:
+  release:
+    types: [published]
+permissions:
+  contents: read
+concurrency:
+  group: npm-publish-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Setup Node 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - name: Verify release tag and package version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -eu
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const pkg = JSON.parse(fs.readFileSync("package.json","utf8"));
+            const tag = process.env.RELEASE_TAG;
+            if (pkg.name !== "rulewitness" || tag !== "v" + pkg.version || !/^v[0-9]+[.][0-9]+[.][0-9]+(-[0-9A-Za-z.-]+)?$/.test(tag)) {
+              console.error("Release tag does not match package name/version"); process.exit(1);
+            }
+          '
+          test "$(git rev-parse HEAD)" = "$(git rev-list -n 1 "$RELEASE_TAG")"
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor HEAD origin/main
+      - name: Ensure npm supports Trusted Publishing
+        run: npm install --global npm@^11
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify build and package
+        run: |
+          npm run typecheck
+          npm test
+          npm run build
+          npm run test:package
+          npm run format:check
+          node dist/cli.js scan HEAD --json
+          npm pack --dry-run
+      - name: Block duplicate package versions
+        run: |
+          if npm view "rulewitness@$(node -p 'require("./package.json").version')" version --registry=https://registry.npmjs.org/ >/dev/null 2>&1; then
+            echo "Version is already published; refusing to republish"
+            exit 1
+          fi
+      - name: Publish using npm OIDC
+        run: npm publish --access public
