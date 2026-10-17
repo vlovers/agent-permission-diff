@@ -4,6 +4,7 @@
 
 [![RuleWitness CI](https://github.com/vlovers/rulewitness/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/vlovers/rulewitness/actions/workflows/ci.yml?query=branch%3Amain)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/rulewitness.svg)](https://www.npmjs.com/package/rulewitness)
 
 Detect, explain, and test Claude Code permission changes across Git revisions.
 
