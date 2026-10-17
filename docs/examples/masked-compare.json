@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "provider": "claude-code",
+  "scope": "tracked-project-rule-policy",
+  "command": "compare",
+  "revisions": [
+    "285071331fbea361193dc48b63b06e9d1fee8495",
+    "e056ddac44318a4385848c75999f232741898ae4"
+  ],
+  "complete": false,
+  "findings": [],
+  "policies": [
+    {
+      "revision": "285071331fbea361193dc48b63b06e9d1fee8495",
+      "rules": [
+        {
+          "tool": "Bash",
+          "pattern": "git push *",
+          "decision": "DENY",
+          "evidence": {
+            "revision": "285071331fbea361193dc48b63b06e9d1fee8495",
+            "file": ".claude/settings.json",
+            "pointer": "/permissions/deny/0",
+            "rule": "Bash(git push *)"
+          }
+        },
+        {
+          "tool": "Bash",
+          "pattern": "git push",
+          "decision": "DENY",
+          "evidence": {
+            "revision": "285071331fbea361193dc48b63b06e9d1fee8495",
+            "file": ".claude/settings.json",
+            "pointer": "/permissions/deny/0",
+            "rule": "Bash(git push *)"
+          }
+        },
+        {
+          "tool": "Bash",
+          "pattern": "npm test",
+          "decision": "ALLOW",
+          "evidence": {
+            "revision": "285071331fbea361193dc48b63b06e9d1fee8495",
+            "file": ".claude/settings.json",
+            "pointer": "/permissions/allow/0",
+            "rule": "Bash(npm test)"
+          }
+        }
+      ],
+      "issues": [],
+      "files": [
+        ".claude/settings.json"
+      ]
+    },
+    {
+      "revision": "e056ddac44318a4385848c75999f232741898ae4",
+      "rules": [
+        {
+          "tool": "Bash",
+          "pattern": "git push *",
+          "decision": "DENY",
+          "evidence": {
+            "revision": "e056ddac44318a4385848c75999f232741898ae4",
+            "file": ".claude/settings.json",
+            "pointer": "/permissions/deny/0",
+            "rule": "Bash(git push *)"
+          }
+        },
+        {
+          "tool": "Bash",
+          "pattern": "git push",
+          "decision": "DENY",
+          "evidence": {
+            "revision": "e056ddac44318a4385848c75999f232741898ae4",
+            "file": ".claude/settings.json",
+            "pointer": "/permissions/deny/0",
+            "rule": "Bash(git push *)"
+          }
+        },
+        {
+          "tool": "Bash",
+          "pattern": "npm test",
+          "decision": "ALLOW",
+          "evidence": {
+            "revision": "e056ddac44318a4385848c75999f232741898ae4",
+            "file": ".claude/settings.json",
+            "pointer": "/permissions/allow/0",
+            "rule": "Bash(npm test)"
+          }
+        },
+        {
+          "tool": "Bash",
+          "pattern": "git push origin main",
+          "decision": "ALLOW",
+          "evidence": {
+            "revision": "e056ddac44318a4385848c75999f232741898ae4",
+            "file": ".claude/settings.json",
+            "pointer": "/permissions/allow/1",
+            "rule": "Bash(git push origin main)"
+          }
+        }
+      ],
+      "issues": [],
+      "files": [
+        ".claude/settings.json"
+      ]
+    }
+  ]
+}

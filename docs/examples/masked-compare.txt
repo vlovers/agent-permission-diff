@@ -1,0 +1,9 @@
+RuleWitness — Permission Diff
+Scope: tracked-project-rule-policy; runtime authorization is not established.
+Revisions: "285071331fbea361193dc48b63b06e9d1fee8495" → "e056ddac44318a4385848c75999f232741898ae4"
+Coverage: partial (see README for assumptions and unsupported runtime semantics)
+Outcome: modeled-no-op (within the inspected model only)
+No decision changes found within the supported rule model; runtime behavior remains unverified.
+
+Supported configured-rule semantics only; runtime authorization is not guaranteed.
+External settings, session state, shell normalization and runtime checks are not established by this report.

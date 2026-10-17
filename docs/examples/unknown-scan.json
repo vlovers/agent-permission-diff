@@ -54,6 +54,18 @@
             "pointer": "/permissions/deny/0"
           }
         ]
+      },
+      "explanation": {
+        "certainty": "uncertain",
+        "summary": "Inventory: the modeled decision is UNKNOWN.",
+        "steps": [
+          "Before: Unmodeled configuration affects this tool",
+          "After: Unmodeled configuration affects this tool"
+        ],
+        "limitations": [
+          "Supported configured-rule semantics only; runtime authorization is not guaranteed.",
+          "External settings, session state, shell normalization and runtime checks are not established by this report."
+        ]
       }
     },
     {
@@ -101,6 +113,18 @@
             "file": ".claude/settings.json",
             "pointer": "/permissions/deny/0"
           }
+        ]
+      },
+      "explanation": {
+        "certainty": "uncertain",
+        "summary": "Inventory: the modeled decision is UNKNOWN.",
+        "steps": [
+          "Before: Unmodeled configuration affects this tool",
+          "After: Unmodeled configuration affects this tool"
+        ],
+        "limitations": [
+          "Supported configured-rule semantics only; runtime authorization is not guaranteed.",
+          "External settings, session state, shell normalization and runtime checks are not established by this report."
         ]
       }
     }

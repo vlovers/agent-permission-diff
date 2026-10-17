@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "name": "Tests should be allowed",
+      "tool": "Bash",
+      "input": "npm test",
+      "expected": "ALLOW"
+    },
+    {
+      "name": "Git pushes should be denied",
+      "tool": "Bash",
+      "input": "git push origin main",
+      "expected": "DENY"
+    }
+  ]
+}

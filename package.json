@@ -1,7 +1,7 @@
 {
-  "name": "agent-permission-diff",
-  "version": "0.1.0",
-  "description": "Offline effective permission policy comparison for AI coding agents",
+  "name": "rulewitness",
+  "version": "0.2.0",
+  "description": "Detect, explain, and test Claude Code permission changes across Git revisions.",
   "type": "module",
   "license": "MIT",
   "repository": {
@@ -16,6 +16,7 @@
     "node": ">=24 <25"
   },
   "bin": {
+    "rulewitness": "dist/cli.js",
     "agent-permission-diff": "dist/cli.js"
   },
   "exports": {
@@ -45,5 +46,16 @@
     "@types/node": "^24.0.0",
     "prettier": "^3.6.0",
     "typescript": "^5.9.0"
-  }
+  },
+  "keywords": [
+    "claude-code",
+    "claude-permissions",
+    "permission-diff",
+    "ai-agent-security",
+    "git-diff",
+    "typescript",
+    "cli",
+    "policy-testing",
+    "static-analysis"
+  ]
 }

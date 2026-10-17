@@ -254,7 +254,7 @@ export function evaluate(
         evidence: [],
       };
 }
-function uniqueEvidence(evidence: Evidence[]): Evidence[] {
+export function uniqueEvidence(evidence: Evidence[]): Evidence[] {
   return evidence.filter(
     (item, index) =>
       evidence.findIndex(
