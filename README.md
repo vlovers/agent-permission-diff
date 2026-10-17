@@ -7,35 +7,41 @@
 
 Detect, explain, and test Claude Code permission changes across Git revisions.
 
+![RuleWitness CLI demonstration](assets/rulewitness-demo.gif)
+
 RuleWitness is an experimental, offline TypeScript CLI and library for reviewing **Claude Code configuration-rule decisions** between Git commits. It produces concrete, replay-checked witnesses, explains the determining rules, filters modeled no-ops, and runs reusable policy assertions.
 
 **This is not a runtime authorization engine.** `ALLOW` means the supported configured rules allow that input in this model. It does not guarantee Claude Code will execute it. Every report retains `complete: false`. Unsupported settings and uncertain changes remain visible. Only Claude Code's documented subset below is supported; other agents are not advertised.
 
-This is the v0.2 evolution of AgentPermissionDiff. The repository stays [vlovers/agent-permission-diff](https://github.com/vlovers/rulewitness); the new candidate package is `rulewitness@0.2.0`. See [migration notes](docs/migration-v0.2.md) and [release preparation](docs/release-v0.2.0.md).
+This is the v0.2 evolution of AgentPermissionDiff. The repository is [vlovers/rulewitness](https://github.com/vlovers/rulewitness), and `rulewitness@0.2.0` is [published on npm](https://www.npmjs.com/package/rulewitness/v/0.2.0). See [migration notes](docs/migration-v0.2.md) and [release preparation](docs/release-v0.2.0.md).
 
 ## Installation and quick start
 
 Requires **Node.js 24** and Git supporting `--no-lazy-fetch` (documented in Git 2.47+). Local macOS is tested; Linux is exercised by CI. Windows execution/symlinks are not validated.
 
-The candidate has **not been published by this change**. Direct registry requests returned no public entry for `rulewitness` on 2026-10-17; this does not reserve the name or guarantee publish permission. Until a separately authorized release, use this checkout:
-
-```sh
-npm ci --ignore-scripts --no-audit --no-fund
-npm run build
-node dist/cli.js scan HEAD
-node dist/cli.js compare main HEAD --json
-npm pack --dry-run
-```
-
-To test a local tarball, run `npm pack`, install `./rulewitness-0.2.0.tgz` in a separate consumer with `npm install --ignore-scripts /absolute/path/to/rulewitness-0.2.0.tgz`, and use its `node_modules/.bin/rulewitness` from the target repository root. Packing is local and does not publish.
-
-**After an explicitly authorized npm publication**, the intended commands are:
+Install the published experimental release in the repository you want to inspect:
 
 ```sh
 npm install --save-dev rulewitness@0.2.0
-npx --no-install rulewitness compare main HEAD
+npx --no-install rulewitness scan HEAD
+npx --no-install rulewitness compare HEAD~1 HEAD
+npx --no-install rulewitness compare HEAD~1 HEAD --json --fail-on high
+```
+
+To run policy assertions, create `rulewitness.tests.json` as shown [below](#permission-policy-tests), then run:
+
+```sh
 npx --no-install rulewitness test
 ```
+
+For a global CLI installation:
+
+```sh
+npm install --global rulewitness@0.2.0
+rulewitness scan HEAD
+```
+
+Run analysis from the target Git repository root. Comparisons require both revisions to exist locally; RuleWitness never fetches them. The animation shows an excerpt of the actual [captured comparison](docs/examples/compare.txt), with its scope and determining rules preserved. Regenerate it locally with [scripts/render-demo.py](scripts/render-demo.py); no analysis commands or external generation APIs are invoked.
 
 The legacy `agent-permission-diff` executable is retained as an alias in the new package. Import paths change to `rulewitness`; the old package name is not an import alias. We retain the executable alias for the v0.2 migration to avoid breaking existing local scripts; it is compatibility-only and all primary examples use `rulewitness`. A later removal would require a documented breaking change.
 
@@ -50,7 +56,7 @@ rulewitness scan HEAD
 rulewitness test --config rulewitness.tests.json --rev HEAD
 ```
 
-The gated command exits 1 for this known transition. Unsupported configuration instead makes the gate exit 3; threshold violations and uncertainty are reported separately. Inputs are never executed. These commands assume a locally installed candidate or a later authorized npm release.
+The gated command exits 1 for this known transition. Unsupported configuration instead makes the gate exit 3; threshold violations and uncertainty are reported separately. Inputs are never executed. The bare `rulewitness` commands assume a global installation; with a local development dependency, prefix them with `npx --no-install`.
 
 ## Why semantic permission diffs matter
 
@@ -308,6 +314,6 @@ To deliberately refresh captures after a reviewed output change, build and run `
 
 ## Contributing and security
 
-Contributions should extend the documented model conservatively, include primary sources and regression tests, and preserve coverage diagnostics. See [CONTRIBUTING](CONTRIBUTING.md), the MIT [LICENSE](LICENSE), [SECURITY](SECURITY.md), and [publishing checklist](docs/release-v0.2.0.md). The maintainer can use the [exact GitHub metadata and rename checklist](docs/github-rename.md) after merge and explicit authorization; current links remain valid until then. Historical v0.1 audit/release documents are retained as historical records of AgentPermissionDiff, not retroactive claims about RuleWitness.
+Contributions should extend the documented model conservatively, include primary sources and regression tests, and preserve coverage diagnostics. See [CONTRIBUTING](CONTRIBUTING.md), the MIT [LICENSE](LICENSE), [SECURITY](SECURITY.md), and [publishing checklist](docs/release-v0.2.0.md). The [GitHub metadata and rename checklist](docs/github-rename.md) records the migration from the former repository name; current product links use `vlovers/rulewitness`. Historical v0.1 audit/release documents are retained as historical records of AgentPermissionDiff, not retroactive claims about RuleWitness.
 
-Use the repository's private vulnerability reporting form when enabled; never post secrets or exploits in a public issue. Reporting enablement and maintainer ownership must be verified before publication. This work does not publish to npm, create a GitHub release/tag, rename the repository, modify security settings or merge its PR.
+Use the repository's private vulnerability reporting form when enabled; never post secrets or exploits in a public issue. Maintainers should regularly verify the private reporting channel and security-notification ownership. The package remains experimental; see the scope and limitations above.
