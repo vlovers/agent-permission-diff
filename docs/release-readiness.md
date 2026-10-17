@@ -1,5 +1,7 @@
 # First GitHub release readiness
 
+Historical AgentPermissionDiff v0.1 preparation record. For current RuleWitness branding, packaging and limitations, use [v0.2 release preparation](release-v0.2.0.md). The baseline statements and counts below describe that earlier preparation, not the current candidate.
+
 Baseline: audited commit `52c6ac6f2f78293c15bbc199b70d533430a09bb1`. The baseline has two linear local commits; `git fsck --full` passed. No tracked IDE files or generated build artifacts were present. Unrelated untracked `.idea/` files are excluded from formatting and packaging and are not part of this change.
 
 Intended repository: [vlovers/agent-permission-diff](https://github.com/vlovers/agent-permission-diff). Repository existence, visibility and remote settings could not be verified through the public web fetch. The URL is used as project metadata and for prospective disclosure links; no repository, remote, push, release, deployment or npm publication is created by this preparation.

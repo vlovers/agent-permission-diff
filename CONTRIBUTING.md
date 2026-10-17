@@ -1,5 +1,7 @@
 # Contributing
 
+RuleWitness evolves AgentPermissionDiff in the same repository. Keep the provider model narrow, evidence-based and explicitly experimental. Do not claim runtime guarantees from raw rule matches or passing policy assertions.
+
 Use Node.js 24. Install development dependencies with `npm ci --ignore-scripts --no-audit --no-fund`.
 
 Before submitting a change, run:
@@ -19,4 +21,4 @@ Never execute analyzed settings, hooks, agent commands, or package scripts. Keep
 
 Changes to the JSON format should retain `schemaVersion` compatibility or explicitly increment it. Severity changes require a documented transition table and tests. A pull request should describe the problem, resulting behavior, coverage limits, and checks run.
 
-The package suite installs only a locally produced tarball in disposable repositories beneath this project, using offline npm with lifecycle scripts disabled. It verifies compiled behavior and installed imports/declarations without including source tests in the package. See the [release checklist](docs/release-readiness.md) for package contents, reproduction commands and GitHub settings. This project currently has no publishing or deployment automation. Releases and registry publication require a separate maintainer decision.
+The package suite creates disposable fixture repositories and installs only a locally produced tarball in an independent consumer outside the source repository, using offline npm with lifecycle scripts disabled. It verifies both bins, compiled commands, installed imports/declarations, exits and captured reports without including source tests in the package. See [v0.2 release preparation](docs/release-v0.2.0.md) and [migration](docs/migration-v0.2.md). Regenerate reviewed captures with `RULEWITNESS_UPDATE_EXAMPLES=1 npm run test:package` after building, and inspect every golden/README diff. This project has no publishing or deployment automation. Releases and registry publication require separate authorization.

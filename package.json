@@ -1,7 +1,7 @@
 {
-  "name": "agent-permission-diff",
-  "version": "0.1.0",
-  "description": "Offline effective permission policy comparison for AI coding agents",
+  "name": "rulewitness",
+  "version": "0.2.0",
+  "description": "Explain, prove, and test AI coding-agent permission changes (supported configuration model only)",
   "type": "module",
   "license": "MIT",
   "repository": {
@@ -16,6 +16,7 @@
     "node": ">=24 <25"
   },
   "bin": {
+    "rulewitness": "dist/cli.js",
     "agent-permission-diff": "dist/cli.js"
   },
   "exports": {

@@ -37,6 +37,18 @@
             "rule": "Bash(npm run build)"
           }
         ]
+      },
+      "explanation": {
+        "certainty": "modeled",
+        "summary": "The modeled decision for this witness changes from ASK to ALLOW.",
+        "steps": [
+          "Before: Matching ask rule(s) in deny > ask > allow order",
+          "After: Matching allow rule(s) in deny > ask > allow order"
+        ],
+        "limitations": [
+          "Supported configured-rule semantics only; runtime authorization is not guaranteed.",
+          "External settings, session state, shell normalization and runtime checks are not established by this report."
+        ]
       }
     }
   ],

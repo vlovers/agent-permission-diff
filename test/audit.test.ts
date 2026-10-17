@@ -330,7 +330,15 @@ test("audit: JSON v1 structure, determinism, round-trip and terminal escaping", 
   for (const f of report.findings)
     assert.deepEqual(
       Object.keys(f).sort(),
-      ["kind", "tool", "witness", "severity", "before", "after"].sort(),
+      [
+        "kind",
+        "tool",
+        "witness",
+        "severity",
+        "before",
+        "after",
+        "explanation",
+      ].sort(),
     );
   assert.ok(!formatHuman(report).includes("\u001b"));
   for (const unsafe of ["\u0085", "\u202e", "\u2028"])

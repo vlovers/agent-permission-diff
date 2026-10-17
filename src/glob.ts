@@ -32,7 +32,9 @@ export function regions(
     );
   }
   const literals = new Set(patterns.join("").replaceAll("*", ""));
-  let other = "x";
+  const candidates =
+    "xz0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-./";
+  let other = [...candidates].find((char) => !literals.has(char)) ?? "é";
   while (literals.has(other))
     other = String.fromCodePoint(other.codePointAt(0)! + 1);
   // Prefer a printable OTHER witness over punctuation/whitespace when possible.

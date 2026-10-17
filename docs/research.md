@@ -1,5 +1,7 @@
 # Research notes
 
+Historical AgentPermissionDiff v0.1 notes. See the [RuleWitness v0.2 research](rulewitness-research.md) for the current audit, named competitor review and positioning.
+
 Reviewed 2026-10-16. Documentation evolves independently of this project; this MVP models only the subset listed in the README. It has not been validated against a running Claude Code installation and does not pin a compatible Claude Code release range.
 
 The [v0.1 audit](audit-v0.1.md) rechecks these sources, records reproduced bugs, and documents conservative support restrictions and remaining release blockers.

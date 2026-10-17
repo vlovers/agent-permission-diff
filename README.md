@@ -1,33 +1,50 @@
-# AgentPermissionDiff
+# RuleWitness
 
-A small, offline TypeScript CLI and library for comparing the effective **configured permission rule policy** of AI coding agents across Git commits. First provider: Claude Code.
+**Explain, prove, and test AI coding-agent permission changes.**
 
-It compares decisions after rule precedence and wildcard matching, rather than reporting changed JSON lines. Adding an allow rule underneath a matching deny rule produces no permission finding. Widening an allow rule can produce a finding even if the rule's tool name stays the same.
+RuleWitness is an experimental, offline TypeScript CLI and library for reviewing **Claude Code configuration-rule decisions** between Git commits. It produces concrete, replay-checked witnesses, explains the determining rules, filters modeled no-ops, and runs reusable policy assertions.
 
-**MVP scope:** tracked, root-level `.claude/settings.json` and `.claude/settings.local.json`; Bash rule matching and bare WebSearch permissions. This is a partial model of the configuration rule layer, not a Claude Code runtime emulator or an assurance that an operation can execute. Every report has `complete: false`. Review coverage diagnostics alongside findings.
+**This is not a runtime authorization engine.** `ALLOW` means the supported configured rules allow that input in this model. It does not guarantee Claude Code will execute it. Every report retains `complete: false`. Unsupported settings and uncertain changes remain visible. Only Claude Code's documented subset below is supported; other agents are not advertised.
 
-The first GitHub release should be labeled **experimental**. See the [release checklist](docs/release-readiness.md) for verification, repository settings, and remaining blockers. No npm publication is implied.
+This is the v0.2 evolution of AgentPermissionDiff. The repository stays [vlovers/agent-permission-diff](https://github.com/vlovers/agent-permission-diff); the new candidate package is `rulewitness@0.2.0`. See [migration notes](docs/migration-v0.2.md) and [release preparation](docs/release-v0.2.0.md).
 
-## Requirements and local use
+## Why semantic permission diffs matter
 
-Node.js 24 and Git with `--no-lazy-fetch` support (documented in Git 2.47 and later). Older Git fails closed. There are no runtime npm dependencies, network requests, AI API calls, or telemetry in the CLI/library.
+A changed JSON line does not establish a changed decision. Adding an allow beneath a matching deny does nothing to the supported decision model. Widening an exact permission to a wildcard can affect inputs that never appeared in a sample command list.
+
+RuleWitness compares bounded glob automata after applying `DENY → ASK → ALLOW` precedence. It re-evaluates every emitted transition witness against both policies and attaches commit IDs, paths, JSON pointers, reasons, and explicit limitations. No agent, hook, command from a configuration, or assertion input is executed. There are no runtime npm dependencies, network requests, paid AI calls, or telemetry.
+
+Semantic diffs, explanations and CI gates already exist elsewhere. Our focus is the inspectable combination of a narrow documented model, symbolic counterexamples, conservative uncertainty handling, and assertions using the same evaluator. The [research comparison](docs/rulewitness-research.md) credits the related projects and describes differences without claiming uniqueness.
+
+## Installation and quick start
+
+Requires **Node.js 24** and Git supporting `--no-lazy-fetch` (documented in Git 2.47+). Local macOS is tested; Linux is exercised by CI. Windows execution/symlinks are not validated.
+
+The candidate has **not been published by this change**. Direct registry requests returned no public entry for `rulewitness` on 2026-10-17; this does not reserve the name or guarantee publish permission. Until a separately authorized release, use this checkout:
 
 ```sh
 npm ci --ignore-scripts --no-audit --no-fund
 npm run build
-node dist/cli.js scan
-node dist/cli.js scan HEAD~1 --json
-node dist/cli.js compare main HEAD
+node dist/cli.js scan HEAD
 node dist/cli.js compare main HEAD --json
+npm pack --dry-run
 ```
 
-Run at the repository root. `scan` defaults to `HEAD`; neither command reads the working copy. Revisions must resolve to commits. Uncommitted and untracked settings do not participate. An initial repository needs a commit before it can be scanned. The executable name in the package is `agent-permission-diff`; this project is not yet published to npm.
+To test a local tarball, run `npm pack`, install `./rulewitness-0.2.0.tgz` in a separate consumer with `npm install --ignore-scripts /absolute/path/to/rulewitness-0.2.0.tgz`, and use its `node_modules/.bin/rulewitness` from the target repository root. Packing is local and does not publish.
 
-Exit codes: `0` means a report was produced (including findings or incomplete coverage), `2` means invalid arguments, a Git/read failure, or an analysis resource limit. Finding severity does not change the exit code. Consumers must inspect `findings`, `policies[].issues`, and `complete`; an empty finding list is not a security pass.
+**After an explicitly authorized npm publication**, the intended commands are:
 
-## Example
+```sh
+npm install --save-dev rulewitness@0.2.0
+npx --no-install rulewitness compare main HEAD
+npx --no-install rulewitness test
+```
 
-Before:
+The legacy `agent-permission-diff` executable is retained as an alias in the new package. Import paths change to `rulewitness`; the old package name is not an import alias.
+
+## Example: an explainable permission change
+
+Before, in `.claude/settings.json`:
 
 ```json
 {
@@ -53,58 +70,103 @@ After:
 }
 ```
 
-These are `.claude/settings.json` snapshots. Both commits also contain a tracked `.claude/settings.local.json` allowing `Bash(npm run lint)`. The build approval changes from `ASK` to `ALLOW`; the existing test/lint grants and push denial are unchanged.
-
-Actual installed-CLI output from the deterministic disposable example repository, running `agent-permission-diff compare HEAD~1 HEAD`:
+Both example commits also contain tracked local settings allowing `Bash(npm run lint)`. The build approval changes from `ASK` to `ALLOW`; the other grants and denial are unchanged. Actual installed-CLI output for `rulewitness compare HEAD~1 HEAD`:
 
 ```text
-AgentPermissionDiff — Claude Code
+RuleWitness — Permission Diff
 Scope: tracked-project-rule-policy; runtime authorization is not established.
 Revisions: "004faef35fab1f677974ed183fa0f8ee40f97ebc" → "0126081ca8f2348bc0ccdc0862f5dd73827bd9ee"
 Coverage: partial (see README for assumptions and unsupported runtime semantics)
+Outcome: modeled-change (within the inspected model only)
 
 [HIGH] permission "Bash" "npm run build": ASK → ALLOW
-  Before: "004faef35fab":".claude/settings.json"#"/permissions/ask/0" "Bash(npm run build)"; Matching ask rule(s) in deny > ask > allow order
-  After:  "0126081ca8f2":".claude/settings.json"#"/permissions/allow/1" "Bash(npm run build)"; Matching allow rule(s) in deny > ask > allow order
+  Before: ASK
+  After:  ALLOW
+  Why: The modeled decision for this witness changes from ASK to ALLOW.
+    Before: Matching ask rule(s) in deny > ask > allow order
+    After: Matching allow rule(s) in deny > ask > allow order
+  Evidence:
+    Before: "004faef35fab":".claude/settings.json"#"/permissions/ask/0" "Bash(npm run build)"; Matching ask rule(s) in deny > ask > allow order
+    After:  "0126081ca8f2":".claude/settings.json"#"/permissions/allow/1" "Bash(npm run build)"; Matching allow rule(s) in deny > ask > allow order
+  Witness: Bash("npm run build")
+
+Supported configured-rule semantics only; runtime authorization is not guaranteed.
+External settings, session state, shell normalization and runtime checks are not established by this report.
 ```
 
-`compare HEAD~1 HEAD --json` produces the [complete JSON report](docs/examples/compare.json), including both policies, full commit IDs, `schemaVersion: 1`, and `complete: false`. `scan HEAD` inventories decisions rather than transitions: [human](docs/examples/scan.txt), [JSON](docs/examples/scan.json). The example commit IDs belong to disposable test repositories, not this project's Git history.
+These hashes belong to deterministic disposable repositories, not this project's history. See the full [JSON comparison](docs/examples/compare.json), [human scan](docs/examples/scan.txt), and [JSON scan](docs/examples/scan.json). JSON v1 retains every existing field and adds optional structured `finding.explanation` data: certainty, summary, evidence-derived steps, and limitations. Older reports without that field remain renderable. Diagnostic strings, ordering, witnesses and fingerprints are not cross-version identifiers.
 
-A second realistic fixture contains a hook, sandbox settings, and an unsupported Read rule. Adding a Bash grant beneath those unchanged unknown settings reports `MEDIUM` coverage with `UNKNOWN → UNKNOWN`, rather than claiming unchanged permissions: [human compare](docs/examples/unknown-compare.txt), [JSON compare](docs/examples/unknown-compare.json), [human scan](docs/examples/unknown-scan.txt), [JSON scan](docs/examples/unknown-scan.json). Hooks and commands in these fixtures are never executed.
+For a wildcard change from `Bash(npm test)` to `Bash(npm *)`, a newly matched witness such as `npm` has a changed raw-rule decision. Its previous fallback is `UNKNOWN`, so it is reported as uncertain, not a proven escalation. Witnesses are data, never executable demonstrations.
 
-The [package smoke suite](https://github.com/vlovers/agent-permission-diff/blob/main/test/package-smoke.test.mjs) creates these repositories, installs a local tarball offline, and verifies all eight captured reports against the installed CLI. Witnesses are abstract rule-input strings, not recommended commands or proof that a command exists. To intentionally refresh captures after reviewed output changes, run `npm run build` then `APD_UPDATE_EXAMPLES=1 npm run test:package` and review the example/README diffs.
+## Example: a harmless masked change
 
-## Supported semantics
+If `deny` contains `Bash(git push *)`, adding `Bash(git push origin main)` to `allow` does not change a modeled decision. The deny still wins. Removing redundant rules, duplicates, reordering, consecutive-star equivalents and supported legacy-equivalent spellings are likewise filtered when equivalence can be established.
 
-| Feature               | Behavior                                                                                                            |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Decisions             | `ALLOW`, `ASK`, `DENY`, `UNKNOWN`                                                                                   |
-| Precedence            | Deny wins over ask, which wins over allow; specificity and list order cannot override it                            |
-| Settings sources      | Both tracked project permission lists are merged; local rules cannot erase shared rules                             |
-| Bash                  | Bare `Bash`, `Bash(*)`, exact text, and `*` anywhere in a supported specifier                                       |
-| Bash boundary         | A sole trailing ` *` also matches the bare prefix; `ls *` excludes `lsof`, while `ls*` includes it                  |
-| Legacy Bash           | A trailing `:*` normalizes to ` *` when unambiguous; single-identifier colon selectors in ask/deny remain `UNKNOWN` |
-| WebSearch             | Bare tool rules; no match means `ASK` under the manual-mode assumption                                              |
-| No Bash match         | `UNKNOWN`; built-in read-only approvals vary by input and are not modeled                                           |
-| Unknown configuration | Coverage diagnostics; potentially affected tools become `UNKNOWN`                                                   |
+The comparison outcome distinguishes:
 
-The analysis assumes a trusted project and a manual/default session with no external permission sources. Missing `defaultMode` uses that analytical assumption; it does not assert what mode a user's installed Claude Code would select. Explicit `default` and `manual` are accepted. Other modes are unknown.
+| Outcome          | Meaning                                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `modeled-change` | At least one supported known-to-known decision changes, with a replay-valid witness                               |
+| `modeled-no-op`  | No decision changes in the supported raw model, with no inspected configuration issues; not a runtime no-op claim |
+| `uncertain`      | Coverage issues, coverage findings or transitions involving `UNKNOWN` prevent a proven conclusion                 |
 
-Supported Bash specifiers use printable ASCII and exclude shell control syntax, quoting, substitutions, redirects, and parameter selectors. `*` is a rule wildcard. Literal `?`, brackets, parentheses, and ambiguous parameter syntax are conservatively unsupported. In ask/deny, `Bash(name:*)` might refer to a scalar parameter, so it is now unknown; use the documented space form `Bash(name *)` for a command prefix. Multiword legacy prefixes such as `Bash(git push:*)` and allow-list legacy prefixes remain supported. Literal wrapper/find command forms (`watch`, `setsid`, `ionice`, `flock`, `find`, `timeout`, `time`, `nice`, `nohup`, `stdbuf`, `command`, `builtin`, `noglob`, `xargs`) followed by whitespace or end of pattern are also unknown, including exact forms, until their runtime behavior is modeled.
+An unchanged unsupported hook must not hide changed grants. Such changes produce coverage findings with `UNKNOWN → UNKNOWN` and relevant rule evidence. See [human](docs/examples/unknown-compare.txt), [JSON](docs/examples/unknown-compare.json), and [unknown scan](docs/examples/unknown-scan.json). Unknown configuration is not proof of equivalence.
 
-The matcher and `evaluate()` operate on raw rule-input text; they do not split compounds, unwrap commands, normalize assignments, or perform filesystem checks. Even a broad supported pattern can match input whose runtime authorization differs. For example, `evaluate()` can return the configured `ALLOW` for a compound string that Claude Code would split and reject. It must never be used as an authorization API. Runtime-sensitive patterns beginning with wildcards or other spellings can escape the literal wrapper guard. Runtime-complete Bash comparison remains a release blocker; see [the audit](docs/audit-v0.1.md).
+## Permission policy tests
 
-Unmodeled settings are never executed or assumed harmless. Unsupported tools (including Read/Edit path rules, MCP, Agent, PowerShell and WebFetch) conservatively affect the whole policy because tool interactions can matter. Unsupported Bash/WebSearch specifiers affect that tool. Unknown keys inside `permissions`, hooks, sandbox settings, plugins and other top-level settings affect the whole policy. Only a string `$schema` metadata value is ignored. `model` and `effortLevel` are now unknown rather than silently ignored: this tool cannot validate their provider schema or infer invalid-file recovery. Unsupported values use type-preserving, object-key-sorted JSON fingerprints rather than being echoed. Arrays retain their order.
+Create `rulewitness.tests.json` in the target repository root:
 
-Changes to unsupported configuration generate a `coverage` finding. Changes to supported rules under an unchanged relevant unknown setting also generate a coverage finding, with `UNKNOWN` on both sides and the changed rule evidence. Missing knowledge does not establish equivalence. Coverage findings are instructions to review missing semantics, not proven permission escalations; they can conservatively flag redundant rule changes under unknown settings. Duplicate/reordered normalized supported rules are ignored. With no relevant unknown settings, legacy-equivalent patterns, redundant grants, and deny-masked changes produce no permission findings.
+```json
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "name": "Tests should be allowed",
+      "tool": "Bash",
+      "input": "npm test",
+      "expected": "ALLOW"
+    },
+    {
+      "name": "Git pushes should be denied",
+      "tool": "Bash",
+      "input": "git push origin main",
+      "expected": "DENY"
+    }
+  ]
+}
+```
 
-## Reports and severity
+```sh
+rulewitness test
+rulewitness test --config rulewitness.tests.json --rev HEAD~1 --json
+rulewitness test --markdown
+```
 
-JSON includes `schemaVersion: 1`, the provider/scope, resolved commit IDs, policies, coverage issues, and findings. Each permission finding has a tool, witness, severity, and before/after decisions with evidence. Evidence uses RFC 6901 JSON pointers (no line-number guessing). Defaults explain their reason and have no determining rule. Human output escapes configuration strings to avoid terminal-control injection.
+Policy settings come from the specified commit, default `HEAD`. Test definitions are explicitly read from the current working-tree data file, not from that revision. The file must be regular, resolve within the target repository, and be at most 1 MiB. Unknown keys, duplicate names, unsupported schema versions, empty suites, invalid decisions and more than 1,000 cases are rejected. Names are at most 200 characters, tool names 100 and inputs 4,000. No test input is executed.
 
-JSON v1 field names, types and decision/severity enums are retained by the audit fixes. Findings and reasons can change as bugs are fixed. Treat messages, ordering, witnesses and fingerprints as diagnostic data, not stable identifiers; fingerprints from different analyzer versions are not comparable. Policy objects passed to library functions must come from this version's `parsePolicy` or `readPolicy`; serialized reports are data, not a validated policy import format.
+Results show expected and actual modeled decisions, pass/mismatch/unknown status, reason and determining evidence. **`UNKNOWN` never passes**, even when expected is `UNKNOWN`. Unsupported tools and inspected policy issues remain unknown. Assertions conservatively reject complex Bash query syntax—including compounds, quoting, substitutions, redirections, globs, leading assignments and known wrapper/find forms—rather than allowing it through a broad raw rule. This intentionally narrower assertion boundary is not a shell parser. Raw `evaluate()` retains its v0.1 matching contract and must not authorize execution.
 
-The severity function uses only the decision transition; it does not infer command danger from keywords:
+Tests assert only the listed supported queries. Passing assertions do not prove complete policy or runtime safety. The assertion JSON is a separate version-1 `command: "test"` contract with `results`, `passed`, `revision`, `issues` and `complete: false`.
+
+## CI reporting and exit codes
+
+```sh
+rulewitness compare main HEAD --markdown
+rulewitness compare main HEAD --json --fail-on high
+```
+
+Fetch the necessary refs before comparing them; the CLI itself never fetches. For a pull-request workflow, use an ordinary `pull_request` trigger, read-only contents permissions and checkout with enough history, then compare a trusted base commit SHA with the PR head SHA. Do not run contributor code under `pull_request_target` with elevated permissions.
+
+| Exit | Meaning                                                                                                   |
+| ---- | --------------------------------------------------------------------------------------------------------- |
+| `0`  | Ungated scan/compare produced a report; assertions passed; or no reliable finding met an opt-in threshold |
+| `1`  | A known decision change meets `--fail-on`, or an assertion mismatched/is unknown                          |
+| `2`  | Usage, configuration, Git, decoding or analysis-limit failure; no partial success report is emitted       |
+| `3`  | An opt-in comparison gate encountered inspected-model uncertainty, even if no high finding exists         |
+
+Thresholds are `high`, `medium`, `low`, `info`, apply only to `compare`, and only classify known-to-known permission changes. Uncertainty takes precedence over a threshold failure. No flag preserves v0.1 report-only exit behavior, including exit 0 for uncertain reports. Consumers must inspect `complete`, coverage and findings; exit 0 is never a full security pass. The universal external/runtime scope limit does not itself force every scoped gate to fail: an unchanged issue-free raw model can pass while `complete` stays false.
+
+Severity is deterministic and keyword-independent:
 
 | Before → after | DENY   | ASK    | ALLOW  | UNKNOWN |
 | -------------- | ------ | ------ | ------ | ------- |
@@ -113,40 +175,72 @@ The severity function uses only the decision transition; it does not infer comma
 | ALLOW          | LOW    | LOW    | INFO   | MEDIUM  |
 | UNKNOWN        | MEDIUM | MEDIUM | MEDIUM | INFO    |
 
-Unchanged decisions produce no comparison finding. Coverage changes are always `MEDIUM`, including `UNKNOWN → UNKNOWN`. Scan entries are an informational inventory, not transition risk findings.
+Unchanged decisions do not produce comparison findings. Coverage changes are MEDIUM and never masquerade as a proven escalation. Markdown uses a data-dependent fenced block to keep configuration text inert. SARIF is deferred rather than mapping uncertain rule-model findings to misleading code-scanning claims.
 
-## Library
+## Supported Claude Code semantics
+
+| Feature         | Supported behavior                                                                                              |
+| --------------- | --------------------------------------------------------------------------------------------------------------- |
+| Sources         | Root-level tracked `.claude/settings.json` and `.claude/settings.local.json`; lists merge                       |
+| Precedence      | Deny before ask before allow, independent of specificity and array order                                        |
+| Bash rules      | Bare `Bash`, `Bash(*)`, exact printable-ASCII text and `*` anywhere in supported specifiers                     |
+| Prefix boundary | A sole trailing ` *` also matches the bare prefix; `ls *` excludes `lsof`, `ls*` includes it                    |
+| Legacy suffix   | Allow-list `:*` and unambiguous multiword prefixes normalize to ` *`; ambiguous ask/deny `name:*` stays unknown |
+| WebSearch       | Bare rules; unmatched default is ASK under the fixed manual-mode assumption                                     |
+| No Bash match   | UNKNOWN; built-in runtime read-only approvals are not guessed                                                   |
+
+The analysis assumes trusted project settings, a manual/default session, and no discovered external permission sources. Missing `defaultMode` uses this analytical assumption, not a claim about installed defaults. Explicit `default` and `manual` are accepted; other modes are unknown. See current official [permissions](https://code.claude.com/docs/en/permissions) and [settings](https://code.claude.com/docs/en/settings) documentation, plus the [research notes](docs/rulewitness-research.md).
+
+## Unsupported semantics and limitations
+
+- Shell parsing/normalization, built-in approvals, runtime path checks, redirects, protected files, workspace trust, sandbox enforcement, hooks, session approvals and non-manual modes are not modeled. Broad raw patterns can cover inputs the runtime rejects. A witness proves a raw modeled transition, not command availability or execution.
+- Quoting, shell controls, substitutions, non-ASCII rule text, parameter selectors and literal wrapper/find command forms are unsupported. Conservative guards do not implement their semantics. Other tools—including Read/Edit paths, WebFetch, MCP, Agent and PowerShell—remain unknown. Only a string `$schema` metadata value is ignored; `model`, `effortLevel` and other unmodeled settings produce coverage diagnostics.
+- User/managed/CLI settings, environment overrides, untracked local settings, nested settings, main-checkout/worktree discovery, skills/plugins and files outside the two allowlisted paths can change runtime behavior without a finding. Runtime/provider compatibility is not established by documentation review. Windows is unverified.
+- Configuration diagnostics may conservatively flag redundant rule changes under unknowns. An empty finding list is not a complete security audit. Supported raw decisions do not describe tool visibility or lifecycle/session behavior.
+- Library policies must come from this version's parser/reader. Serialized reports are data, not a validated policy import format. Original supported permission strings may contain sensitive information; handle reports accordingly. Fingerprints can be guessed for low-entropy unsupported values.
+
+Bounds: 2 MiB per settings/Git output, 1,000 characters per rule, 64 unsupported-value nesting levels, 128 unique combined patterns / 8,192 pattern characters per tool, 20,000 product states and 2,000,000 symbolic work units. Assertions additionally cap estimated input-by-pattern work at 10,000,000 units. Limits fail explicitly. Git decoding is strict UTF-8; BOMs remain conservatively invalid JSON. Limits reduce denial-of-service risk but are not a hard process sandbox.
+
+Git operations are fixed argv `rev-parse`, `ls-tree`, `show` calls against resolved commits. Optional locks, replace objects, transports, lazy fetch, prompting and user/system Git config are disabled; inherited Git variables are scrubbed. Settings symlinks are not followed. No checkout, index write, remote contact, helper/hook execution or configuration mutation is performed by the analyzer. Git and local repository metadata remain trusted execution inputs.
+
+## TypeScript library
 
 ```ts
 import {
   readPolicy,
   comparePolicies,
-  evaluate,
-  formatHuman,
-} from "agent-permission-diff";
+  validateWitness,
+  comparisonOutcome,
+  formatMarkdown,
+  parseTestConfig,
+  runPolicyTests,
+} from "rulewitness";
 
 const before = readPolicy(process.cwd(), "main");
 const after = readPolicy(process.cwd(), "HEAD");
 const report = comparePolicies(before, after);
-console.log(formatHuman(report));
-console.log(evaluate(after, "Bash", "npm test"));
+for (const finding of report.findings) {
+  if (finding.kind === "permission") {
+    console.log(validateWitness(before, after, finding));
+  }
+}
+console.log(comparisonOutcome(report));
+console.log(formatMarkdown(report));
+
+const cases = parseTestConfig(
+  JSON.stringify({
+    schemaVersion: 1,
+    cases: [
+      { name: "Tests", tool: "Bash", input: "npm test", expected: "ALLOW" },
+    ],
+  }),
+);
+console.log(runPolicyTests(after, cases).passed);
 ```
 
-`parsePolicy(revision, files)` accepts an in-memory mapping from settings file paths to JSON text. `scanPolicy(policy)` returns a decision inventory. Library Git operations are synchronous and throw on failures. No configuration code is imported.
+Existing exports remain: `parsePolicy`, `evaluate`, `readPolicy`, `scanPolicy`, `comparePolicies`, `severity`, `formatHuman`, `SETTINGS_FILES` and their types. New exports include `explainFinding`, `validateWitness`, `comparisonOutcome`, `comparisonExitCode`, `hasUncertainty`, `relevantIssues`, `formatMarkdown`, `parseTestConfig`, `readTestConfig`, `runPolicyTests` and typed assertion/explanation contracts. No global mutable configuration is introduced.
 
-## Architecture and limits
-
-- `git.ts`: resolves commits, checks regular blob modes, and reads two allowlisted paths. It never follows settings symlinks, checks out commits, fetches, or invokes configuration commands.
-- `policy.ts`: validates the supported subset, normalizes patterns, merges rules, and evaluates precedence with source evidence.
-- `glob.ts`: glob NFAs and a product-state traversal. Literal characters plus an OTHER character represent every input equivalence class. This detects wildcard differences symbolically instead of sampling commands.
-- `compare.ts`: compares acceptance regions, suppresses unchanged decisions, and assigns deterministic severity. One representative is retained per transition and determining-evidence combination; reports are not an enumeration of every possible command.
-- `report.ts` / `cli.ts`: human/JSON output and strict positional command parsing. `index.ts` exports the library API.
-
-Limits: 2 MiB per Git output or library settings input, 64 levels of unsupported-value nesting, 1,000 characters per rule, 128 unique combined patterns / 8,192 total pattern characters per tool, 20,000 product states, and 2,000,000 symbolic work units (active-state memberships plus per-pattern transition overhead). A resource limit produces an error, never a successful empty report. Git input must be valid UTF-8; invalid byte sequences fail rather than being replaced. A BOM is preserved and conservatively treated as invalid JSON. Large or adversarial policies may require smaller comparisons. Output is deterministic for the same policies and ordering.
-
-User/home settings, credentials, managed policies, CLI flags, session approvals, environment overrides, workspace trust, nested settings, skills/agent frontmatter, plugin-defined hooks, MCP metadata, and runtime filesystem/sandbox behavior are outside the inspected inputs. External constraints are not discovered. Shared settings are associated with Claude Code's primary working directory; local settings may come from the main checkout in a worktree, with platform/ownership exceptions. This tool reads only the current revision's root-level tracked snapshot, even in worktrees. It does not reproduce that runtime discovery. Tracked local settings require workspace trust too. Unknown configuration can intentionally reduce precision. Changes outside the two allowlisted files are not analyzed or reported; `complete: false` also covers these omissions. Git itself and the local repository configuration are part of the trusted execution environment; use an isolated environment for repositories with untrusted Git metadata.
-
-Analysis uses `rev-parse`, `ls-tree` and `show`, with no shell. Git optional locks, replace objects, lazy fetching, terminal prompting and user/system Git configuration are disabled for the reader. Inherited Git variables are removed case-insensitively; an empty protocol allowlist additionally blocks transports. An unsupported `--no-lazy-fetch` option is an error. The checkout/index are untouched. It does not inspect credentials or invoke hooks, credential helpers, package scripts, or commands mentioned in settings. Reports may contain sensitive permission strings already stored in analyzed settings; handle reports accordingly.
+The architecture extends the existing parser/evaluator, Git reader and NFA matcher with small explanation and assertion modules. Rendering and CLI routing stay separate from analysis. See [migration](docs/migration-v0.2.md) for precise compatibility details.
 
 ## Development
 
@@ -160,6 +254,12 @@ npm run format:check
 npm pack --dry-run
 ```
 
-The 28 source tests cover precedence, list merging, wildcards/boundaries, unknown semantics, unchanged effective permissions, evidence replay, all severity transitions, independent glob oracles, Git/CLI behavior, symlink rejection, non-execution, and checkout/index preservation. Seven additional package tests verify dry-run/actual tarball contents, offline installation, executable bin, ESM exports, TypeScript declarations, realistic compiled-CLI scenarios, and reproducible documentation. CI runs both suites on Node.js 24 with read-only repository permissions. `prepack` builds artifacts before ordinary packing; the package smoke suite uses `--ignore-scripts` to test exactly the artifacts built by CI. Dependabot maintains development dependencies and GitHub Actions.
+Existing tests are preserved and extended. Tests cover precedence, wildcard boundaries, overlaps, shadowing, equivalent rules, unknowns, independent recursive/regex glob oracles, seeded policy pairs, replay, hostile revisions/data, limits, read-only behavior, assertions, Markdown and CI exits. Package tests build a local tarball, install it offline **outside the source repository**, compile an independent TypeScript consumer, verify both bins, and compare deterministic CLI captures. They never run configured commands. CI uses Node.js 24 and read-only GitHub permissions.
 
-See [research and source notes](docs/research.md), [contributing](CONTRIBUTING.md), [security](SECURITY.md), and the [MIT license](LICENSE).
+To deliberately refresh captures after a reviewed output change, build and run `RULEWITNESS_UPDATE_EXAMPLES=1 npm run test:package`, then update this README's actual output and inspect every diff. The legacy `APD_UPDATE_EXAMPLES=1` switch remains a test-maintenance alias. Captured JSON is excluded from reformatting so it stays byte-for-byte CLI output.
+
+## Contributing and security
+
+Contributions should extend the documented model conservatively, include primary sources and regression tests, and preserve coverage diagnostics. See [CONTRIBUTING](CONTRIBUTING.md), the MIT [LICENSE](LICENSE), [SECURITY](SECURITY.md), and [publishing checklist](docs/release-v0.2.0.md). Historical v0.1 audit/release documents are retained as historical records of AgentPermissionDiff, not retroactive claims about RuleWitness.
+
+Use the repository's private vulnerability reporting form when enabled; never post secrets or exploits in a public issue. Reporting enablement and maintainer ownership must be verified before publication. This work does not publish to npm, create a GitHub release/tag, rename the repository, modify security settings or merge its PR.

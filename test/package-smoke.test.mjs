@@ -11,7 +11,7 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { devNull } from "node:os";
+import { devNull, tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { after, before, test } from "node:test";
 import { fileURLToPath } from "node:url";
@@ -197,7 +197,10 @@ before(() => {
     },
   ]);
   empty = repository("empty", [{}, {}]);
-  if (process.env.APD_UPDATE_EXAMPLES === "1") {
+  if (
+    process.env.RULEWITNESS_UPDATE_EXAMPLES === "1" ||
+    process.env.APD_UPDATE_EXAMPLES === "1"
+  ) {
     mkdirSync(join(root, "docs/examples"), { recursive: true });
     for (const [name, content] of Object.entries(examples(false)))
       writeFileSync(join(root, "docs/examples", name), content);
@@ -213,8 +216,11 @@ before(() => {
   manifest = JSON.parse(
     npm(["pack", "--pack-destination", temporary, ...options]),
   )[0];
-  consumer = join(temporary, "consumer");
-  mkdirSync(consumer);
+  consumer = mkdtempSync(join(tmpdir(), "rulewitness-consumer-"));
+  assert.ok(
+    !consumer.startsWith(root + "/"),
+    "Consumer must be outside the source repository",
+  );
   writeFileSync(
     join(consumer, "package.json"),
     JSON.stringify({ name: "release-consumer", private: true, type: "module" }),
@@ -233,16 +239,19 @@ before(() => {
     ],
     consumer,
   );
-  installed = join(consumer, "node_modules/agent-permission-diff/dist/cli.js");
+  installed = join(consumer, "node_modules/rulewitness/dist/cli.js");
 });
 after(() => {
+  if (consumer) rmSync(consumer, { recursive: true, force: true });
   if (temporary) rmSync(temporary, { recursive: true, force: true });
 });
 
 test("package: dry-run and actual tarball include only documented runtime and documentation files", () => {
   const modules = [
+    "assertions",
     "cli",
     "compare",
+    "explain",
     "git",
     "glob",
     "index",
@@ -273,21 +282,24 @@ test("package: dry-run and actual tarball include only documented runtime and do
   );
   for (const path of ["LICENSE", "README.md", "CONTRIBUTING.md", "SECURITY.md"])
     assert.equal(
-      read(join(consumer, "node_modules/agent-permission-diff", path)),
+      read(join(consumer, "node_modules/rulewitness", path)),
       read(join(root, path)),
     );
   assert.match(
-    read(join(consumer, "node_modules/agent-permission-diff/LICENSE")),
+    read(join(consumer, "node_modules/rulewitness/LICENSE")),
     /MIT License/,
   );
   assert.equal(manifest.entryCount, expected.length);
 });
 
 test("package: installed ESM exports, declarations and executable bin work without source files", () => {
-  const pkgRoot = join(consumer, "node_modules/agent-permission-diff");
+  const pkgRoot = join(consumer, "node_modules/rulewitness");
   const pkg = JSON.parse(read(join(pkgRoot, "package.json")));
   assert.equal(pkg.license, "MIT");
   assert.equal(pkg.bin["agent-permission-diff"], "dist/cli.js");
+  assert.equal(pkg.bin.rulewitness, "dist/cli.js");
+  assert.equal(pkg.name, "rulewitness");
+  assert.equal(pkg.version, "0.2.0");
   assert.equal(pkg.exports["."].import, "./dist/index.js");
   assert.equal(pkg.exports["."].types, "./dist/index.d.ts");
   assert.deepEqual(pkg.dependencies ?? {}, {});
@@ -301,10 +313,17 @@ test("package: installed ESM exports, declarations and executable bin work witho
     encoding: "utf8",
   });
   assert.equal(help.status, 0, help.stderr);
-  assert.match(help.stdout, /Usage: agent-permission-diff scan/);
+  assert.match(help.stdout, /Usage: rulewitness scan/);
+  const primary = spawnSync(
+    join(consumer, "node_modules/.bin/rulewitness"),
+    ["--help"],
+    { cwd: consumer, env, encoding: "utf8" },
+  );
+  assert.equal(primary.status, 0, primary.stderr);
+  assert.equal(primary.stdout, help.stdout);
   writeFileSync(
     join(consumer, "verify.mjs"),
-    `import assert from "node:assert/strict"; import * as api from "agent-permission-diff"; for (const name of ["readPolicy","parsePolicy","evaluate","scanPolicy","comparePolicies","formatHuman","severity"]) assert.equal(typeof api[name], "function"); const p=api.parsePolicy("r",{}); assert.equal(api.scanPolicy(p).complete,false); console.log("installed exports passed");`,
+    `import assert from "node:assert/strict"; import * as api from "rulewitness"; for (const name of ["readPolicy","parsePolicy","evaluate","scanPolicy","comparePolicies","formatHuman","severity","formatMarkdown","explainFinding","validateWitness","comparisonOutcome","comparisonExitCode","parseTestConfig","readTestConfig","runPolicyTests","relevantIssues"]) assert.equal(typeof api[name], "function"); const p=api.parsePolicy("r",{}); assert.equal(api.scanPolicy(p).complete,false); const t=api.runPolicyTests(p,api.parseTestConfig(JSON.stringify({schemaVersion:1,cases:[{name:"unknown",tool:"Bash",input:"npm test",expected:"UNKNOWN"}]}))); assert.equal(t.passed,false); console.log("installed exports passed");`,
   );
   assert.match(
     execFileSync(process.execPath, ["verify.mjs"], {
@@ -316,7 +335,7 @@ test("package: installed ESM exports, declarations and executable bin work witho
   );
   writeFileSync(
     join(consumer, "verify.ts"),
-    `import {parsePolicy, scanPolicy, type Report, type Decision} from "agent-permission-diff"; const report: Report = scanPolicy(parsePolicy("r", {})); const decision: Decision = report.findings[0]!.after.decision; void decision;`,
+    `import {parsePolicy, scanPolicy, parseTestConfig, runPolicyTests, formatMarkdown, comparisonOutcome, type Report, type Decision, type PolicyTestReport} from "rulewitness"; const report: Report = scanPolicy(parsePolicy("r", {})); const decision: Decision = report.findings[0]!.after.decision; const assertions: PolicyTestReport=runPolicyTests(parsePolicy("r",{}),parseTestConfig('{"schemaVersion":1,"cases":[{"name":"n","tool":"Bash","input":"npm test","expected":"ALLOW"}]}')); formatMarkdown(assertions); void decision; void comparisonOutcome;`,
   );
   execFileSync(
     process.execPath,
@@ -449,7 +468,7 @@ test("package: masked changes are suppressed, working copy/index stay untouched,
     const result = invoke(supported, args);
     assert.equal(result.status, 2);
     assert.equal(result.stdout, "");
-    assert.match(result.stderr, /AgentPermissionDiff:/);
+    assert.match(result.stderr, /RuleWitness:/);
   }
   assert.equal(git(supported.directory, "status", "--porcelain=v1"), status);
   assert.deepEqual(
@@ -463,13 +482,7 @@ test("package: README and checked-in example reports reproduce installed CLI out
     assert.equal(content, read(join(root, "docs/examples", name)), name);
     assert.equal(
       content,
-      read(
-        join(
-          consumer,
-          "node_modules/agent-permission-diff/docs/examples",
-          name,
-        ),
-      ),
+      read(join(consumer, "node_modules/rulewitness/docs/examples", name)),
       `packed ${name}`,
     );
   }
@@ -479,4 +492,148 @@ test("package: README and checked-in example reports reproduce installed CLI out
     readme.includes(output),
     "README must include the actual complete human compare output",
   );
+});
+
+test("package: installed policy-test command passes, fails, rejects invalid config, and honors revisions", () => {
+  const path = join(supported.directory, "rulewitness.tests.json");
+  const cases = {
+    schemaVersion: 1,
+    cases: [
+      {
+        name: "Build approval",
+        tool: "Bash",
+        input: "npm run build",
+        expected: "ALLOW",
+      },
+      {
+        name: "Push denied",
+        tool: "Bash",
+        input: "git push origin main",
+        expected: "DENY",
+      },
+    ],
+  };
+  writeFileSync(path, JSON.stringify(cases));
+  const good = invoke(supported, ["test", "--json"]);
+  assert.equal(good.status, 0, good.stderr);
+  const report = JSON.parse(good.stdout);
+  assert.equal(report.passed, true);
+  assert.equal(report.complete, false);
+  assert.equal(
+    report.results[0].actual.evidence[0].pointer,
+    "/permissions/allow/1",
+  );
+  assert.match(
+    successful(supported, ["test"]),
+    /Expected: ALLOW; Actual: ALLOW/,
+  );
+  assert.match(
+    successful(supported, ["test", "--markdown"]),
+    /^# RuleWitness — Policy Tests/,
+  );
+  const previous = invoke(supported, [
+    "test",
+    "--rev",
+    supported.before,
+    "--config",
+    "rulewitness.tests.json",
+    "--json",
+  ]);
+  assert.equal(previous.status, 1);
+  assert.equal(JSON.parse(previous.stdout).results[0].actual.decision, "ASK");
+  writeFileSync(path, '{"schemaVersion":2,"cases":[]}');
+  const bad = invoke(supported, ["test", "--json"]);
+  assert.equal(bad.status, 2);
+  assert.equal(bad.stdout, "");
+  rmSync(path);
+});
+
+test("package: installed assertions never pass UNKNOWN or execute compound test inputs", () => {
+  const path = join(unknown.directory, "rulewitness.tests.json");
+  writeFileSync(
+    path,
+    JSON.stringify({
+      schemaVersion: 1,
+      cases: [
+        {
+          name: "Unknown is not success",
+          tool: "Bash",
+          input: "npm test",
+          expected: "UNKNOWN",
+        },
+        {
+          name: "Do not execute",
+          tool: "Bash",
+          input: "npm test && touch SHOULD_NOT_RUN",
+          expected: "ALLOW",
+        },
+      ],
+    }),
+  );
+  const result = invoke(unknown, ["test", "--json"]);
+  assert.equal(result.status, 1);
+  assert.ok(
+    JSON.parse(result.stdout).results.every(
+      (r) => r.actual.decision === "UNKNOWN" && r.status === "unknown",
+    ),
+  );
+  assert.equal(existsSync(join(unknown.directory, "SHOULD_NOT_RUN")), false);
+  rmSync(path);
+});
+
+test("package: installed severity gates, Markdown and uncertainty use distinct exit codes", () => {
+  const result = invoke(supported, [
+    "compare",
+    supported.before,
+    supported.after,
+    "--fail-on",
+    "high",
+    "--json",
+  ]);
+  assert.equal(result.status, 1);
+  assert.equal(
+    JSON.parse(result.stdout).findings[0].explanation.certainty,
+    "modeled",
+  );
+  assert.equal(
+    invoke(masked, [
+      "compare",
+      masked.before,
+      masked.after,
+      "--fail-on",
+      "high",
+    ]).status,
+    0,
+  );
+  const uncertain = invoke(unknown, [
+    "compare",
+    unknown.before,
+    unknown.after,
+    "--fail-on",
+    "high",
+    "--markdown",
+  ]);
+  assert.equal(uncertain.status, 3);
+  assert.match(uncertain.stdout, /^# RuleWitness/);
+  assert.match(uncertain.stdout, /UNKNOWN → UNKNOWN/);
+  assert.equal(
+    invoke(unknown, [
+      "compare",
+      unknown.after,
+      unknown.after,
+      "--fail-on",
+      "high",
+    ]).status,
+    3,
+  );
+  for (const args of [
+    ["scan", "--fail-on", "high"],
+    ["compare", "HEAD", "HEAD", "--fail-on", "critical"],
+    ["test", "--rev"],
+    ["compare", "HEAD", "HEAD", "--json", "--markdown"],
+  ]) {
+    const invalid = invoke(supported, args);
+    assert.equal(invalid.status, 2);
+    assert.equal(invalid.stdout, "");
+  }
 });

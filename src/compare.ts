@@ -1,5 +1,6 @@
 import { regions } from "./glob.ts";
-import { evaluate, relevantIssues } from "./policy.ts";
+import { evaluate, relevantIssues, uniqueEvidence } from "./policy.ts";
+import { explainFinding, validateWitness } from "./explain.ts";
 import type {
   Decision,
   Evaluation,
@@ -40,14 +41,17 @@ export function comparePolicies(before: Policy, after: Policy): Report {
       const key = JSON.stringify([left, right]);
       if (seen.has(key)) continue;
       seen.add(key);
-      findings.push({
+      const finding: Finding = {
         kind: "permission",
         tool,
         witness,
         severity: severity(left.decision, right.decision),
         before: left,
         after: right,
-      });
+      };
+      if (!validateWitness(before, after, finding))
+        throw new Error("Generated witness failed evaluator replay");
+      findings.push(finding);
     }
     // UNKNOWN is missing knowledge, not a semantic equivalence class. A
     // stable hook/mode/unsupported rule must not hide changed known rules.
@@ -68,12 +72,12 @@ export function comparePolicies(before: Policy, after: Policy): Report {
         decision: "UNKNOWN",
         reason:
           "Supported rules changed under unresolved configuration; unchanged behavior cannot be established",
-        evidence: [
+        evidence: uniqueEvidence([
           ...relevantIssues(policy, tool).map((issue) => issue.evidence),
           ...policy.rules
             .filter((rule) => rule.tool === tool)
             .map((rule) => rule.evidence),
-        ],
+        ]),
       });
       findings.push({
         kind: "coverage",
@@ -151,7 +155,10 @@ function report(
     command,
     revisions: policies.map((policy) => policy.revision),
     complete: false,
-    findings,
+    findings: findings.map((finding) => ({
+      ...finding,
+      explanation: explainFinding(finding),
+    })),
     policies,
   };
 }

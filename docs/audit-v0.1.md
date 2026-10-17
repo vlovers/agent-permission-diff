@@ -1,5 +1,7 @@
 # v0.1 correctness and security audit
 
+Historical AgentPermissionDiff audit, retained as evidence of the project's evolution into RuleWitness. Current candidate details are in [the v0.2 release notes](release-v0.2.0.md); this document's test counts and output descriptions refer to v0.1.
+
 Audit target: `658f7d133b973ed733317a7ecd866ecc77df7405`. Reviewed 2026-10-16 from a clean checkout, by re-reading the implementation and current primary documentation, constructing failing regressions, and testing the fixes. This is a separate audit pass by the same coding assistant, not third-party certification or a live Claude Code conformance test. No analyzed command, credential, paid AI service, or telemetry was used. Work and fixture repositories stayed inside AgentPermissionDiff.
 
 ## Documentation verification

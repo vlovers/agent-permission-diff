@@ -36,6 +36,42 @@ export interface Finding {
   severity: Severity;
   before: Evaluation;
   after: Evaluation;
+  /** Additive JSON v1 field; absent in reports produced before v0.2. */
+  explanation?: Explanation;
+}
+export interface Explanation {
+  certainty: "modeled" | "uncertain";
+  summary: string;
+  steps: string[];
+  limitations: string[];
+}
+export type ComparisonOutcome =
+  "modeled-change" | "modeled-no-op" | "uncertain";
+export type SeverityThreshold = "high" | "medium" | "low" | "info";
+export interface PolicyTestCase {
+  name: string;
+  tool: string;
+  input: string;
+  expected: Decision;
+}
+export interface PolicyTestConfig {
+  schemaVersion: 1;
+  cases: PolicyTestCase[];
+}
+export interface PolicyAssertion extends PolicyTestCase {
+  actual: Evaluation;
+  status: "passed" | "mismatch" | "unknown";
+}
+export interface PolicyTestReport {
+  schemaVersion: 1;
+  provider: "claude-code";
+  scope: "tracked-project-rule-policy";
+  command: "test";
+  revision: string;
+  complete: false;
+  passed: boolean;
+  results: PolicyAssertion[];
+  issues: Issue[];
 }
 export interface Report {
   schemaVersion: 1;

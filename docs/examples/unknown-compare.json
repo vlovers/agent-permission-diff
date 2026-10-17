@@ -42,12 +42,6 @@
           {
             "revision": "c7ece59c14b22e431b1c3841b9300c576fca3378",
             "file": ".claude/settings.json",
-            "pointer": "/permissions/deny/1",
-            "rule": "Bash(git push *)"
-          },
-          {
-            "revision": "c7ece59c14b22e431b1c3841b9300c576fca3378",
-            "file": ".claude/settings.json",
             "pointer": "/permissions/allow/0",
             "rule": "Bash(npm test)"
           }
@@ -81,12 +75,6 @@
           {
             "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
             "file": ".claude/settings.json",
-            "pointer": "/permissions/deny/1",
-            "rule": "Bash(git push *)"
-          },
-          {
-            "revision": "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3",
-            "file": ".claude/settings.json",
             "pointer": "/permissions/allow/0",
             "rule": "Bash(npm test)"
           },
@@ -96,6 +84,18 @@
             "pointer": "/permissions/allow/1",
             "rule": "Bash(npm run build)"
           }
+        ]
+      },
+      "explanation": {
+        "certainty": "uncertain",
+        "summary": "Unresolved configuration changed or masks changed rules; semantic equivalence cannot be established.",
+        "steps": [
+          "Before: Supported rules changed under unresolved configuration; unchanged behavior cannot be established",
+          "After: Supported rules changed under unresolved configuration; unchanged behavior cannot be established"
+        ],
+        "limitations": [
+          "Supported configured-rule semantics only; runtime authorization is not guaranteed.",
+          "External settings, session state, shell normalization and runtime checks are not established by this report."
         ]
       }
     }

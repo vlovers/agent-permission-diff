@@ -1,28 +1,73 @@
-AgentPermissionDiff — Claude Code
+RuleWitness — Permission Inventory
 Scope: tracked-project-rule-policy; runtime authorization is not established.
 Revisions: "0126081ca8f2348bc0ccdc0862f5dd73827bd9ee"
 Coverage: partial (see README for assumptions and unsupported runtime semantics)
 
 [INFO] permission "Bash" "x": UNKNOWN → UNKNOWN
-  Before: No determining rule; No matching rule; Bash built-in approvals and runtime checks are not modeled
-  After:  No determining rule; No matching rule; Bash built-in approvals and runtime checks are not modeled
+  Before: UNKNOWN
+  After:  UNKNOWN
+  Why: Inventory: the modeled decision is UNKNOWN.
+    Before: No matching rule; Bash built-in approvals and runtime checks are not modeled
+    After: No matching rule; Bash built-in approvals and runtime checks are not modeled
+  Evidence:
+    Before: No determining rule; No matching rule; Bash built-in approvals and runtime checks are not modeled
+    After:  No determining rule; No matching rule; Bash built-in approvals and runtime checks are not modeled
+  Witness: Bash("x")
 
 [INFO] permission "Bash" "git push": DENY → DENY
-  Before: "0126081ca8f2":".claude/settings.json"#"/permissions/deny/0" "Bash(git push *)"; Matching deny rule(s) in deny > ask > allow order
-  After:  "0126081ca8f2":".claude/settings.json"#"/permissions/deny/0" "Bash(git push *)"; Matching deny rule(s) in deny > ask > allow order
+  Before: DENY
+  After:  DENY
+  Why: Inventory: the modeled decision is DENY.
+    Before: Matching deny rule(s) in deny > ask > allow order
+    After: Matching deny rule(s) in deny > ask > allow order
+  Evidence:
+    Before: "0126081ca8f2":".claude/settings.json"#"/permissions/deny/0" "Bash(git push *)"; Matching deny rule(s) in deny > ask > allow order
+    After:  "0126081ca8f2":".claude/settings.json"#"/permissions/deny/0" "Bash(git push *)"; Matching deny rule(s) in deny > ask > allow order
+  Witness: Bash("git push")
 
 [INFO] permission "Bash" "npm test": ALLOW → ALLOW
-  Before: "0126081ca8f2":".claude/settings.json"#"/permissions/allow/0" "Bash(npm test)"; Matching allow rule(s) in deny > ask > allow order
-  After:  "0126081ca8f2":".claude/settings.json"#"/permissions/allow/0" "Bash(npm test)"; Matching allow rule(s) in deny > ask > allow order
+  Before: ALLOW
+  After:  ALLOW
+  Why: Inventory: the modeled decision is ALLOW.
+    Before: Matching allow rule(s) in deny > ask > allow order
+    After: Matching allow rule(s) in deny > ask > allow order
+  Evidence:
+    Before: "0126081ca8f2":".claude/settings.json"#"/permissions/allow/0" "Bash(npm test)"; Matching allow rule(s) in deny > ask > allow order
+    After:  "0126081ca8f2":".claude/settings.json"#"/permissions/allow/0" "Bash(npm test)"; Matching allow rule(s) in deny > ask > allow order
+  Witness: Bash("npm test")
 
 [INFO] permission "Bash" "npm run lint": ALLOW → ALLOW
-  Before: "0126081ca8f2":".claude/settings.local.json"#"/permissions/allow/0" "Bash(npm run lint)"; Matching allow rule(s) in deny > ask > allow order
-  After:  "0126081ca8f2":".claude/settings.local.json"#"/permissions/allow/0" "Bash(npm run lint)"; Matching allow rule(s) in deny > ask > allow order
+  Before: ALLOW
+  After:  ALLOW
+  Why: Inventory: the modeled decision is ALLOW.
+    Before: Matching allow rule(s) in deny > ask > allow order
+    After: Matching allow rule(s) in deny > ask > allow order
+  Evidence:
+    Before: "0126081ca8f2":".claude/settings.local.json"#"/permissions/allow/0" "Bash(npm run lint)"; Matching allow rule(s) in deny > ask > allow order
+    After:  "0126081ca8f2":".claude/settings.local.json"#"/permissions/allow/0" "Bash(npm run lint)"; Matching allow rule(s) in deny > ask > allow order
+  Witness: Bash("npm run lint")
 
 [INFO] permission "Bash" "npm run build": ALLOW → ALLOW
-  Before: "0126081ca8f2":".claude/settings.json"#"/permissions/allow/1" "Bash(npm run build)"; Matching allow rule(s) in deny > ask > allow order
-  After:  "0126081ca8f2":".claude/settings.json"#"/permissions/allow/1" "Bash(npm run build)"; Matching allow rule(s) in deny > ask > allow order
+  Before: ALLOW
+  After:  ALLOW
+  Why: Inventory: the modeled decision is ALLOW.
+    Before: Matching allow rule(s) in deny > ask > allow order
+    After: Matching allow rule(s) in deny > ask > allow order
+  Evidence:
+    Before: "0126081ca8f2":".claude/settings.json"#"/permissions/allow/1" "Bash(npm run build)"; Matching allow rule(s) in deny > ask > allow order
+    After:  "0126081ca8f2":".claude/settings.json"#"/permissions/allow/1" "Bash(npm run build)"; Matching allow rule(s) in deny > ask > allow order
+  Witness: Bash("npm run build")
 
 [INFO] permission "WebSearch" "*": ASK → ASK
-  Before: No determining rule; Manual-mode WebSearch default requires approval
-  After:  No determining rule; Manual-mode WebSearch default requires approval
+  Before: ASK
+  After:  ASK
+  Why: Inventory: the modeled decision is ASK.
+    Before: Manual-mode WebSearch default requires approval
+    After: Manual-mode WebSearch default requires approval
+  Evidence:
+    Before: No determining rule; Manual-mode WebSearch default requires approval
+    After:  No determining rule; Manual-mode WebSearch default requires approval
+  Witness: WebSearch("*")
+
+Supported configured-rule semantics only; runtime authorization is not guaranteed.
+External settings, session state, shell normalization and runtime checks are not established by this report.

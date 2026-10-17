@@ -1,14 +1,24 @@
-AgentPermissionDiff — Claude Code
+RuleWitness — Permission Diff
 Scope: tracked-project-rule-policy; runtime authorization is not established.
 Revisions: "c7ece59c14b22e431b1c3841b9300c576fca3378" → "22aaa8a94e30900897b61b3e25ccbd70aa27e5c3"
 Coverage: partial (see README for assumptions and unsupported runtime semantics)
+Outcome: uncertain (within the inspected model only)
 
 [MEDIUM] coverage "Bash" "Supported rules changed under unresolved configuration": UNKNOWN → UNKNOWN
-  Before: "c7ece59c14b2":".claude/settings.json"#"/hooks"; "c7ece59c14b2":".claude/settings.json"#"/sandbox"; "c7ece59c14b2":".claude/settings.json"#"/permissions/deny/0"; "c7ece59c14b2":".claude/settings.json"#"/permissions/deny/1" "Bash(git push *)"; "c7ece59c14b2":".claude/settings.json"#"/permissions/deny/1" "Bash(git push *)"; "c7ece59c14b2":".claude/settings.json"#"/permissions/allow/0" "Bash(npm test)"; Supported rules changed under unresolved configuration; unchanged behavior cannot be established
-  After:  "22aaa8a94e30":".claude/settings.json"#"/hooks"; "22aaa8a94e30":".claude/settings.json"#"/sandbox"; "22aaa8a94e30":".claude/settings.json"#"/permissions/deny/0"; "22aaa8a94e30":".claude/settings.json"#"/permissions/deny/1" "Bash(git push *)"; "22aaa8a94e30":".claude/settings.json"#"/permissions/deny/1" "Bash(git push *)"; "22aaa8a94e30":".claude/settings.json"#"/permissions/allow/0" "Bash(npm test)"; "22aaa8a94e30":".claude/settings.json"#"/permissions/allow/1" "Bash(npm run build)"; Supported rules changed under unresolved configuration; unchanged behavior cannot be established
+  Before: UNKNOWN
+  After:  UNKNOWN
+  Why: Unresolved configuration changed or masks changed rules; semantic equivalence cannot be established.
+    Before: Supported rules changed under unresolved configuration; unchanged behavior cannot be established
+    After: Supported rules changed under unresolved configuration; unchanged behavior cannot be established
+  Evidence:
+    Before: "c7ece59c14b2":".claude/settings.json"#"/hooks"; "c7ece59c14b2":".claude/settings.json"#"/sandbox"; "c7ece59c14b2":".claude/settings.json"#"/permissions/deny/0"; "c7ece59c14b2":".claude/settings.json"#"/permissions/deny/1" "Bash(git push *)"; "c7ece59c14b2":".claude/settings.json"#"/permissions/allow/0" "Bash(npm test)"; Supported rules changed under unresolved configuration; unchanged behavior cannot be established
+    After:  "22aaa8a94e30":".claude/settings.json"#"/hooks"; "22aaa8a94e30":".claude/settings.json"#"/sandbox"; "22aaa8a94e30":".claude/settings.json"#"/permissions/deny/0"; "22aaa8a94e30":".claude/settings.json"#"/permissions/deny/1" "Bash(git push *)"; "22aaa8a94e30":".claude/settings.json"#"/permissions/allow/0" "Bash(npm test)"; "22aaa8a94e30":".claude/settings.json"#"/permissions/allow/1" "Bash(npm run build)"; Supported rules changed under unresolved configuration; unchanged behavior cannot be established
 Coverage issue "c7ece59c14b2":".claude/settings.json"#"/hooks": "Unmodeled top-level setting: hooks"
 Coverage issue "c7ece59c14b2":".claude/settings.json"#"/sandbox": "Unmodeled top-level setting: sandbox"
 Coverage issue "c7ece59c14b2":".claude/settings.json"#"/permissions/deny/0": "Unmodeled tool: Read"
 Coverage issue "22aaa8a94e30":".claude/settings.json"#"/hooks": "Unmodeled top-level setting: hooks"
 Coverage issue "22aaa8a94e30":".claude/settings.json"#"/sandbox": "Unmodeled top-level setting: sandbox"
 Coverage issue "22aaa8a94e30":".claude/settings.json"#"/permissions/deny/0": "Unmodeled tool: Read"
+
+Supported configured-rule semantics only; runtime authorization is not guaranteed.
+External settings, session state, shell normalization and runtime checks are not established by this report.
