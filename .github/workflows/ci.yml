@@ -1,4 +1,4 @@
-name: CI
+name: RuleWitness CI
 on:
   push:
   pull_request:

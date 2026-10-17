@@ -1,7 +1,7 @@
 {
   "name": "rulewitness",
   "version": "0.2.0",
-  "description": "Explain, prove, and test AI coding-agent permission changes (supported configuration model only)",
+  "description": "Detect, explain, and test Claude Code permission changes across Git revisions.",
   "type": "module",
   "license": "MIT",
   "repository": {
@@ -46,5 +46,16 @@
     "@types/node": "^24.0.0",
     "prettier": "^3.6.0",
     "typescript": "^5.9.0"
-  }
+  },
+  "keywords": [
+    "claude-code",
+    "claude-permissions",
+    "permission-diff",
+    "ai-agent-security",
+    "git-diff",
+    "typescript",
+    "cli",
+    "policy-testing",
+    "static-analysis"
+  ]
 }

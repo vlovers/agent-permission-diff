@@ -1,20 +1,17 @@
 # RuleWitness
 
-**Explain, prove, and test AI coding-agent permission changes.**
+**Semantic Permission Diff for AI Coding Agents**
+
+[![RuleWitness CI](https://github.com/vlovers/agent-permission-diff/actions/workflows/ci.yml/badge.svg?branch=feat%2Frulewitness-v0.2)](https://github.com/vlovers/agent-permission-diff/actions/workflows/ci.yml?query=branch%3Afeat%2Frulewitness-v0.2)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+Detect, explain, and test Claude Code permission changes across Git revisions.
 
 RuleWitness is an experimental, offline TypeScript CLI and library for reviewing **Claude Code configuration-rule decisions** between Git commits. It produces concrete, replay-checked witnesses, explains the determining rules, filters modeled no-ops, and runs reusable policy assertions.
 
 **This is not a runtime authorization engine.** `ALLOW` means the supported configured rules allow that input in this model. It does not guarantee Claude Code will execute it. Every report retains `complete: false`. Unsupported settings and uncertain changes remain visible. Only Claude Code's documented subset below is supported; other agents are not advertised.
 
 This is the v0.2 evolution of AgentPermissionDiff. The repository stays [vlovers/agent-permission-diff](https://github.com/vlovers/agent-permission-diff); the new candidate package is `rulewitness@0.2.0`. See [migration notes](docs/migration-v0.2.md) and [release preparation](docs/release-v0.2.0.md).
-
-## Why semantic permission diffs matter
-
-A changed JSON line does not establish a changed decision. Adding an allow beneath a matching deny does nothing to the supported decision model. Widening an exact permission to a wildcard can affect inputs that never appeared in a sample command list.
-
-RuleWitness compares bounded glob automata after applying `DENY → ASK → ALLOW` precedence. It re-evaluates every emitted transition witness against both policies and attaches commit IDs, paths, JSON pointers, reasons, and explicit limitations. No agent, hook, command from a configuration, or assertion input is executed. There are no runtime npm dependencies, network requests, paid AI calls, or telemetry.
-
-Semantic diffs, explanations and CI gates already exist elsewhere. Our focus is the inspectable combination of a narrow documented model, symbolic counterexamples, conservative uncertainty handling, and assertions using the same evaluator. The [research comparison](docs/rulewitness-research.md) credits the related projects and describes differences without claiming uniqueness.
 
 ## Installation and quick start
 
@@ -40,7 +37,28 @@ npx --no-install rulewitness compare main HEAD
 npx --no-install rulewitness test
 ```
 
-The legacy `agent-permission-diff` executable is retained as an alias in the new package. Import paths change to `rulewitness`; the old package name is not an import alias.
+The legacy `agent-permission-diff` executable is retained as an alias in the new package. Import paths change to `rulewitness`; the old package name is not an import alias. We retain the executable alias for the v0.2 migration to avoid breaking existing local scripts; it is compatibility-only and all primary examples use `rulewitness`. A later removal would require a documented breaking change.
+
+## 30-second example
+
+Move `Bash(npm run build)` from `permissions.ask` to `permissions.allow` in `.claude/settings.json`, then commit the change. RuleWitness finds the concrete witness `npm run build`: **ASK → ALLOW**, severity **HIGH**. It identifies the determining rules at `#/permissions/ask/0` before and `#/permissions/allow/1` after in the complete example below.
+
+```sh
+rulewitness compare HEAD~1 HEAD
+rulewitness compare HEAD~1 HEAD --json --fail-on high
+rulewitness scan HEAD
+rulewitness test --config rulewitness.tests.json --rev HEAD
+```
+
+The gated command exits 1 for this known transition. Unsupported configuration instead makes the gate exit 3; threshold violations and uncertainty are reported separately. Inputs are never executed. These commands assume a locally installed candidate or a later authorized npm release.
+
+## Why semantic permission diffs matter
+
+A changed JSON line does not establish a changed decision. Adding an allow beneath a matching deny does nothing to the supported decision model. Widening an exact permission to a wildcard can affect inputs that never appeared in a sample command list.
+
+RuleWitness compares bounded glob automata after applying `DENY → ASK → ALLOW` precedence. It re-evaluates every emitted transition witness against both policies and attaches commit IDs, paths, JSON pointers, reasons, and explicit limitations. No agent, hook, command from a configuration, or assertion input is executed. There are no runtime npm dependencies, network requests, paid AI calls, or telemetry.
+
+Semantic diffs, explanations and CI gates already exist elsewhere. Our focus is the inspectable combination of a narrow documented model, symbolic counterexamples, conservative uncertainty handling, and assertions using the same evaluator. The [research comparison](docs/rulewitness-research.md) credits the related projects and describes differences without claiming uniqueness.
 
 ## Example: an explainable permission change
 
@@ -101,6 +119,22 @@ For a wildcard change from `Bash(npm test)` to `Bash(npm *)`, a newly matched wi
 ## Example: a harmless masked change
 
 If `deny` contains `Bash(git push *)`, adding `Bash(git push origin main)` to `allow` does not change a modeled decision. The deny still wins. Removing redundant rules, duplicates, reordering, consecutive-star equivalents and supported legacy-equivalent spellings are likewise filtered when equivalence can be established.
+
+Actual installed-CLI output for this deny-masked fixture (`rulewitness compare HEAD~1 HEAD`):
+
+```text
+RuleWitness — Permission Diff
+Scope: tracked-project-rule-policy; runtime authorization is not established.
+Revisions: "285071331fbea361193dc48b63b06e9d1fee8495" → "e056ddac44318a4385848c75999f232741898ae4"
+Coverage: partial (see README for assumptions and unsupported runtime semantics)
+Outcome: modeled-no-op (within the inspected model only)
+No decision changes found within the supported rule model; runtime behavior remains unverified.
+
+Supported configured-rule semantics only; runtime authorization is not guaranteed.
+External settings, session state, shell normalization and runtime checks are not established by this report.
+```
+
+The full [masked JSON report](docs/examples/masked-compare.json) has an empty `findings` array. Both examples are regenerated and checked byte-for-byte by `npm run test:package`, which creates deterministic disposable Git repositories; their commit hashes are fixture identifiers.
 
 The comparison outcome distinguishes:
 
@@ -163,6 +197,20 @@ Fetch the necessary refs before comparing them; the CLI itself never fetches. Fo
 | `1`  | A known decision change meets `--fail-on`, or an assertion mismatched/is unknown                          |
 | `2`  | Usage, configuration, Git, decoding or analysis-limit failure; no partial success report is emitted       |
 | `3`  | An opt-in comparison gate encountered inspected-model uncertainty, even if no high finding exists         |
+
+With `--fail-on`, JSON v1 adds `gate`:
+
+```json
+{
+  "threshold": "high",
+  "thresholdExceeded": true,
+  "uncertain": true,
+  "violations": [0],
+  "exitCode": 3
+}
+```
+
+This illustrates a mixed report: a reliable threshold violation exists at `findings[0]` and another inspected setting is unresolved. `violations` contains zero-based indices of known-to-known permission changes only; UNKNOWN transitions do not qualify. Both facts are calculated before choosing an exit code. Precedence is **analysis/usage error (2, no success report) → uncertainty (3) → threshold (1) → scoped pass (0)**. Human and Markdown reports also print both gate facts.
 
 Thresholds are `high`, `medium`, `low`, `info`, apply only to `compare`, and only classify known-to-known permission changes. Uncertainty takes precedence over a threshold failure. No flag preserves v0.1 report-only exit behavior, including exit 0 for uncertain reports. Consumers must inspect `complete`, coverage and findings; exit 0 is never a full security pass. The universal external/runtime scope limit does not itself force every scoped gate to fail: an unchanged issue-free raw model can pass while `complete` stays false.
 
@@ -238,7 +286,7 @@ const cases = parseTestConfig(
 console.log(runPolicyTests(after, cases).passed);
 ```
 
-Existing exports remain: `parsePolicy`, `evaluate`, `readPolicy`, `scanPolicy`, `comparePolicies`, `severity`, `formatHuman`, `SETTINGS_FILES` and their types. New exports include `explainFinding`, `validateWitness`, `comparisonOutcome`, `comparisonExitCode`, `hasUncertainty`, `relevantIssues`, `formatMarkdown`, `parseTestConfig`, `readTestConfig`, `runPolicyTests` and typed assertion/explanation contracts. No global mutable configuration is introduced.
+Existing exports remain: `parsePolicy`, `evaluate`, `readPolicy`, `scanPolicy`, `comparePolicies`, `severity`, `formatHuman`, `SETTINGS_FILES` and their types. New exports include `explainFinding`, `validateWitness`, `comparisonOutcome`, `comparisonExitCode`, `assessComparisonGate`, `hasUncertainty`, `relevantIssues`, `formatMarkdown`, `parseTestConfig`, `readTestConfig`, `runPolicyTests` and typed assertion/explanation contracts. No global mutable configuration is introduced.
 
 The architecture extends the existing parser/evaluator, Git reader and NFA matcher with small explanation and assertion modules. Rendering and CLI routing stay separate from analysis. See [migration](docs/migration-v0.2.md) for precise compatibility details.
 
@@ -254,12 +302,12 @@ npm run format:check
 npm pack --dry-run
 ```
 
-Existing tests are preserved and extended. Tests cover precedence, wildcard boundaries, overlaps, shadowing, equivalent rules, unknowns, independent recursive/regex glob oracles, seeded policy pairs, replay, hostile revisions/data, limits, read-only behavior, assertions, Markdown and CI exits. Package tests build a local tarball, install it offline **outside the source repository**, compile an independent TypeScript consumer, verify both bins, and compare deterministic CLI captures. They never run configured commands. CI uses Node.js 24 and read-only GitHub permissions.
+Existing tests are preserved and extended. Tests cover precedence, wildcard boundaries, overlaps, shadowing, equivalent rules, unknowns, independent recursive/regex glob oracles and a separate dynamic-programming policy oracle, 200 seeded policy pairs with exhaustive inputs of length 1–5 over a four-character alphabet, replay, hostile revisions/data, limits, read-only behavior, assertions, Markdown and CI exits. Package tests build a local tarball, install it offline **outside the source repository**, compile an independent TypeScript consumer, verify both bins, and compare deterministic CLI captures. They never run configured commands. CI uses Node.js 24 and read-only GitHub permissions. These model checks do not establish native Claude Code conformance; see the [final review](docs/final-review-v0.2.md).
 
 To deliberately refresh captures after a reviewed output change, build and run `RULEWITNESS_UPDATE_EXAMPLES=1 npm run test:package`, then update this README's actual output and inspect every diff. The legacy `APD_UPDATE_EXAMPLES=1` switch remains a test-maintenance alias. Captured JSON is excluded from reformatting so it stays byte-for-byte CLI output.
 
 ## Contributing and security
 
-Contributions should extend the documented model conservatively, include primary sources and regression tests, and preserve coverage diagnostics. See [CONTRIBUTING](CONTRIBUTING.md), the MIT [LICENSE](LICENSE), [SECURITY](SECURITY.md), and [publishing checklist](docs/release-v0.2.0.md). Historical v0.1 audit/release documents are retained as historical records of AgentPermissionDiff, not retroactive claims about RuleWitness.
+Contributions should extend the documented model conservatively, include primary sources and regression tests, and preserve coverage diagnostics. See [CONTRIBUTING](CONTRIBUTING.md), the MIT [LICENSE](LICENSE), [SECURITY](SECURITY.md), and [publishing checklist](docs/release-v0.2.0.md). The maintainer can use the [exact GitHub metadata and rename checklist](docs/github-rename.md) after merge and explicit authorization; current links remain valid until then. Historical v0.1 audit/release documents are retained as historical records of AgentPermissionDiff, not retroactive claims about RuleWitness.
 
 Use the repository's private vulnerability reporting form when enabled; never post secrets or exploits in a public issue. Reporting enablement and maintainer ownership must be verified before publication. This work does not publish to npm, create a GitHub release/tag, rename the repository, modify security settings or merge its PR.

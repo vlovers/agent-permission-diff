@@ -56,6 +56,7 @@ let temporary,
   supported,
   unknown,
   masked,
+  mixed,
   empty;
 
 function repository(name, documents) {
@@ -109,6 +110,16 @@ function successful(repo, args, packed = true) {
 }
 function examples(packed) {
   return {
+    "masked-compare.txt": successful(
+      masked,
+      ["compare", masked.before, masked.after],
+      packed,
+    ),
+    "masked-compare.json": successful(
+      masked,
+      ["compare", masked.before, masked.after, "--json"],
+      packed,
+    ),
     "compare.txt": successful(
       supported,
       ["compare", supported.before, supported.after],
@@ -197,6 +208,21 @@ before(() => {
     },
   ]);
   empty = repository("empty", [{}, {}]);
+  mixed = repository("mixed", [
+    {
+      ".claude/settings.json": {
+        permissions: {
+          ask: ["WebSearch"],
+          allow: ["Bash(echo 'unsupported')"],
+        },
+      },
+    },
+    {
+      ".claude/settings.json": {
+        permissions: { allow: ["WebSearch", "Bash(echo 'unsupported')"] },
+      },
+    },
+  ]);
   if (
     process.env.RULEWITNESS_UPDATE_EXAMPLES === "1" ||
     process.env.APD_UPDATE_EXAMPLES === "1"
@@ -323,7 +349,7 @@ test("package: installed ESM exports, declarations and executable bin work witho
   assert.equal(primary.stdout, help.stdout);
   writeFileSync(
     join(consumer, "verify.mjs"),
-    `import assert from "node:assert/strict"; import * as api from "rulewitness"; for (const name of ["readPolicy","parsePolicy","evaluate","scanPolicy","comparePolicies","formatHuman","severity","formatMarkdown","explainFinding","validateWitness","comparisonOutcome","comparisonExitCode","parseTestConfig","readTestConfig","runPolicyTests","relevantIssues"]) assert.equal(typeof api[name], "function"); const p=api.parsePolicy("r",{}); assert.equal(api.scanPolicy(p).complete,false); const t=api.runPolicyTests(p,api.parseTestConfig(JSON.stringify({schemaVersion:1,cases:[{name:"unknown",tool:"Bash",input:"npm test",expected:"UNKNOWN"}]}))); assert.equal(t.passed,false); console.log("installed exports passed");`,
+    `import assert from "node:assert/strict"; import * as api from "rulewitness"; for (const name of ["readPolicy","parsePolicy","evaluate","scanPolicy","comparePolicies","formatHuman","severity","formatMarkdown","explainFinding","validateWitness","comparisonOutcome","comparisonExitCode","assessComparisonGate","parseTestConfig","readTestConfig","runPolicyTests","relevantIssues"]) assert.equal(typeof api[name], "function"); const p=api.parsePolicy("r",{}); assert.equal(api.scanPolicy(p).complete,false); const t=api.runPolicyTests(p,api.parseTestConfig(JSON.stringify({schemaVersion:1,cases:[{name:"unknown",tool:"Bash",input:"npm test",expected:"UNKNOWN"}]}))); assert.equal(t.passed,false); console.log("installed exports passed");`,
   );
   assert.match(
     execFileSync(process.execPath, ["verify.mjs"], {
@@ -335,7 +361,7 @@ test("package: installed ESM exports, declarations and executable bin work witho
   );
   writeFileSync(
     join(consumer, "verify.ts"),
-    `import {parsePolicy, scanPolicy, parseTestConfig, runPolicyTests, formatMarkdown, comparisonOutcome, type Report, type Decision, type PolicyTestReport} from "rulewitness"; const report: Report = scanPolicy(parsePolicy("r", {})); const decision: Decision = report.findings[0]!.after.decision; const assertions: PolicyTestReport=runPolicyTests(parsePolicy("r",{}),parseTestConfig('{"schemaVersion":1,"cases":[{"name":"n","tool":"Bash","input":"npm test","expected":"ALLOW"}]}')); formatMarkdown(assertions); void decision; void comparisonOutcome;`,
+    `import {parsePolicy, scanPolicy, parseTestConfig, runPolicyTests, formatMarkdown, comparisonOutcome, assessComparisonGate, type ComparisonGate, type Report, type Decision, type PolicyTestReport} from "rulewitness"; const report: Report = scanPolicy(parsePolicy("r", {})); const decision: Decision = report.findings[0]!.after.decision; const assertions: PolicyTestReport=runPolicyTests(parsePolicy("r",{}),parseTestConfig('{"schemaVersion":1,"cases":[{"name":"n","tool":"Bash","input":"npm test","expected":"ALLOW"}]}')); formatMarkdown(assertions); const gate: ComparisonGate=assessComparisonGate({...report,command:"compare"},"high"); void gate.thresholdExceeded; void decision; void comparisonOutcome;`,
   );
   execFileSync(
     process.execPath,
@@ -492,6 +518,12 @@ test("package: README and checked-in example reports reproduce installed CLI out
     readme.includes(output),
     "README must include the actual complete human compare output",
   );
+  assert.ok(
+    readme.includes(
+      read(join(root, "docs/examples/masked-compare.txt")).trim(),
+    ),
+    "README must include actual masked-change output",
+  );
 });
 
 test("package: installed policy-test command passes, fails, rejects invalid config, and honors revisions", () => {
@@ -591,6 +623,13 @@ test("package: installed severity gates, Markdown and uncertainty use distinct e
     "--json",
   ]);
   assert.equal(result.status, 1);
+  assert.deepEqual(JSON.parse(result.stdout).gate, {
+    threshold: "high",
+    thresholdExceeded: true,
+    uncertain: false,
+    violations: [0],
+    exitCode: 1,
+  });
   assert.equal(
     JSON.parse(result.stdout).findings[0].explanation.certainty,
     "modeled",
@@ -636,4 +675,23 @@ test("package: installed severity gates, Markdown and uncertainty use distinct e
     assert.equal(invalid.status, 2);
     assert.equal(invalid.stdout, "");
   }
+});
+
+test("package: mixed high findings and uncertainty retain both structured gate facts", () => {
+  const args = ["compare", mixed.before, mixed.after, "--fail-on", "high"];
+  const result = invoke(mixed, [...args, "--json"]);
+  assert.equal(result.status, 3);
+  assert.equal(result.stderr, "");
+  const report = JSON.parse(result.stdout);
+  assert.equal(report.gate.thresholdExceeded, true);
+  assert.equal(report.gate.uncertain, true);
+  assert.equal(report.gate.exitCode, 3);
+  assert.equal(report.gate.violations.length, 1);
+  assert.equal(report.findings[report.gate.violations[0]].tool, "WebSearch");
+  const human = invoke(mixed, args);
+  assert.equal(human.status, 3);
+  assert.match(
+    human.stdout,
+    /thresholdExceeded=true; uncertain=true; exitCode=3/,
+  );
 });
