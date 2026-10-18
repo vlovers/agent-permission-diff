@@ -35,11 +35,19 @@ function scenario(
       );
     git("add", "--all");
     git(
-      "-c", "user.name=Tests",
-      "-c", "user.email=tests@example.invalid",
-      "-c", "commit.gpgsign=false",
-      "-c", `core.hooksPath=${devNull}`,
-      "commit", "--quiet", "--allow-empty", "-m", message,
+      "-c",
+      "user.name=Tests",
+      "-c",
+      "user.email=tests@example.invalid",
+      "-c",
+      "commit.gpgsign=false",
+      "-c",
+      `core.hooksPath=${devNull}`,
+      "commit",
+      "--quiet",
+      "--allow-empty",
+      "-m",
+      message,
     );
     return git("rev-parse", "HEAD");
   };
@@ -60,7 +68,14 @@ test("PR SHA comparison reports a known high escalation and preserves gating", (
     { permissions: { allow: ["Bash(npm test)"] } },
   );
   try {
-    const result = fixture.run(["compare", fixture.base, fixture.head, "--json", "--fail-on", "high"]);
+    const result = fixture.run([
+      "compare",
+      fixture.base,
+      fixture.head,
+      "--json",
+      "--fail-on",
+      "high",
+    ]);
     assert.equal(result.status, 1, result.stderr);
     const report = JSON.parse(result.stdout);
     assert.deepEqual(report.revisions, [fixture.base, fixture.head]);
@@ -75,10 +90,22 @@ test("PR SHA comparison reports a known high escalation and preserves gating", (
 test("PR SHA comparison ignores modeled masked additions", () => {
   const fixture = scenario(
     { permissions: { deny: ["Bash(git push *)"] } },
-    { permissions: { deny: ["Bash(git push *)"], allow: ["Bash(git push origin main)"] } },
+    {
+      permissions: {
+        deny: ["Bash(git push *)"],
+        allow: ["Bash(git push origin main)"],
+      },
+    },
   );
   try {
-    const result = fixture.run(["compare", fixture.base, fixture.head, "--json", "--fail-on", "high"]);
+    const result = fixture.run([
+      "compare",
+      fixture.base,
+      fixture.head,
+      "--json",
+      "--fail-on",
+      "high",
+    ]);
     assert.equal(result.status, 0, result.stderr);
     const report = JSON.parse(result.stdout);
     assert.deepEqual(report.findings, []);
@@ -91,10 +118,20 @@ test("PR SHA comparison ignores modeled masked additions", () => {
 test("PR SHA comparison fails conservatively with unsupported settings", () => {
   const fixture = scenario(
     { permissions: { allow: ["Bash(npm test)"] } },
-    { permissions: { allow: ["Bash(npm test)"] }, hooks: { PreToolUse: [] } },
+    {
+      permissions: { allow: ["Bash(npm test)"] },
+      hooks: { PreToolUse: [] },
+    },
   );
   try {
-    const result = fixture.run(["compare", fixture.base, fixture.head, "--json", "--fail-on", "high"]);
+    const result = fixture.run([
+      "compare",
+      fixture.base,
+      fixture.head,
+      "--json",
+      "--fail-on",
+      "high",
+    ]);
     assert.equal(result.status, 3, result.stderr);
     const report = JSON.parse(result.stdout);
     assert.equal(report.gate.uncertain, true);
@@ -111,7 +148,14 @@ test("PR missing base object is an analysis error, never a pass", () => {
   );
   try {
     const missing = "a".repeat(40);
-    const result = fixture.run(["compare", missing, fixture.head, "--json", "--fail-on", "high"]);
+    const result = fixture.run([
+      "compare",
+      missing,
+      fixture.head,
+      "--json",
+      "--fail-on",
+      "high",
+    ]);
     assert.equal(result.status, 2);
     assert.equal(result.stdout, "");
     assert.match(result.stderr, /Read-only Git operation failed/);
@@ -123,7 +167,14 @@ test("PR missing base object is an analysis error, never a pass", () => {
 test("PR settings-absent revisions remain partial rather than full security pass", () => {
   const fixture = scenario(null, null);
   try {
-    const result = fixture.run(["compare", fixture.base, fixture.head, "--json", "--fail-on", "high"]);
+    const result = fixture.run([
+      "compare",
+      fixture.base,
+      fixture.head,
+      "--json",
+      "--fail-on",
+      "high",
+    ]);
     assert.equal(result.status, 0, result.stderr);
     const report = JSON.parse(result.stdout);
     assert.equal(report.complete, false);
