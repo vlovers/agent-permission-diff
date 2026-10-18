@@ -1,50 +1,47 @@
-# RuleWitness v0.3.0 PR adoption
+# RuleWitness v0.3 PR adoption
 
-RuleWitness v0.3.0 is not published yet.
+This guide describes proposed v0.3 functionality.
 
-The published version is `rulewitness@0.2.0`.
+Version 0.3.0 is not yet published.
 
-## GitHub PR workflow
+The current npm package is version 0.2.0.
 
-Use the read-only workflow in `docs/examples/github-pr-workflow.md`.
-
-For the published version:
+## Existing CLI
 
 ```sh
 rulewitness compare BASE HEAD --markdown --fail-on high
 ```
 
-The future `--pr-markdown` format is not in npm v0.2.0.
+Use exact base and head commit IDs.
 
-Use exact commit SHAs and a trusted analyzer installation.
+The new pr-markdown option is not available in npm 0.2.0.
 
-Do not execute code from untrusted pull requests.
+## Security
 
-## CI exit codes
+- Use read-only GitHub permissions.
+- Do not run untrusted pull request scripts.
+- Install a trusted published analyzer.
+- Treat missing commit objects as analysis errors.
+- Treat reports as potentially sensitive.
+- Preserve explicit uncertainty.
 
-| Exit | Meaning |
-| --- | --- |
-| 0 | Scoped success |
-| 1 | Known threshold violation |
-| 2 | Analysis failure |
-| 3 | Uncertainty |
+## Exit status
 
-Exit 0 is not runtime authorization or security certification.
+- 0 means scoped pass.
+- 1 means known threshold violation.
+- 2 means analysis failure.
+- 3 means uncertainty.
 
-## Release checks
+A scoped pass is not runtime authorization.
 
-- [x] Audit: PR #13.
-- [x] Workflow example: PR #14.
-- [x] PR formatter: PR #15.
-- [x] Disposable Git tests: PR #16.
-- [ ] Verify the combined main CI.
-- [ ] Verify same-repository and fork PR behavior.
-- [ ] Review the npm package contents.
-- [ ] Verify the new pinned CLI against the workflow.
-- [ ] Confirm security limitations remain visible.
-- [ ] Publish a new version after validation.
+## Remaining release checks
 
-The current workflow has not been verified on a real fork PR.
+- Verify combined CI.
+- Test actual same-repository pull requests.
+- Test actual fork pull requests.
+- Verify rendered Markdown.
+- Validate packaged CLI usage.
+- Update release-specific documentation.
+- Review and publish the new npm version.
 
-See the [Claude Code permissions](https://code.claude.com/docs/en/permissions)
-and [settings](https://code.claude.com/docs/en/settings) documentation.
+Fork compatibility has not been established.
