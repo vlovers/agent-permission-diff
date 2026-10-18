@@ -4,7 +4,7 @@ This is a **consumer example**, not a workflow activated in RuleWitness itself.
 Copy the YAML below to the target repository's `.github/workflows/rulewitness.yml`.
 This example installs a **fixed published version** of RuleWitness rather than executing the untrusted PR's `package.json`, build scripts or workflow content.
 
-Requirements: GitHub Actions running on Linux; a GitHub checkout that contains both exact event SHAs; Node.js 24 and Git 2.47+; the trusted published `rulewitness@0.2.0` package. Review and pin newer RuleWitness versions deliberately.
+This example targets the unverified v0.3.0 release candidate; until v0.3.0 is published, continue to use pinned v0.2.0 and its `--markdown` flag.\n\nRequirements: GitHub Actions running on Linux; a GitHub checkout that contains both exact event SHAs; Node.js 24 and Git 2.47+; the trusted published `rulewitness@0.3.0` package. Review and pin newer RuleWitness versions deliberately.
 
 ```yaml
 name: RuleWitness PR permissions
@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: 24
       - name: Install pinned published analyzer (not PR dependencies)
-        run: npm install --global --ignore-scripts --no-audit --no-fund rulewitness@0.2.0
+        run: npm install --global --ignore-scripts --no-audit --no-fund rulewitness@0.3.0
       - name: Compare exact PR revisions
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -37,7 +37,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          rulewitness compare "$BASE_SHA" "$HEAD_SHA" --markdown --fail-on high > "$RUNNER_TEMP/rulewitness-report.md" 2> "$RUNNER_TEMP/rulewitness-error.txt"
+          rulewitness compare "$BASE_SHA" "$HEAD_SHA" --pr-markdown --fail-on high > "$RUNNER_TEMP/rulewitness-report.md" 2> "$RUNNER_TEMP/rulewitness-error.txt"
           result=$?
           set -e
           echo "RuleWitness gate exit code: $result"

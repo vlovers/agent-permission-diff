@@ -14,7 +14,7 @@ RuleWitness is an experimental, offline TypeScript CLI and library for reviewing
 
 **This is not a runtime authorization engine.** `ALLOW` means the supported configured rules allow that input in this model. It does not guarantee Claude Code will execute it. Every report retains `complete: false`. Unsupported settings and uncertain changes remain visible. Only Claude Code's documented subset below is supported; other agents are not advertised.
 
-This is the v0.2 evolution of AgentPermissionDiff. The repository is [vlovers/rulewitness](https://github.com/vlovers/rulewitness), and `rulewitness@0.2.0` is [published on npm](https://www.npmjs.com/package/rulewitness/v/0.2.0). See [migration notes](docs/migration-v0.2.md), the [v0.2.0 release](https://github.com/vlovers/rulewitness/releases/tag/v0.2.0), and the [historical release preparation notes](docs/release-v0.2.0.md).
+This project evolved from AgentPermissionDiff in v0.2. Version v0.3 adds a reviewer-focused Markdown presentation, without expanding the permission model. The repository is [vlovers/rulewitness](https://github.com/vlovers/rulewitness), and `rulewitness@0.3.0` is the [targeted v0.3.0 package](https://www.npmjs.com/package/rulewitness/v/0.2.0). See [migration notes](docs/migration-v0.2.md), the [v0.2.0 release](https://github.com/vlovers/rulewitness/releases/tag/v0.2.0), and the [historical release preparation notes](docs/release-v0.2.0.md).
 
 ## Installation and quick start
 
@@ -23,7 +23,7 @@ Requires **Node.js 24** and Git supporting `--no-lazy-fetch` (documented in Git 
 Install the published experimental release in the repository you want to inspect:
 
 ```sh
-npm install --save-dev rulewitness@0.2.0
+npm install --save-dev rulewitness@0.3.0
 npx --no-install rulewitness scan HEAD
 npx --no-install rulewitness compare HEAD~1 HEAD
 npx --no-install rulewitness compare HEAD~1 HEAD --json --fail-on high
@@ -38,7 +38,7 @@ npx --no-install rulewitness test
 For a global CLI installation:
 
 ```sh
-npm install --global rulewitness@0.2.0
+npm install --global rulewitness@0.3.0
 rulewitness scan HEAD
 ```
 
@@ -188,6 +188,18 @@ Policy settings come from the specified commit, default `HEAD`. Test definitions
 Results show expected and actual modeled decisions, pass/mismatch/unknown status, reason and determining evidence. **`UNKNOWN` never passes**, even when expected is `UNKNOWN`. Unsupported tools and inspected policy issues remain unknown. Assertions conservatively reject complex Bash query syntax—including compounds, quoting, substitutions, redirections, globs, leading assignments and known wrapper/find forms—rather than allowing it through a broad raw rule. This intentionally narrower assertion boundary is not a shell parser. Raw `evaluate()` retains its v0.1 matching contract and must not authorize execution.
 
 Tests assert only the listed supported queries. Passing assertions do not prove complete policy or runtime safety. The assertion JSON is a separate version-1 `command: "test"` contract with `results`, `passed`, `revision`, `issues` and `complete: false`.
+
+## Pull request review (v0.3)
+
+After v0.3.0 has been published, use the opt-in reviewer Markdown output:
+
+```sh
+rulewitness compare BASE_SHA HEAD_SHA --pr-markdown --fail-on high
+```
+
+This produces a compact table of supported modeled transitions and separate uncertain findings, with determining evidence and the existing scope limitations. The analyzer does not fetch revisions; both exact commit objects must exist locally. Until npm publishes v0.3.0, the released v0.2.0 still uses `--markdown` rather than `--pr-markdown`.
+
+A read-only GitHub Actions consumer example is in [docs/examples/github-pr-workflow.md](docs/examples/github-pr-workflow.md). Its behavior on real fork PRs has not been independently validated; missing commit objects must fail with exit 2. Do not execute untrusted PR dependencies with elevated credentials.
 
 ## CI reporting and exit codes
 
