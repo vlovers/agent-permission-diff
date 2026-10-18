@@ -13,7 +13,7 @@ const cleanEnvironment = Object.fromEntries(
 function scenario(
   before: object | null,
   after: object | null,
-): { directory: string; base: string; head: string; run: (args: string[]) => ReturnType<typeof spawnSync> } {
+) {
   const directory = mkdtempSync(join(tmpdir(), "rulewitness-pr-"));
   const env = {
     ...cleanEnvironment,
