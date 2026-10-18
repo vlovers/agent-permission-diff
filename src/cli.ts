@@ -36,10 +36,19 @@ try {
     let format: "human" | "json" | "markdown" | "pr-markdown" = "human";
     for (let i = 0; i < rest.length; i++) {
       const arg = rest[i]!;
-      if (arg === "--json" || arg === "--markdown" || arg === "--pr-markdown") {
+      if (
+        arg === "--json" ||
+        arg === "--markdown" ||
+        arg === "--pr-markdown"
+      ) {
         if (format !== "human")
           throw new Error("Choose exactly one output format");
-        format = arg === "--json" ? "json" : arg === "--pr-markdown" ? "pr-markdown" : "markdown";
+        format =
+          arg === "--json"
+            ? "json"
+            : arg === "--pr-markdown"
+              ? "pr-markdown"
+              : "markdown";
       } else if (["--config", "--rev", "--fail-on"].includes(arg)) {
         const value = rest[++i];
         if (options.has(arg) || !value || value.startsWith("-"))
