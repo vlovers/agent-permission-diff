@@ -14,7 +14,7 @@ RuleWitness is an experimental, offline TypeScript CLI and library for reviewing
 
 **This is not a runtime authorization engine.** `ALLOW` means the supported configured rules allow that input in this model. It does not guarantee Claude Code will execute it. Every report retains `complete: false`. Unsupported settings and uncertain changes remain visible. Only Claude Code's documented subset below is supported; other agents are not advertised.
 
-This project evolved from AgentPermissionDiff in v0.2. Version v0.3 adds a reviewer-focused Markdown presentation, without expanding the permission model. The repository is [vlovers/rulewitness](https://github.com/vlovers/rulewitness), and `rulewitness@0.3.0` is the [targeted v0.3.0 package](https://www.npmjs.com/package/rulewitness/v/0.2.0). See [migration notes](docs/migration-v0.2.md), the [v0.2.0 release](https://github.com/vlovers/rulewitness/releases/tag/v0.2.0), and the [historical release preparation notes](docs/release-v0.2.0.md).
+This project evolved from AgentPermissionDiff in v0.2. Version v0.3 adds a reviewer-focused Markdown presentation, without expanding the permission model. The repository is [vlovers/rulewitness](https://github.com/vlovers/rulewitness), and `rulewitness@0.3.0` is [published on npm](https://www.npmjs.com/package/rulewitness/v/0.3.0). See [migration notes](docs/migration-v0.2.md), the [v0.2.0 release](https://github.com/vlovers/rulewitness/releases/tag/v0.2.0), and the [historical release preparation notes](docs/release-v0.2.0.md).
 
 ## Installation and quick start
 
