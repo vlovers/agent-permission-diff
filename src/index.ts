@@ -8,6 +8,7 @@ export {
 export { readPolicy } from "./git.ts";
 export { comparePolicies, scanPolicy, severity } from "./compare.ts";
 export { formatHuman, formatMarkdown } from "./report.ts";
+export { formatPullRequestMarkdown } from "./pr-markdown.ts";
 export {
   explainFinding,
   validateWitness,
