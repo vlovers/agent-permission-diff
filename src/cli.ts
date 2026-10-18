@@ -36,11 +36,7 @@ try {
     let format: "human" | "json" | "markdown" | "pr-markdown" = "human";
     for (let i = 0; i < rest.length; i++) {
       const arg = rest[i]!;
-      if (
-        arg === "--json" ||
-        arg === "--markdown" ||
-        arg === "--pr-markdown"
-      ) {
+      if (arg === "--json" || arg === "--markdown" || arg === "--pr-markdown") {
         if (format !== "human")
           throw new Error("Choose exactly one output format");
         format =
