@@ -4,7 +4,9 @@ This is a **consumer example**, not a workflow activated in RuleWitness itself.
 Copy the YAML below to the target repository's `.github/workflows/rulewitness.yml`.
 This example installs a **fixed published version** of RuleWitness rather than executing the untrusted PR's `package.json`, build scripts or workflow content.
 
-The published v0.3.0 release provides `--pr-markdown`. This example remains unverified for fork pull requests.\n\nRequirements: GitHub Actions running on Linux; a GitHub checkout that contains both exact event SHAs; Node.js 24 and Git 2.47+; the trusted published `rulewitness@0.3.0` package. Review and pin newer RuleWitness versions deliberately.
+The published v0.3.0 release provides `--pr-markdown`. Real fork PR behavior still needs end-to-end validation.
+
+Requirements: GitHub Actions running on Linux; a GitHub checkout that contains both exact event SHAs; Node.js 24 and Git 2.47+; the trusted published `rulewitness@0.3.0` package. Review and pin newer RuleWitness versions deliberately.
 
 ```yaml
 name: RuleWitness PR permissions
@@ -23,8 +25,10 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-          # Checkout PR content as inert Git data; never run scripts from it.
-          ref: ${{ github.event.pull_request.head.sha }}
+          # Checkout GitHub\u0027s PR merge ref from the base repository.
+          # Keep PR content inert; do not run scripts from it.
+          # Checkout the GitHub-generated PR merge ref from the base repository.
+          # Its history contains the base and head commits, including for fork PRs.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
@@ -68,7 +72,7 @@ jobs:
 - `fetch-depth: 0` makes the history available, but cross-repository/fork PRs may have a base SHA not reachable by the head repository's fetched refs. **If the analyzer returns exit 2, do not treat the check as a pass.** The preflight step fails closed when objects are missing. Real fork PR support is not yet verified; never silently replace SHAs with branch names.
 - Gate exit codes: 0=scoped pass, 1=known threshold violation, 2=analysis/input failure, 3=inspected-model uncertainty. A gate result cannot certify runtime Claude Code authorization; every report retains `complete: false`.
 - The summary includes verbatim permission rules from the repository. If those strings are sensitive, omit the summary publishing step and keep the output in job logs subject to your organization's retention settings.
-- This example has not yet been validated by a dedicated GitHub Actions consumer fixture against both same-repo and fork PRs. It should not be described as universally fork-compatible until that validation is completed.
+- The repository workflow was exercised on same-repository pull requests, but not yet on a real fork PR. It should not be described as universally fork-compatible until that validation is completed.
 - Manual follow-up: obtain a real PR, check known escalation and uncertainty, verify absent base object produces code 2, and confirm the summary does not hide failures.
 
 See [README](../../README.md) for the supported Claude Code permission subset, assumptions and known exclusions.
