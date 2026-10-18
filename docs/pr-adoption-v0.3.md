@@ -1,55 +1,50 @@
-# RuleWitness v0.3.0 PR adoption checklist
+# RuleWitness v0.3.0 PR adoption
 
-This is a proposed guide. **v0.3.0 is not published.** The currently published npm version is `rulewitness@0.2.0`.
+RuleWitness v0.3.0 is not published yet.
 
-## Published CLI usage
+The published version is `rulewitness@0.2.0`.
 
-Use `rulewitness compare BASE_SHA HEAD_SHA --markdown --fail-on high` with the
-published v0.2.0. A read-only example workflow is proposed in
-[PR #14](https://github.com/vlovers/rulewitness/pull/14/files).
+## GitHub PR workflow
 
-The opt-in `--pr-markdown` output is proposed in
-[PR #15](https://github.com/vlovers/rulewitness/pull/15). Do not assume it
-exists in v0.2.0.
+Use the read-only workflow in `docs/examples/github-pr-workflow.md`.
 
-## GitHub PR safety
+For the published version:
 
-- Use `pull_request` with read-only `contents` permissions.
-- Use the exact event base and head commit SHAs, not branch names.
-- Install a fixed, trusted published analyzer, never PR dependencies.
-- Do not execute contributor-supplied hooks or scripts.
-- Treat missing base objects as analysis errors, never as passes.
-- Remember that reports can contain sensitive permission strings.
+```sh
+rulewitness compare BASE HEAD --markdown --fail-on high
+```
 
-## Exit codes
+The future `--pr-markdown` format is not in npm v0.2.0.
+
+Use exact commit SHAs and a trusted analyzer installation.
+
+Do not execute code from untrusted pull requests.
+
+## CI exit codes
 
 | Exit | Meaning |
 | --- | --- |
-| 0 | Scoped pass, never a full security certification |
-| 1 | Confirmed modeled finding meets the chosen threshold |
-| 2 | Analysis or Git input failed |
-| 3 | Inspected-model uncertainty |
+| 0 | Scoped success |
+| 1 | Known threshold violation |
+| 2 | Analysis failure |
+| 3 | Uncertainty |
 
-Disposable Git integration scenarios are proposed in
-[PR #16](https://github.com/vlovers/rulewitness/pull/16).
-These do not validate GitHub Actions behavior for actual fork PRs.
+Exit 0 is not runtime authorization or security certification.
 
-## Release checklist
+## Release checks
 
-- [x] Audit and roadmap drafted in PR #13.
-- [x] Read-only workflow proposed in PR #14.
-- [x] Reviewer Markdown proposed in PR #15.
-- [x] Disposable Git tests proposed in PR #16.
-- [ ] Review and merge approved PRs.
-- [ ] Verify integrated tests and installed package.
-- [ ] Validate real same-repository and fork PR checkouts.
-- [ ] Confirm reports remain inert when rendered in GitHub.
-- [ ] Update the workflow's pinned analyzer only after publishing the new version.
-- [ ] Verify package manifest, version, changelog, and npm provenance.
-- [ ] Release only once outstanding checks have been resolved.
+- [x] Audit: PR #13.
+- [x] Workflow example: PR #14.
+- [x] PR formatter: PR #15.
+- [x] Disposable Git tests: PR #16.
+- [ ] Verify the combined main CI.
+- [ ] Verify same-repository and fork PR behavior.
+- [ ] Review the npm package contents.
+- [ ] Verify the new pinned CLI against the workflow.
+- [ ] Confirm security limitations remain visible.
+- [ ] Publish a new version after validation.
 
-The existing configured-rule model is deliberately partial.
-An `ALLOW` finding never guarantees Claude Code will execute a command.
+The current workflow has not been verified on a real fork PR.
 
-Official documentation: [permissions](https://code.claude.com/docs/en/permissions)
-and [settings](https://code.claude.com/docs/en/settings).
+See the [Claude Code permissions](https://code.claude.com/docs/en/permissions)
+and [settings](https://code.claude.com/docs/en/settings) documentation.
