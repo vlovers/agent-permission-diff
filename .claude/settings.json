@@ -1,5 +1,5 @@
 {
   "permissions": {
-    "ask": ["Bash(npm test)"]
+    "allow": ["Bash(npm test)"]
   }
 }
