@@ -10,10 +10,7 @@ const cleanEnvironment = Object.fromEntries(
   Object.entries(process.env).filter(([key]) => !/^GIT_/i.test(key)),
 );
 
-function scenario(
-  before: object | null,
-  after: object | null,
-) {
+function scenario(before: object | null, after: object | null) {
   const directory = mkdtempSync(join(tmpdir(), "rulewitness-pr-"));
   const env = {
     ...cleanEnvironment,
