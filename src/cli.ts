@@ -4,6 +4,7 @@ import {
   assessComparisonGate,
   formatHuman,
   formatMarkdown,
+  formatPullRequestMarkdown,
   readPolicy,
   readTestConfig,
   runPolicyTests,
@@ -13,7 +14,7 @@ import { safeText } from "./report.ts";
 import type { PolicyTestReport, Report, SeverityThreshold } from "./types.ts";
 
 const usage = `Usage: rulewitness scan [REV] [--json|--markdown]
-       rulewitness compare BEFORE AFTER [--json|--markdown] [--fail-on high|medium|low|info]
+       rulewitness compare BEFORE AFTER [--json|--markdown|--pr-markdown] [--fail-on high|medium|low|info]
        rulewitness test [--config rulewitness.tests.json] [--rev HEAD] [--json|--markdown]
 Run at the Git repository root. Default scan/test revision: HEAD.
 Compatibility bin: agent-permission-diff (same commands and output).
@@ -32,13 +33,13 @@ try {
     if (!["scan", "compare", "test"].includes(command!)) throw new Error(usage);
     const refs: string[] = [];
     const options = new Map<string, string>();
-    let format: "human" | "json" | "markdown" = "human";
+    let format: "human" | "json" | "markdown" | "pr-markdown" = "human";
     for (let i = 0; i < rest.length; i++) {
       const arg = rest[i]!;
-      if (arg === "--json" || arg === "--markdown") {
+      if (arg === "--json" || arg === "--markdown" || arg === "--pr-markdown") {
         if (format !== "human")
           throw new Error("Choose exactly one output format");
-        format = arg === "--json" ? "json" : "markdown";
+        format = arg === "--json" ? "json" : arg === "--pr-markdown" ? "pr-markdown" : "markdown";
       } else if (["--config", "--rev", "--fail-on"].includes(arg)) {
         const value = rest[++i];
         if (options.has(arg) || !value || value.startsWith("-"))
@@ -56,6 +57,8 @@ try {
     const threshold = options.get("--fail-on");
     if (threshold && !["high", "medium", "low", "info"].includes(threshold))
       throw new Error("Invalid severity threshold");
+    if (format === "pr-markdown" && command !== "compare")
+      throw new Error("--pr-markdown applies only to compare");
     let report: Report | PolicyTestReport;
     if (command === "scan" && refs.length <= 1) {
       report = scanPolicy(readPolicy(process.cwd(), refs[0] ?? "HEAD"));
@@ -84,7 +87,9 @@ try {
         ? JSON.stringify(report, null, 2) + "\n"
         : format === "markdown"
           ? formatMarkdown(report)
-          : formatHuman(report),
+          : format === "pr-markdown"
+            ? formatPullRequestMarkdown(report as Report)
+            : formatHuman(report),
     );
   }
 } catch (error) {
