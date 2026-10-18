@@ -5,9 +5,10 @@ For currently published npm usage, install `rulewitness@0.2.0`.
 
 ## Use the released v0.2.0 in GitHub PRs
 
-Follow the read-only [consumer workflow](examples/github-pr-workflow.md)
-proposed in a separate draft PR. Until that PR lands, the linked workflow is
-available in [PR #14](https://github.com/vlovers/rulewitness/pull/14/files).
+See the read-only consumer workflow proposed in
+[PR #14](https://github.com/vlovers/rulewitness/pull/14/files).
+Once merged, its permanent path will be
+`docs/examples/github-pr-workflow.md`.
 
 The published CLI understands:
 
