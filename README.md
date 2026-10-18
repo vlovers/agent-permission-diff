@@ -189,6 +189,17 @@ Results show expected and actual modeled decisions, pass/mismatch/unknown status
 
 Tests assert only the listed supported queries. Passing assertions do not prove complete policy or runtime safety. The assertion JSON is a separate version-1 `command: "test"` contract with `results`, `passed`, `revision`, `issues` and `complete: false`.
 
+## Validated GitHub PR workflows
+
+The released `rulewitness@0.3.0` CLI has been exercised in real GitHub Actions reviews with read-only permissions:
+
+- [PR #21](https://github.com/vlovers/rulewitness/pull/21): same-repository PR, scoped pass.
+- [PR #22](https://github.com/vlovers/rulewitness/pull/22): uncertain permission introduction blocked with exit 3.
+- [PR #23](https://github.com/vlovers/rulewitness/pull/23): known `ASK → ALLOW` escalation blocked with exit 1.
+- [PR #26](https://github.com/vlovers/rulewitness/pull/26): external fork PR completed checkout, exact-revision comparison and Job Summary successfully.
+
+These checks validate the listed scenarios, not all fork configurations or the full Claude Code runtime authorization model. The test PRs were closed without merging their permission changes. For setup, see the [read-only workflow example](docs/examples/github-pr-workflow.md) and [fork E2E runbook](docs/fork-pr-e2e.md).
+
 ## Pull request review (v0.3)
 
 After v0.3.0 has been published, use the opt-in reviewer Markdown output:

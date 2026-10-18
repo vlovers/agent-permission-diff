@@ -1,6 +1,6 @@
 # Fork pull request end-to-end validation
 
-This is a manual validation plan for the published RuleWitness v0.3.0 CLI and the repository's read-only PR workflow. **Passing same-repository PR tests does not establish fork compatibility.**
+This is a reproducible validation plan for the published RuleWitness v0.3.0 CLI and the repository's read-only PR workflow. The external fork [PR #26](https://github.com/vlovers/rulewitness/pull/26) passed the checkout, analyzer comparison, and Job Summary checks. Other fork scenarios remain subject to verification.
 
 ## Preparation
 
