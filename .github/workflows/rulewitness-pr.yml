@@ -1,0 +1,42 @@
+name: RuleWitness permissions review
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  rulewitness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout pull request commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Setup trusted analyzer runtime
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - name: Install released RuleWitness
+        run: npm install --global --ignore-scripts --no-audit --no-fund rulewitness@0.3.0
+      - name: Compare exact commits
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          git cat-file -e "${BASE_SHA}^{commit}"
+          git cat-file -e "${HEAD_SHA}^{commit}"
+          rulewitness compare "$BASE_SHA" "$HEAD_SHA" --pr-markdown --fail-on high > "$RUNNER_TEMP/rulewitness-report.md"
+      - name: Publish report
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$RUNNER_TEMP/rulewitness-report.md" ]; then
+            cat "$RUNNER_TEMP/rulewitness-report.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            printf '%s\n' '### RuleWitness analysis could not complete' 'Inspect the comparison step for a missing Git object or other analysis failure.' >> "$GITHUB_STEP_SUMMARY"
+          fi
