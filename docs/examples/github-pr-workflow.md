@@ -69,10 +69,10 @@ jobs:
 
 - `pull_request` with `contents: read` deliberately avoids write tokens. Do **not** change to `pull_request_target` while checking out an untrusted PR head.
 - All configured rule strings and witnesses remain **data**, never commands to run. The only executed analyzer comes from the pinned released npm package. Review the published package's supply chain before adopting.
-- `fetch-depth: 0` makes the history available, but cross-repository/fork PRs may have a base SHA not reachable by the head repository's fetched refs. **If the analyzer returns exit 2, do not treat the check as a pass.** The preflight step fails closed when objects are missing. Real fork PR support is not yet verified; never silently replace SHAs with branch names.
+- `fetch-depth: 0` makes the history available, but cross-repository/fork PRs may have a base SHA not reachable by the head repository's fetched refs. **If the analyzer returns exit 2, do not treat the check as a pass.** The preflight step fails closed when objects are missing. The checkout passed on an external fork PR (#26); still fail closed when either SHA is absent and never silently substitute branch names.
 - Gate exit codes: 0=scoped pass, 1=known threshold violation, 2=analysis/input failure, 3=inspected-model uncertainty. A gate result cannot certify runtime Claude Code authorization; every report retains `complete: false`.
 - The summary includes verbatim permission rules from the repository. If those strings are sensitive, omit the summary publishing step and keep the output in job logs subject to your organization's retention settings.
-- The repository workflow was exercised on same-repository pull requests, but not yet on a real fork PR. It should not be described as universally fork-compatible until that validation is completed.
+- The repository workflow was exercised on same-repository pull requests, and successfully on external fork [PR #26](https://github.com/vlovers/rulewitness/pull/26). This is concrete E2E evidence, not a guarantee for every fork scenario.
 - Manual follow-up: obtain a real PR, check known escalation and uncertainty, verify absent base object produces code 2, and confirm the summary does not hide failures.
 
 See [README](../../README.md) for the supported Claude Code permission subset, assumptions and known exclusions.
