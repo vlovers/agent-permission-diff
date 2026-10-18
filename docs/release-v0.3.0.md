@@ -1,23 +1,25 @@
-# RuleWitness v0.3.0 release candidate
+# RuleWitness v0.3.0 release notes
 
 ## Scope
 
-This version improves GitHub pull-request review of the *existing* documented subset of Claude Code configured-rule decisions.
+Version 0.3.0 improves pull request review for the existing Claude Code rule model.
 
-- Opt-in `compare BEFORE AFTER --pr-markdown` with compact known-change and uncertainty sections, evidence, limitations and gate metadata.
-- Additive TypeScript export `formatPullRequestMarkdown`.
-- Read-only GitHub Actions consumer example using exact event SHAs and a pinned analyzer package.
-- Disposable Git consumer tests for known escalation, masked changes, unknown settings, missing base objects, and empty settings snapshots.
-- Updated v0.3 adoption guide, audit and roadmap.
+- Adds the opt-in pr-markdown comparison format.
+- Adds a TypeScript formatter for pull request reviews.
+- Includes a read-only GitHub Actions example.
+- Includes disposable Git consumer regression tests.
+- Updates documentation and release guidance.
 
-There is **no new Claude Code provider-rule support** and no claim of runtime authorization or verified fork PR support. JSON schema v1, existing `--markdown`, and exit-code precedence remain unchanged.
+No additional provider semantics are claimed.
 
-## Release blockers and validation
+## Validation
 
-- Validate merged source and installed-package CI on this candidate.
-- Check the candidate tarball and exported TypeScript declarations.
-- Validate real same-repository and fork-PR workflow execution before advertising both as verified.
-- Ensure `rulewitness@0.3.0` is not yet published before creating a version tag and GitHub release.
-- Review the publishing workflow's npm trusted publisher configuration and resulting provenance.
+- Verify full CI and installed-package tests.
+- Verify exported TypeScript declarations.
+- Test real GitHub same-repository and fork pull requests.
+- Review the npm package contents and provenance.
+- Confirm registry availability before publication.
 
-Do not tag or publish based only on documentation CI.
+Missing Git objects must fail conservatively.
+
+No report establishes Claude Code runtime authorization.
