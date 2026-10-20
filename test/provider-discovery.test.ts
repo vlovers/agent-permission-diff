@@ -84,7 +84,10 @@ test("inventory: reject unsafe paths and resource exhaustion", () => {
     "bad\npath",
     "x".repeat(1025),
   ]) {
-    assert.throws(() => discoverProviders([path]), /Invalid provider inventory/);
+    assert.throws(
+      () => discoverProviders([path]),
+      /Invalid provider inventory/,
+    );
   }
   assert.throws(
     () => discoverProviders(Array(4097).fill("same-path")),
