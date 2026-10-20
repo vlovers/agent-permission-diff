@@ -76,6 +76,20 @@ export function readTrackedProviderSnapshot(
   ref: string,
 ): TrackedProviderSnapshot {
   const policy = readPolicy(repository, ref);
+  // readPolicy records non-regular Claude paths as coverage issues. A marker
+  // that is a symlink or a non-tree directory is not an absent provider.
+  // Snapshot discovery must never downgrade unsafe Git objects to "absent".
+  if (
+    policy.issues.some(
+      (issue) =>
+        issue.message ===
+          "Settings path is not a regular Git blob; symlinks are not followed" &&
+        (issue.evidence.file === ".claude" ||
+          issue.evidence.file === ".claude/settings.json" ||
+          issue.evidence.file === ".claude/settings.local.json"),
+    )
+  )
+    throw new Error("Unsafe Claude configuration path in Git revision");
   const markerPaths: string[] = policy.files.filter(
     (file) =>
       file === ".claude/settings.json" ||
