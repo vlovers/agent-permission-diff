@@ -33,11 +33,19 @@ function repository() {
   git("init", "--quiet", "--initial-branch=main");
   const commit = () => {
     git(
-      "-c", "user.name=Fixture",
-      "-c", "user.email=fixture@example.invalid",
-      "-c", "commit.gpgsign=false",
-      "-c", `core.hooksPath=${devNull}`,
-      "commit", "-q", "--allow-empty", "-m", "object fixture",
+      "-c",
+      "user.name=Fixture",
+      "-c",
+      "user.email=fixture@example.invalid",
+      "-c",
+      "commit.gpgsign=false",
+      "-c",
+      `core.hooksPath=${devNull}`,
+      "commit",
+      "-q",
+      "--allow-empty",
+      "-m",
+      "object fixture",
     );
     return git("rev-parse", "HEAD");
   };
@@ -46,11 +54,21 @@ function repository() {
 }
 
 test("Git object boundary: gitlink/submodule cannot become Claude or Codex settings", () => {
-  for (const path of [".claude", ".codex", ".claude/settings.json", ".codex/config.toml"]) {
+  for (const path of [
+    ".claude",
+    ".codex",
+    ".claude/settings.json",
+    ".codex/config.toml",
+  ]) {
     const f = repository();
     try {
       const initial = f.commit();
-      f.git("update-index", "--add", "--cacheinfo", `160000,${initial},${path}`);
+      f.git(
+        "update-index",
+        "--add",
+        "--cacheinfo",
+        `160000,${initial},${path}`,
+      );
       const head = f.commit();
       const entry = gitEntry(f.directory, head, path);
       assert.equal(entry?.mode, "160000");
@@ -126,12 +144,25 @@ test("Git object boundary: missing objects, non-commits and invalid tree selecto
   const f = repository();
   try {
     const head = f.commit();
-    assert.throws(() => gitEntry(f.directory, "a".repeat(40), ".codex/config.toml"));
-    assert.throws(() => gitEntry(f.directory, "HEAD", ".codex/config.toml"), /verified Git commit/);
-    assert.throws(() => gitEntry(f.directory, "", ".claude/settings.json"), /verified Git commit/);
-    assert.throws(() => readTrackedProviderSnapshot(f.directory, "a".repeat(40)));
+    assert.throws(() =>
+      gitEntry(f.directory, "a".repeat(40), ".codex/config.toml"),
+    );
+    assert.throws(
+      () => gitEntry(f.directory, "HEAD", ".codex/config.toml"),
+      /verified Git commit/,
+    );
+    assert.throws(
+      () => gitEntry(f.directory, "", ".claude/settings.json"),
+      /verified Git commit/,
+    );
+    assert.throws(() =>
+      readTrackedProviderSnapshot(f.directory, "a".repeat(40)),
+    );
     assert.throws(() => readOnlyGit(f.directory, ["show", "a".repeat(40)]));
-    assert.equal(readTrackedProviderSnapshot(f.directory, head).selection.kind, "absent");
+    assert.equal(
+      readTrackedProviderSnapshot(f.directory, head).selection.kind,
+      "absent",
+    );
   } finally {
     f.close();
   }
