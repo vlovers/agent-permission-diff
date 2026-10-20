@@ -16,12 +16,12 @@ Use exact available commit SHAs. A missing object is an analysis error, not perm
 
 ## Exit statuses
 
-| Code | Meaning |
-| --- | --- |
-| 0 | Scoped pass within the modeled configuration rules |
-| 1 | Known change exceeds the configured severity threshold |
-| 2 | Analysis or input failure |
-| 3 | Inspected-model uncertainty |
+| Code | Meaning                                                |
+| ---- | ------------------------------------------------------ |
+| 0    | Scoped pass within the modeled configuration rules     |
+| 1    | Known change exceeds the configured severity threshold |
+| 2    | Analysis or input failure                              |
+| 3    | Inspected-model uncertainty                            |
 
 Treat all nonzero exits as failing CI, but distinguish proven changes from uncertainty and analysis failures. Even code 0 does **not** establish safe runtime authorization. Every machine-readable report states `complete: false`.
 
