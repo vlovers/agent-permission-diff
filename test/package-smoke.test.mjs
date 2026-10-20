@@ -280,6 +280,7 @@ test("package: dry-run and actual tarball include only documented runtime and do
     "compare",
     "explain",
     "git",
+    "git-reader",
     "glob",
     "index",
     "policy",
@@ -336,6 +337,7 @@ test("package: installed ESM exports, declarations and executable bin work witho
   assert.equal(pkg.exports["./provider-adapter"], undefined);
   assert.equal(pkg.exports["./provider-discovery"], undefined);
   assert.equal(pkg.exports["./provider-snapshot"], undefined);
+  assert.equal(pkg.exports["./git-reader"], undefined);
   assert.equal(pkg.exports["./claude-model-adapter"], undefined);
   assert.ok(existsSync(join(pkgRoot, "dist/provider-adapter.js")));
   assert.deepEqual(pkg.dependencies ?? {}, {});
