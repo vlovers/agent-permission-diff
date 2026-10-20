@@ -29,5 +29,9 @@ test("release candidate: publish trigger is not a PR merge", () => {
   assert.match(workflow, /\*\-\*\) npm publish --access public --tag next/);
   assert.match(workflow, /\*\) npm publish --access public --tag latest/);
   assert.doesNotMatch(workflow, /^\s*run: npm publish --access public\s*$/m);
+  assert.match(workflow, /npm view rulewitness versions --json/);
+  assert.match(workflow, /Unexpected npm registry version response/);
+  assert.match(workflow, /Package version is already published/);
+  assert.doesNotMatch(workflow, /if npm view "rulewitness@/);
   assert.doesNotMatch(workflow, /pull_request_target:/);
 });
