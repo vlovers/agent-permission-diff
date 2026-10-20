@@ -167,3 +167,45 @@ test("snapshot: missing and hostile refs never become empty success", () => {
     f.close();
   }
 });
+
+test("snapshot: symlinked Claude settings never look like absent policy", () => {
+  const f = repository();
+  try {
+    f.write("placeholder", '{"permissions":{"allow":["WebSearch"]}}');
+    f.write(".claude/settings.json", '{"permissions":{"ask":["WebSearch"]}}');
+    const initial = f.commit();
+    assert.equal(
+      readTrackedProviderSnapshot(f.directory, initial).selection.kind,
+      "claude-code",
+    );
+    rmSync(join(f.directory, ".claude/settings.json"));
+    symlinkSync("../placeholder", join(f.directory, ".claude/settings.json"));
+    const linked = f.commit();
+    assert.throws(
+      () => readTrackedProviderSnapshot(f.directory, linked),
+      /Unsafe Claude configuration path/,
+    );
+    assert.equal(f.git("rev-parse", "HEAD"), linked);
+  } finally {
+    f.close();
+  }
+});
+
+test("snapshot: symlinked Claude directory is rejected even with Codex", () => {
+  const f = repository();
+  try {
+    f.write("placeholder", "inert");
+    f.write(".claude/settings.json", "{}");
+    f.write(".codex/config.toml", 'sandbox_mode = "read-only"');
+    f.commit();
+    rmSync(join(f.directory, ".claude"), { recursive: true });
+    symlinkSync("placeholder", join(f.directory, ".claude"));
+    const linked = f.commit();
+    assert.throws(
+      () => readTrackedProviderSnapshot(f.directory, linked),
+      /Unsafe Claude configuration path/,
+    );
+  } finally {
+    f.close();
+  }
+});
