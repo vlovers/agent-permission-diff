@@ -4,16 +4,16 @@ Status: **proposal for review**, not implemented. Baseline: published v0.3.0. Th
 
 ## Current implementation inventory
 
-| Boundary | Today | Implication |
-| --- | --- | --- |
-| `src/git.ts` | `readPolicy(repository, ref)` reads two fixed `.claude` paths via read-only Git, rejects symlinks, disables transport and lazy fetch | Provider discovery must never execute or source configuration |
-| `src/policy.ts` | Parses Claude permissions, emits rules and issues; `evaluate` applies deny, ask, allow with conservative UNKNOWN | Provider-specific parsing and decisions must not be conflated with another agent's syntax |
-| `src/glob.ts` | Bounded Bash pattern regions and concrete witnesses | Its language is not a universal permission-expression engine |
-| `src/compare.ts` | Hard-coded Bash/WebSearch tool inventory, witness replay and Claude-specific report metadata | A future provider needs its own supported input-domain partitioner, not just a name switch |
-| `src/explain.ts` | Explanations, witness validation, exit gates and limitations | Preserve evidence and uncertainty semantics in all implementations |
-| `src/types.ts` | JSON schemaVersion 1 and literal provider `claude-code`; report.complete is false at runtime | Do not widen or silently reinterpret v1 fields |
-| `src/cli.ts` | `scan`, `compare`, `test` without provider selection | Default commands must continue to behave exactly as in v0.3 |
-| `src/index.ts` | Exports existing public types and helpers | Existing import names, function signatures and output fixtures are compatibility obligations |
+| Boundary         | Today                                                                                                                                | Implication                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| `src/git.ts`     | `readPolicy(repository, ref)` reads two fixed `.claude` paths via read-only Git, rejects symlinks, disables transport and lazy fetch | Provider discovery must never execute or source configuration                                |
+| `src/policy.ts`  | Parses Claude permissions, emits rules and issues; `evaluate` applies deny, ask, allow with conservative UNKNOWN                     | Provider-specific parsing and decisions must not be conflated with another agent's syntax    |
+| `src/glob.ts`    | Bounded Bash pattern regions and concrete witnesses                                                                                  | Its language is not a universal permission-expression engine                                 |
+| `src/compare.ts` | Hard-coded Bash/WebSearch tool inventory, witness replay and Claude-specific report metadata                                         | A future provider needs its own supported input-domain partitioner, not just a name switch   |
+| `src/explain.ts` | Explanations, witness validation, exit gates and limitations                                                                         | Preserve evidence and uncertainty semantics in all implementations                           |
+| `src/types.ts`   | JSON schemaVersion 1 and literal provider `claude-code`; report.complete is false at runtime                                         | Do not widen or silently reinterpret v1 fields                                               |
+| `src/cli.ts`     | `scan`, `compare`, `test` without provider selection                                                                                 | Default commands must continue to behave exactly as in v0.3                                  |
+| `src/index.ts`   | Exports existing public types and helpers                                                                                            | Existing import names, function signatures and output fixtures are compatibility obligations |
 
 ## Compatibility contract (must pass before implementation)
 
