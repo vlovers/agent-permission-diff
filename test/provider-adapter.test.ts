@@ -224,3 +224,61 @@ test("synthetic provider: rejects empty candidates, and no candidate is a safe f
     /Invalid provider candidate/,
   );
 });
+
+test("synthetic provider: rejects oversized decisions and hidden fields", () => {
+  const invalidOutputs: unknown[] = [
+    { kind: "known", value: "x".repeat(1025) },
+    { kind: "unknown", reason: "x".repeat(1025) },
+    { kind: "known", value: "allow", extra: "hidden" },
+    { kind: "unknown", reason: "ambient", extra: true },
+    ["known", "allow"],
+    null,
+  ];
+  for (const output of invalidOutputs) {
+    const invalid: ModelAdapter<Snapshot> = {
+      ...adapter,
+      candidates: () => ["x"],
+      evaluate: () => output as ModelDecision,
+    };
+    assert.throws(
+      () => compareModelSnapshots(invalid, {}, {}),
+      /invalid or failed replay/,
+    );
+  }
+});
+
+test("synthetic provider: replay catches cross-snapshot stateful mutations", () => {
+  let phase = 0;
+  const unstable: ModelAdapter<Snapshot> = {
+    ...adapter,
+    candidates: () => ["x"],
+    evaluate(snapshot) {
+      if ("after" in snapshot) phase++;
+      return known(phase === 0 ? "ask" : "allow");
+    },
+  };
+  assert.throws(
+    () => compareModelSnapshots(unstable, { before: known("ask") }, { after: known("allow") }),
+    /invalid or failed replay/,
+  );
+});
+
+test("synthetic provider: returns detached normalized decisions", () => {
+  const decision = { kind: "known" as const, value: "ask" };
+  const detached: ModelAdapter<Snapshot> = {
+    ...adapter,
+    candidates: () => ["x"],
+    evaluate(snapshot) {
+      return "after" in snapshot ? known("allow") : decision;
+    },
+  };
+  const result = compareModelSnapshots(
+    detached,
+    { before: known("ask") },
+    { after: known("allow") },
+  );
+  decision.value = "tampered";
+  assert.deepEqual(result, [
+    { candidate: "x", before: known("ask"), after: known("allow") },
+  ]);
+});
