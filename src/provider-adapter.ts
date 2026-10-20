@@ -22,14 +22,16 @@ const MAX_CANDIDATES = 256;
 const MAX_EMITTED_CANDIDATES = 1024;
 const MAX_CANDIDATE_LENGTH = 1024;
 
-function validDecision(value: ModelDecision): boolean {
+function validDecision(value: unknown): value is ModelDecision {
+  if (!value || typeof value !== "object") return false;
+  const decision = value as Partial<ModelDecision>;
   return (
-    (value.kind === "known" &&
-      typeof value.value === "string" &&
-      value.value.length > 0) ||
-    (value.kind === "unknown" &&
-      typeof value.reason === "string" &&
-      value.reason.length > 0)
+    (decision.kind === "known" &&
+      typeof decision.value === "string" &&
+      decision.value.length > 0) ||
+    (decision.kind === "unknown" &&
+      typeof decision.reason === "string" &&
+      decision.reason.length > 0)
   );
 }
 
