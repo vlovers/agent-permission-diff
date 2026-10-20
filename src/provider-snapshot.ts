@@ -76,7 +76,7 @@ export function readTrackedProviderSnapshot(
   ref: string,
 ): TrackedProviderSnapshot {
   const policy = readPolicy(repository, ref);
-  const markerPaths = policy.files.filter(
+  const markerPaths: string[] = policy.files.filter(
     (file) =>
       file === ".claude/settings.json" ||
       file === ".claude/settings.local.json",
