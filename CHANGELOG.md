@@ -8,7 +8,7 @@ All notable changes are documented here. Entries marked **Unreleased** describe 
 
 - Added an internal, bounded provider comparison contract with deterministic candidate ordering, strict decisions, uncertainty preservation, and cross-snapshot replay.
 - Added an internal Claude Code adapter that reuses the existing evaluator; it does not replace the production comparison report.
-- Added read-only provider-marker discovery and exact-commit Git snapshots. Codex can be *detected*, but its permissions are **not** evaluated.
+- Added read-only provider-marker discovery and exact-commit Git snapshots. Codex can be _detected_, but its permissions are **not** evaluated.
 - Consolidated shared Git subprocess hardening and tree-object validation for Claude and Codex marker discovery.
 
 ### Security and verification
