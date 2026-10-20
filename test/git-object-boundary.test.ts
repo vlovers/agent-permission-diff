@@ -111,8 +111,8 @@ test("Git object boundary: poisoned environment cannot redirect Git reads or wri
     Object.assign(process.env, poison);
     assert.equal(readTrackedProviderSnapshot(f.directory, head).revision, head);
     assert.equal(gitEntry(f.directory, head, ".codex/config.toml"), null);
-    assert.equal(existsSync(poison.GIT_INDEX_FILE), false);
-    assert.equal(existsSync(poison.GIT_TRACE), false);
+    assert.equal(existsSync(poison.GIT_INDEX_FILE!), false);
+    assert.equal(existsSync(poison.GIT_TRACE!), false);
   } finally {
     for (const [key, value] of Object.entries(previous)) {
       if (value === undefined) delete process.env[key];
