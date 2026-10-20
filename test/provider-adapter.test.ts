@@ -110,3 +110,128 @@ test("synthetic provider: rejects unstable or invalid evaluator output", () => {
     /failed replay/,
   );
 });
+
+test("synthetic provider: unknown transitions remain explicit and ordered", () => {
+  const before: Snapshot = {
+    alpha: known("read-only"),
+    beta: unknown("inherited restriction unavailable"),
+    gamma: known("ask"),
+    delta: known("same"),
+  };
+  const after: Snapshot = {
+    alpha: unknown("external policy unavailable"),
+    beta: known("read-write"),
+    gamma: unknown("command rules unsupported"),
+    delta: known("same"),
+  };
+  const findings = compareModelSnapshots(adapter, before, after);
+  assert.deepEqual(findings.map((finding) => finding.candidate), [
+    "alpha",
+    "beta",
+    "gamma",
+  ]);
+  assert.deepEqual(findings[0], {
+    candidate: "alpha",
+    before: known("read-only"),
+    after: unknown("external policy unavailable"),
+  });
+  assert.deepEqual(findings[1], {
+    candidate: "beta",
+    before: unknown("inherited restriction unavailable"),
+    after: known("read-write"),
+  });
+  assert.deepEqual(findings[2], {
+    candidate: "gamma",
+    before: known("ask"),
+    after: unknown("command rules unsupported"),
+  });
+});
+
+test("synthetic provider: a missing candidate cannot be mistaken for an allow", () => {
+  const findings = compareModelSnapshots(
+    adapter,
+    { beforeOnly: known("blocked") },
+    { afterOnly: known("granted") },
+  );
+  assert.deepEqual(findings, [
+    {
+      candidate: "afterOnly",
+      before: unknown("not modeled"),
+      after: known("granted"),
+    },
+    {
+      candidate: "beforeOnly",
+      before: known("blocked"),
+      after: unknown("not modeled"),
+    },
+  ]);
+});
+
+test("synthetic provider: deterministic output with duplicate shuffled candidates", () => {
+  const a: Snapshot = { c: known("ask"), b: known("denied"), a: known("ask") };
+  const b: Snapshot = { c: known("allowed"), b: known("denied"), a: known("allowed") };
+  const shuffle: ModelAdapter<Snapshot> = {
+    ...adapter,
+    candidates: () => ["c", "a", "c", "b", "a", "b"],
+  };
+  assert.deepEqual(
+    compareModelSnapshots(shuffle, a, b),
+    compareModelSnapshots(adapter, a, b),
+  );
+});
+
+test("synthetic provider: permits bounded repeated and boundary-length candidates", () => {
+  const boundary = "c".repeat(1024);
+  const dense: ModelAdapter<Snapshot> = {
+    ...adapter,
+    candidates: () => Array(1024).fill(boundary),
+  };
+  assert.deepEqual(
+    compareModelSnapshots(dense, {}, {}),
+    [
+      {
+        candidate: boundary,
+        before: unknown("not modeled"),
+        after: unknown("not modeled"),
+      },
+    ],
+  );
+});
+
+test("synthetic provider: rejects empty, malformed, and undefined decisions", () => {
+  const candidate: ModelAdapter<Snapshot> = {
+    ...adapter,
+    candidates: () => ["x"],
+  };
+  for (const decision of [
+    { kind: "known", value: "" },
+    { kind: "unknown", reason: "" },
+    { kind: "not-modeled" },
+    undefined,
+  ]) {
+    const invalid: ModelAdapter<Snapshot> = {
+      ...candidate,
+      evaluate: () => decision as ModelDecision,
+    };
+    assert.throws(
+      () => compareModelSnapshots(invalid, {}, {}),
+      /invalid or failed replay/,
+    );
+  }
+});
+
+test("synthetic provider: rejects empty candidates, and no candidate is a safe finding", () => {
+  assert.deepEqual(
+    compareModelSnapshots({ ...adapter, candidates: () => [] }, {}, {}),
+    [],
+  );
+  assert.throws(
+    () =>
+      compareModelSnapshots(
+        { ...adapter, candidates: () => [""] },
+        {},
+        {},
+      ),
+    /Invalid provider candidate/,
+  );
+});
