@@ -26,6 +26,8 @@ test("release candidate: publish trigger is not a PR merge", () => {
   );
   assert.match(workflow, /release:\s*\n\s*types:\s*\[published\]/);
   assert.match(workflow, /id-token:\s*write/);
-  assert.match(workflow, /npm publish --access public/);
+  assert.match(workflow, /\*\-\*\) npm publish --access public --tag next/);
+  assert.match(workflow, /\*\) npm publish --access public --tag latest/);
+  assert.doesNotMatch(workflow, /^\s*run: npm publish --access public\s*$/m);
   assert.doesNotMatch(workflow, /pull_request_target:/);
 });
