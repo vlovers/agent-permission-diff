@@ -8,7 +8,7 @@ export function readPolicy(repository: string, ref: string): Policy {
     !ref ||
     ref.startsWith("-") ||
     ref.length > 1024 ||
-    /[\\x00-\\x1f]/.test(ref)
+    /[\x00-\x1f]/.test(ref)
   )
     throw new Error("Invalid Git revision");
   const root = readOnlyGit(repository, ["rev-parse", "--show-prefix"]);
