@@ -3,8 +3,7 @@
  * This compares provider-defined symbolic candidates, NOT runtime authorization.
  */
 export type ModelDecision =
-  | { kind: "known"; value: string }
-  | { kind: "unknown"; reason: string };
+  { kind: "known"; value: string } | { kind: "unknown"; reason: string };
 
 export interface ModelAdapter<Snapshot> {
   readonly id: string;
