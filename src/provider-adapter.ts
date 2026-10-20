@@ -61,9 +61,11 @@ function evaluateStable<Snapshot>(
   if (first.kind !== replay.kind)
     throw new Error("Provider evaluation is invalid or failed replay");
   if (
-    (first.kind === "known" && replay.kind === "known" &&
+    (first.kind === "known" &&
+      replay.kind === "known" &&
       first.value !== replay.value) ||
-    (first.kind === "unknown" && replay.kind === "unknown" &&
+    (first.kind === "unknown" &&
+      replay.kind === "unknown" &&
       first.reason !== replay.reason)
   )
     throw new Error("Provider evaluation is invalid or failed replay");
