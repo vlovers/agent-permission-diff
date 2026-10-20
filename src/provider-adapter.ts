@@ -1,6 +1,7 @@
 /**
  * Internal experimental adapter contract. Not part of the public package exports.
  * This compares provider-defined symbolic candidates, NOT runtime authorization.
+ * Consumers must not use this internal function as an effective-permission gate.
  */
 export type ModelDecision =
   { kind: "known"; value: string } | { kind: "unknown"; reason: string };
