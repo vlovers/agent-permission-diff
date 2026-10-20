@@ -24,7 +24,7 @@ const MAX_CANDIDATE_LENGTH = 1024;
 
 function validDecision(value: unknown): value is ModelDecision {
   if (!value || typeof value !== "object") return false;
-  const decision = value as Partial<ModelDecision>;
+  const decision = value as Record<string, unknown>;
   return (
     (decision.kind === "known" &&
       typeof decision.value === "string" &&
