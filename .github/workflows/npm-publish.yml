@@ -63,4 +63,10 @@ jobs:
             exit 1
           fi
       - name: Publish using npm OIDC
-        run: npm publish --access public
+        run: |
+          set -eu
+          VERSION="$(node -p 'require("./package.json").version')"
+          case "$VERSION" in
+            *-*) npm publish --access public --tag next ;;
+            *) npm publish --access public --tag latest ;;
+          esac
