@@ -4,11 +4,11 @@ Status: **research only** (2026-10-21). Codex support is NOT implemented or adve
 
 ## Primary references
 
-- [Codex basic configuration](https://developers.openai.com/docs/config-file/config-basic) — user and project configuration, precedence and trust-dependent project loading.
-- [Codex configuration reference](https://developers.openai.com/docs/config-file/config-reference) — approval_policy, sandbox_mode, managed requirements, trust and filesystem/network settings.
+- [Codex basic configuration](https://developers.openai.com/codex/config-basic) — user and project configuration, precedence and trust-dependent project loading.
+- [Codex configuration reference](https://developers.openai.com/codex/config-reference) — approval_policy, sandbox_mode, managed requirements, trust and filesystem/network settings.
 - [Official plugin documentation](https://developers.openai.com/plugins/build/plugins) — repository-local plugin configuration, trusted projects and lifecycle hooks.
 
-URLs are documentation entry points; confirm the exact currently served English page and pin a Codex CLI version before writing conformance fixtures.
+These two Codex documentation links were checked on 2026-10-21 (the canonical content may redirect). Pin a Codex CLI version and verify actual precedence and behavior before writing conformance fixtures.
 
 ## Preliminary findings
 
