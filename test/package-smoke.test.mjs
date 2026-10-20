@@ -285,6 +285,7 @@ test("package: dry-run and actual tarball include only documented runtime and do
     "policy",
     "pr-markdown",
     "provider-adapter",
+    "provider-discovery",
     "report",
     "types",
   ];
@@ -332,6 +333,7 @@ test("package: installed ESM exports, declarations and executable bin work witho
   assert.equal(pkg.exports["."].import, "./dist/index.js");
   assert.equal(pkg.exports["."].types, "./dist/index.d.ts");
   assert.equal(pkg.exports["./provider-adapter"], undefined);
+  assert.equal(pkg.exports["./provider-discovery"], undefined);
   assert.equal(pkg.exports["./claude-model-adapter"], undefined);
   assert.ok(existsSync(join(pkgRoot, "dist/provider-adapter.js")));
   assert.deepEqual(pkg.dependencies ?? {}, {});
