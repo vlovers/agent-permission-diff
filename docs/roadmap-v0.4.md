@@ -1,6 +1,6 @@
 # RuleWitness v0.4 — proposed roadmap
 
-Status: **proposal**, not a release commitment. Baseline: published v0.3.0. Nothing in this plan expands the existing Claude Code runtime claims. [v0.3 roadmap](roadmap-v0.3.md) is retained as historical release planning.
+Status: **in progress, unreleased**. See [release readiness](release-readiness-v0.4.md) and [unreleased changelog](../CHANGELOG.md). No v0.4 npm release commitment. Baseline: published v0.3.0. Nothing in this plan expands the existing Claude Code runtime claims. [v0.3 roadmap](roadmap-v0.3.md) is retained as historical release planning.
 
 ## Goal
 
