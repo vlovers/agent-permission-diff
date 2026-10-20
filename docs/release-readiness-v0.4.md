@@ -4,15 +4,15 @@ Reviewed: 2026-10-21. This document records the status of source in `main`, not 
 
 ## Implementation status
 
-| Area | Repository status | Release implication |
-| --- | --- | --- |
-| Claude Code CLI and public TypeScript API | Existing `scan`, `compare`, `test`, schema v1 | Must keep compatibility and exact output checks |
-| Internal provider comparison | Implemented, bounded, synthetic replay-tested | Not an end-user permission engine |
-| Claude model bridge | Internal, tested against the existing evaluator | No runtime-Claude conformance implied |
-| Provider detection | Root-level Claude and Codex marker inventory | Presence of a marker is not effective authorization |
-| Exact-commit snapshots | Internal read-only Git implementation | Reject symlinks/gitlinks; no network/checkout |
-| Codex semantics | **Not implemented** | No `--provider codex` advertisement or report |
-| npm release | Not prepared or authorized | Do not tag or publish until every gate below passes |
+| Area                                      | Repository status                               | Release implication                                 |
+| ----------------------------------------- | ----------------------------------------------- | --------------------------------------------------- |
+| Claude Code CLI and public TypeScript API | Existing `scan`, `compare`, `test`, schema v1   | Must keep compatibility and exact output checks     |
+| Internal provider comparison              | Implemented, bounded, synthetic replay-tested   | Not an end-user permission engine                   |
+| Claude model bridge                       | Internal, tested against the existing evaluator | No runtime-Claude conformance implied               |
+| Provider detection                        | Root-level Claude and Codex marker inventory    | Presence of a marker is not effective authorization |
+| Exact-commit snapshots                    | Internal read-only Git implementation           | Reject symlinks/gitlinks; no network/checkout       |
+| Codex semantics                           | **Not implemented**                             | No `--provider codex` advertisement or report       |
+| npm release                               | Not prepared or authorized                      | Do not tag or publish until every gate below passes |
 
 ## Release gates (must all be checked at release commit)
 
@@ -31,7 +31,7 @@ Reviewed: 2026-10-21. This document records the status of source in `main`, not 
 ## Explicit blockers before v0.4.0
 
 1. The v0.4 scope and version bump have not been approved or finalized. This audit intentionally leaves version `0.3.0`.
-2. Codex detection is *not* provider support; there is no pinned CLI conformance suite for precedence, trust, ambient policy or sandbox rules.
+2. Codex detection is _not_ provider support; there is no pinned CLI conformance suite for precedence, trust, ambient policy or sandbox rules.
 3. The internal model comparator does not replace production Claude report evidence, completeness or gating.
 4. Full native Claude and Windows conformance remain outside the tested scope.
 5. A **fresh** end-to-end release candidate run, package inspection and explicit maintainer release decision have not happened.
