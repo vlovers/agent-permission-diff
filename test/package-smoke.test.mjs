@@ -283,6 +283,7 @@ test("package: dry-run and actual tarball include only documented runtime and do
     "index",
     "policy",
     "pr-markdown",
+    "provider-adapter",
     "report",
     "types",
   ];
