@@ -295,6 +295,7 @@ test("package: dry-run and actual tarball include only documented runtime and do
     "package.json",
     "LICENSE",
     "README.md",
+    "CHANGELOG.md",
     "CONTRIBUTING.md",
     "SECURITY.md",
     ...modules.flatMap((name) => [`dist/${name}.js`, `dist/${name}.d.ts`]),
@@ -312,7 +313,13 @@ test("package: dry-run and actual tarball include only documented runtime and do
       ),
     ),
   );
-  for (const path of ["LICENSE", "README.md", "CONTRIBUTING.md", "SECURITY.md"])
+  for (const path of [
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+  ])
     assert.equal(
       read(join(consumer, "node_modules/rulewitness", path)),
       read(join(root, path)),
@@ -331,7 +338,10 @@ test("package: installed ESM exports, declarations and executable bin work witho
   assert.equal(pkg.bin["agent-permission-diff"], "dist/cli.js");
   assert.equal(pkg.bin.rulewitness, "dist/cli.js");
   assert.equal(pkg.name, "rulewitness");
-  assert.equal(pkg.version, "0.3.0");
+  assert.equal(pkg.version, JSON.parse(read(join(root, "package.json"))).version);
+  assert.deepEqual(pkg.exports, {
+    ".": { types: "./dist/index.d.ts", import: "./dist/index.js" },
+  });
   assert.equal(pkg.exports["."].import, "./dist/index.js");
   assert.equal(pkg.exports["."].types, "./dist/index.d.ts");
   assert.equal(pkg.exports["./provider-adapter"], undefined);
