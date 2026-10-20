@@ -27,7 +27,9 @@ function validPath(path: unknown): path is string {
     !path.startsWith("./") &&
     !path.includes("\\") &&
     !/[\x00-\x1f\x7f]/.test(path) &&
-    path.split("/").every((part) => part.length > 0 && part !== "." && part !== "..")
+    path
+      .split("/")
+      .every((part) => part.length > 0 && part !== "." && part !== "..")
   );
 }
 
@@ -40,23 +42,25 @@ export function discoverProviders(paths: Iterable<string>): ProviderSelection {
   const seen = new Set<string>();
   let emitted = 0;
   for (const path of paths) {
-    if (++emitted > MAX_PATHS) throw new Error("Provider path inventory limit exceeded");
+    if (++emitted > MAX_PATHS)
+      throw new Error("Provider path inventory limit exceeded");
     if (!validPath(path)) throw new Error("Invalid provider inventory path");
     seen.add(path);
   }
-  const providers = (Object.keys(PROVIDER_MARKERS) as CandidateProvider[])
-    .filter((provider) =>
-      PROVIDER_MARKERS[provider].some((marker) => seen.has(marker)),
-    );
-  const files = providers.flatMap((provider) =>
-    PROVIDER_MARKERS[provider].filter((marker) => seen.has(marker)),
-  ).sort();
-  if (providers.length > 1)
-    return { kind: "ambiguous", providers, files };
+  const providers = (
+    Object.keys(PROVIDER_MARKERS) as CandidateProvider[]
+  ).filter((provider) =>
+    PROVIDER_MARKERS[provider].some((marker) => seen.has(marker)),
+  );
+  const files = providers
+    .flatMap((provider) =>
+      PROVIDER_MARKERS[provider].filter((marker) => seen.has(marker)),
+    )
+    .sort();
+  if (providers.length > 1) return { kind: "ambiguous", providers, files };
   if (providers[0] === "codex")
     return { kind: "unsupported", provider: "codex", files };
-  if (providers[0] === "claude-code")
-    return { kind: "claude-code", files };
+  if (providers[0] === "claude-code") return { kind: "claude-code", files };
   return { kind: "absent", files: [] };
 }
 
