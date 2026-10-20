@@ -23,7 +23,9 @@ const adapter: ModelAdapter<Snapshot> = {
   },
 };
 
-test("synthetic provider: deterministic ordering, deduplication and semantic changes", () => {
+test(
+  "synthetic provider: deterministic ordering, deduplication and semantic changes",
+  () => {
   const before = { z: known("prompt"), a: known("blocked") };
   const after = { a: known("blocked"), z: known("allowed") };
   const findings = compareModelSnapshots(adapter, before, after);
@@ -33,7 +35,9 @@ test("synthetic provider: deterministic ordering, deduplication and semantic cha
   assert.deepEqual(compareModelSnapshots(adapter, before, after), findings);
 });
 
-test("synthetic provider: stable UNKNOWN is not treated as proven no-op", () => {
+test(
+  "synthetic provider: stable UNKNOWN is not treated as proven no-op",
+  () => {
   assert.deepEqual(
     compareModelSnapshots(
       adapter,
@@ -50,7 +54,9 @@ test("synthetic provider: stable UNKNOWN is not treated as proven no-op", () => 
   );
 });
 
-test("synthetic provider: rejects unbounded candidates and invalid identifiers", () => {
+test(
+  "synthetic provider: rejects unbounded candidates and invalid identifiers",
+  () => {
   const oversized: ModelAdapter<Snapshot> = {
     ...adapter,
     candidates() {
@@ -111,7 +117,9 @@ test("synthetic provider: rejects unstable or invalid evaluator output", () => {
   );
 });
 
-test("synthetic provider: unknown transitions remain explicit and ordered", () => {
+test(
+  "synthetic provider: unknown transitions remain explicit and ordered",
+  () => {
   const before: Snapshot = {
     alpha: known("read-only"),
     beta: unknown("inherited restriction unavailable"),
@@ -147,7 +155,9 @@ test("synthetic provider: unknown transitions remain explicit and ordered", () =
   });
 });
 
-test("synthetic provider: a missing candidate cannot be mistaken for an allow", () => {
+test(
+  "synthetic provider: a missing candidate cannot be mistaken for an allow",
+  () => {
   const findings = compareModelSnapshots(
     adapter,
     { beforeOnly: known("blocked") },
@@ -167,7 +177,9 @@ test("synthetic provider: a missing candidate cannot be mistaken for an allow", 
   ]);
 });
 
-test("synthetic provider: deterministic output with duplicate shuffled candidates", () => {
+test(
+  "synthetic provider: deterministic output with duplicate shuffled candidates",
+  () => {
   const a: Snapshot = { c: known("ask"), b: known("denied"), a: known("ask") };
   const b: Snapshot = {
     c: known("allowed"),
@@ -184,7 +196,9 @@ test("synthetic provider: deterministic output with duplicate shuffled candidate
   );
 });
 
-test("synthetic provider: permits bounded repeated and boundary-length candidates", () => {
+test(
+  "synthetic provider: permits bounded repeated and boundary-length candidates",
+  () => {
   const boundary = "c".repeat(1024);
   const dense: ModelAdapter<Snapshot> = {
     ...adapter,
@@ -199,7 +213,9 @@ test("synthetic provider: permits bounded repeated and boundary-length candidate
   ]);
 });
 
-test("synthetic provider: rejects empty, malformed, and undefined decisions", () => {
+test(
+  "synthetic provider: rejects empty, malformed, and undefined decisions",
+  () => {
   const candidate: ModelAdapter<Snapshot> = {
     ...adapter,
     candidates: () => ["x"],
@@ -221,7 +237,9 @@ test("synthetic provider: rejects empty, malformed, and undefined decisions", ()
   }
 });
 
-test("synthetic provider: rejects empty candidates, and no candidate is a safe finding", () => {
+test(
+  "synthetic provider: rejects empty candidates, and no candidate is a safe finding",
+  () => {
   assert.deepEqual(
     compareModelSnapshots({ ...adapter, candidates: () => [] }, {}, {}),
     [],
