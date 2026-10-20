@@ -4,6 +4,7 @@
  * This is not a new Claude parser or a replacement for comparePolicies().
  * The generic comparator does not reproduce coverage findings, severity gates,
  * evidence, report ordering, or JSON v1. Keep the existing public path intact.
+ * This bridge is internal and does not establish native runtime authorization.
  */
 import { regions } from "./glob.ts";
 import { evaluate } from "./policy.ts";
