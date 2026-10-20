@@ -2,7 +2,7 @@
 
 All notable changes are documented here. Entries marked **Unreleased** describe repository code, not a published npm version.
 
-## Unreleased — v0.4 development
+## 0.4.0-rc.1 — candidate only (not published)
 
 ### Internal architecture
 
@@ -24,7 +24,7 @@ All notable changes are documented here. Entries marked **Unreleased** describe 
 - Published public CLI and TypeScript API still target the documented **Claude Code subset only**.
 - JSON schema v1, default CLI behavior, and severity/exit gate semantics remain unchanged.
 - These changes do **not** demonstrate parity with Claude Code's complete runtime authorization, or native Codex conformance.
-- No v0.4 version bump, Git tag, GitHub Release, or npm publication has been performed.
+- The source branch has a prerelease version bump to 0.4.0-rc.1. No tag, GitHub Release, or npm publication has been performed.
 
 ## 0.3.0
 

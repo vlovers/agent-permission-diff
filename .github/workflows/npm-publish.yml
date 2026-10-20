@@ -56,11 +56,26 @@ jobs:
           npm run format:check
           node dist/cli.js scan HEAD --json
           npm pack --dry-run
-      - name: Block duplicate package versions
+      - name: Verify registry availability and block existing versions
         run: |
-          if npm view "rulewitness@$(node -p 'require("./package.json").version')" version --registry=https://registry.npmjs.org/ >/dev/null 2>&1; then
-            echo "Version is already published; refusing to republish"
-            exit 1
-          fi
+          set -eu
+          npm view rulewitness versions --json --registry=https://registry.npmjs.org/ > "$RUNNER_TEMP/rulewitness-versions.json"
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            const versions = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + "/rulewitness-versions.json", "utf8"));
+            if (!Array.isArray(versions) || !versions.every(v => typeof v === "string")) {
+              console.error("Unexpected npm registry version response"); process.exit(1);
+            }
+            if (versions.includes(pkg.version)) {
+              console.error("Package version is already published"); process.exit(1);
+            }
+          '
       - name: Publish using npm OIDC
-        run: npm publish --access public
+        run: |
+          set -eu
+          VERSION="$(node -p 'require("./package.json").version')"
+          case "$VERSION" in
+            *-*) npm publish --access public --tag next ;;
+            *) npm publish --access public --tag latest ;;
+          esac
