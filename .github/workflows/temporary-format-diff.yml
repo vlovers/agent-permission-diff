@@ -1,8 +1,6 @@
 name: Temporary format diff
 on:
-  push:
-    branches:
-      - feat/v04-internal-provider-contract
+  pull_request:
 permissions:
   contents: read
 jobs:
