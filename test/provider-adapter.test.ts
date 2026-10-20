@@ -61,6 +61,14 @@ test("synthetic provider: rejects unbounded candidates and invalid identifiers",
     () => compareModelSnapshots(oversized, {}, {}),
     /candidate limit/,
   );
+  const duplicateFlood: ModelAdapter<Snapshot> = {
+    ...adapter,
+    candidates: () => Array(1025).fill("same"),
+  };
+  assert.throws(
+    () => compareModelSnapshots(duplicateFlood, {}, {}),
+    /emitted candidate limit/,
+  );
   assert.throws(
     () =>
       compareModelSnapshots(
