@@ -10,6 +10,7 @@ test("release candidate: package and lockfile agree on name and version", () => 
   const pkg = read("package.json");
   const lock = read("package-lock.json");
   const root = (lock.packages as Record<string, Record<string, unknown>>)[""];
+  assert.ok(root, "lockfile root package is required");
   assert.equal(pkg.name, "rulewitness");
   assert.equal(lock.name, pkg.name);
   assert.equal(root.name, pkg.name);
