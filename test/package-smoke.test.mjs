@@ -330,6 +330,8 @@ test("package: installed ESM exports, declarations and executable bin work witho
   assert.equal(pkg.version, "0.3.0");
   assert.equal(pkg.exports["."].import, "./dist/index.js");
   assert.equal(pkg.exports["."].types, "./dist/index.d.ts");
+  assert.equal(pkg.exports["./provider-adapter"], undefined);
+  assert.ok(existsSync(join(pkgRoot, "dist/provider-adapter.js")));
   assert.deepEqual(pkg.dependencies ?? {}, {});
   assert.ok(!existsSync(join(pkgRoot, "src")));
   assert.ok(read(installed).startsWith("#!/usr/bin/env node\n"));
@@ -349,6 +351,7 @@ test("package: installed ESM exports, declarations and executable bin work witho
   );
   assert.equal(primary.status, 0, primary.stderr);
   assert.equal(primary.stdout, help.stdout);
+  assert.doesNotMatch(read(join(pkgRoot, "dist/index.js")), /provider-adapter/);
   writeFileSync(
     join(consumer, "verify.mjs"),
     `import assert from "node:assert/strict"; import * as api from "rulewitness"; for (const name of ["readPolicy","parsePolicy","evaluate","scanPolicy","comparePolicies","formatHuman","severity","formatMarkdown","explainFinding","validateWitness","comparisonOutcome","comparisonExitCode","assessComparisonGate","parseTestConfig","readTestConfig","runPolicyTests","relevantIssues"]) assert.equal(typeof api[name], "function"); const p=api.parsePolicy("r",{}); assert.equal(api.scanPolicy(p).complete,false); const t=api.runPolicyTests(p,api.parseTestConfig(JSON.stringify({schemaVersion:1,cases:[{name:"unknown",tool:"Bash",input:"npm test",expected:"UNKNOWN"}]}))); assert.equal(t.passed,false); console.log("installed exports passed");`,
