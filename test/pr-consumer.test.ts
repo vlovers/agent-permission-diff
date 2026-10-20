@@ -188,7 +188,6 @@ test("PR settings-absent revisions remain partial rather than full security pass
   }
 });
 
-
 test("PR missing head object is an analysis error, never a fallback to HEAD", () => {
   const fixture = scenario(
     { permissions: { ask: ["Bash(npm test)"] } },
@@ -269,7 +268,10 @@ test("PR comparison treats untrusted hook commands as inert data", () => {
       ),
     );
     assert.equal(report.complete, false);
-    assert.equal(existsSync(join(fixture.directory, "RULEWITNESS_EXECUTED")), false);
+    assert.equal(
+      existsSync(join(fixture.directory, "RULEWITNESS_EXECUTED")),
+      false,
+    );
   } finally {
     rmSync(fixture.directory, { recursive: true, force: true });
   }
