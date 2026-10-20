@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { devNull, tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
@@ -176,6 +183,95 @@ test("PR settings-absent revisions remain partial rather than full security pass
     const report = JSON.parse(result.stdout);
     assert.equal(report.complete, false);
     assert.deepEqual(report.findings, []);
+  } finally {
+    rmSync(fixture.directory, { recursive: true, force: true });
+  }
+});
+
+test("PR missing head object is an analysis error, never a fallback to HEAD", () => {
+  const fixture = scenario(
+    { permissions: { ask: ["Bash(npm test)"] } },
+    { permissions: { allow: ["Bash(npm test)"] } },
+  );
+  try {
+    const result = fixture.run([
+      "compare",
+      fixture.base,
+      "b".repeat(40),
+      "--json",
+      "--fail-on",
+      "high",
+    ]);
+    assert.equal(result.status, 2);
+    assert.equal(result.stdout, "");
+    assert.match(result.stderr, /Read-only Git operation failed/);
+  } finally {
+    rmSync(fixture.directory, { recursive: true, force: true });
+  }
+});
+
+test("PR comparison ignores dirty worktree and leaves Git index untouched", () => {
+  const fixture = scenario(
+    { permissions: { ask: ["Bash(npm test)"] } },
+    { permissions: { allow: ["Bash(npm test)"] } },
+  );
+  try {
+    const indexFile = join(fixture.directory, ".git/index");
+    const beforeIndex = readFileSync(indexFile);
+    const dirtyFile = join(fixture.directory, ".claude/settings.json");
+    writeFileSync(dirtyFile, "invalid uncommitted JSON");
+    const result = fixture.run([
+      "compare",
+      fixture.base,
+      fixture.head,
+      "--json",
+      "--fail-on",
+      "high",
+    ]);
+    assert.equal(result.status, 1, result.stderr);
+    const report = JSON.parse(result.stdout);
+    assert.deepEqual(report.revisions, [fixture.base, fixture.head]);
+    assert.equal(report.gate.thresholdExceeded, true);
+    assert.equal(report.complete, false);
+    assert.equal(readFileSync(dirtyFile, "utf8"), "invalid uncommitted JSON");
+    assert.deepEqual(readFileSync(indexFile), beforeIndex);
+  } finally {
+    rmSync(fixture.directory, { recursive: true, force: true });
+  }
+});
+
+test("PR comparison treats untrusted hook commands as inert data", () => {
+  const fixture = scenario(
+    { permissions: { ask: ["Bash(npm test)"] } },
+    {
+      permissions: { allow: ["Bash(npm test)"] },
+      hooks: { PreToolUse: [{ command: "touch RULEWITNESS_EXECUTED" }] },
+    },
+  );
+  try {
+    const result = fixture.run([
+      "compare",
+      fixture.base,
+      fixture.head,
+      "--json",
+      "--fail-on",
+      "high",
+    ]);
+    assert.equal(result.status, 3, result.stderr);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.gate.uncertain, true);
+    assert.equal(report.gate.thresholdExceeded, false);
+    assert.equal(report.gate.exitCode, 3);
+    assert.ok(
+      report.findings.some(
+        (finding: { kind: string }) => finding.kind === "coverage",
+      ),
+    );
+    assert.equal(report.complete, false);
+    assert.equal(
+      existsSync(join(fixture.directory, "RULEWITNESS_EXECUTED")),
+      false,
+    );
   } finally {
     rmSync(fixture.directory, { recursive: true, force: true });
   }
