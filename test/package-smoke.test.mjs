@@ -338,7 +338,10 @@ test("package: installed ESM exports, declarations and executable bin work witho
   assert.equal(pkg.bin["agent-permission-diff"], "dist/cli.js");
   assert.equal(pkg.bin.rulewitness, "dist/cli.js");
   assert.equal(pkg.name, "rulewitness");
-  assert.equal(pkg.version, JSON.parse(read(join(root, "package.json"))).version);
+  assert.equal(
+    pkg.version,
+    JSON.parse(read(join(root, "package.json"))).version,
+  );
   assert.deepEqual(pkg.exports, {
     ".": { types: "./dist/index.d.ts", import: "./dist/index.js" },
   });
