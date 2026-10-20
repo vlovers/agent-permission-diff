@@ -19,6 +19,7 @@ export interface ModelFinding {
 }
 
 const MAX_CANDIDATES = 256;
+const MAX_EMITTED_CANDIDATES = 1024;
 const MAX_CANDIDATE_LENGTH = 1024;
 
 function validDecision(value: ModelDecision): boolean {
@@ -60,7 +61,10 @@ export function compareModelSnapshots<Snapshot>(
   if (!/^[a-z][a-z0-9-]*$/.test(adapter.id))
     throw new Error("Invalid provider identifier");
   const candidates = new Set<string>();
+  let emitted = 0;
   for (const candidate of adapter.candidates(before, after)) {
+    if (++emitted > MAX_EMITTED_CANDIDATES)
+      throw new Error("Provider emitted candidate limit exceeded");
     if (
       typeof candidate !== "string" ||
       candidate.length === 0 ||
