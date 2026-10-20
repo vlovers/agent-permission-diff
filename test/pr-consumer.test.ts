@@ -261,7 +261,9 @@ test("PR comparison treats untrusted hook commands as inert data", () => {
     assert.equal(result.status, 3, result.stderr);
     const report = JSON.parse(result.stdout);
     assert.equal(report.gate.uncertain, true);
-    assert.equal(report.gate.thresholdExceeded, true);
+    assert.equal(report.gate.thresholdExceeded, false);
+    assert.equal(report.gate.exitCode, 3);
+    assert.ok(report.findings.some((finding: { kind: string }) => finding.kind === "coverage"));
     assert.equal(report.complete, false);
     assert.equal(existsSync(join(fixture.directory, "RULEWITNESS_EXECUTED")), false);
   } finally {
