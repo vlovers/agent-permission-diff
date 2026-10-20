@@ -36,6 +36,7 @@ function validPath(path: unknown): path is string {
 /**
  * Presence means only that a path matched a known location.
  * Content, symlinks, Git modes, trust, ancestor layers, and real applicability
+ * must be inspected separately before any provider-specific analysis.
  * remain unverified. Never silently prefer Claude over another provider.
  */
 export function discoverProviders(paths: Iterable<string>): ProviderSelection {
