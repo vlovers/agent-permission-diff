@@ -169,7 +169,11 @@ test("synthetic provider: a missing candidate cannot be mistaken for an allow", 
 
 test("synthetic provider: deterministic output with duplicate shuffled candidates", () => {
   const a: Snapshot = { c: known("ask"), b: known("denied"), a: known("ask") };
-  const b: Snapshot = { c: known("allowed"), b: known("denied"), a: known("allowed") };
+  const b: Snapshot = {
+    c: known("allowed"),
+    b: known("denied"),
+    a: known("allowed"),
+  };
   const shuffle: ModelAdapter<Snapshot> = {
     ...adapter,
     candidates: () => ["c", "a", "c", "b", "a", "b"],
@@ -186,16 +190,13 @@ test("synthetic provider: permits bounded repeated and boundary-length candidate
     ...adapter,
     candidates: () => Array(1024).fill(boundary),
   };
-  assert.deepEqual(
-    compareModelSnapshots(dense, {}, {}),
-    [
-      {
-        candidate: boundary,
-        before: unknown("not modeled"),
-        after: unknown("not modeled"),
-      },
-    ],
-  );
+  assert.deepEqual(compareModelSnapshots(dense, {}, {}), [
+    {
+      candidate: boundary,
+      before: unknown("not modeled"),
+      after: unknown("not modeled"),
+    },
+  ]);
 });
 
 test("synthetic provider: rejects empty, malformed, and undefined decisions", () => {
@@ -226,12 +227,7 @@ test("synthetic provider: rejects empty candidates, and no candidate is a safe f
     [],
   );
   assert.throws(
-    () =>
-      compareModelSnapshots(
-        { ...adapter, candidates: () => [""] },
-        {},
-        {},
-      ),
+    () => compareModelSnapshots({ ...adapter, candidates: () => [""] }, {}, {}),
     /Invalid provider candidate/,
   );
 });
