@@ -117,8 +117,7 @@ test("Claude bridge keeps unsupported hooks and stable UNKNOWN visible", () => {
   const bridge = compareModelSnapshots(claudeModelAdapter, before, after);
   assert.ok(
     bridge.some(
-      (item) =>
-        item.before.kind === "unknown" && item.after.kind === "unknown",
+      (item) => item.before.kind === "unknown" && item.after.kind === "unknown",
     ),
   );
   assert.ok(
