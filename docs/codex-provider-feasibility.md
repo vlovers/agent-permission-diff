@@ -27,16 +27,16 @@ A Git-revision diff of a tracked project `.codex/config.toml` can at most establ
 
 ## Proposed research matrix (not verified)
 
-| Case | What must be demonstrated |
-| --- | --- |
-| Project trust | Same Git tree under trusted and untrusted project state |
-| CLI overrides | Explicit approval/sandbox options take priority when permitted |
+| Case                       | What must be demonstrated                                                    |
+| -------------------------- | ---------------------------------------------------------------------------- |
+| Project trust              | Same Git tree under trusted and untrusted project state                      |
+| CLI overrides              | Explicit approval/sandbox options take priority when permitted               |
 | User/system/managed layers | Differences between tracked project settings and effective configured values |
-| Nested projects | Which project config applies at a specific working directory |
-| Requirements | Restrictions that cannot be overridden by project or CLI settings |
-| Sandbox/network | Distinct permissions, not one generic ALLOW bit |
-| Unsupported/invalid TOML | Explicit parse errors or UNKNOWN, no silent fallback |
-| Command rules and hooks | Their separately documented syntax, ordering, applicability and trust model |
+| Nested projects            | Which project config applies at a specific working directory                 |
+| Requirements               | Restrictions that cannot be overridden by project or CLI settings            |
+| Sandbox/network            | Distinct permissions, not one generic ALLOW bit                              |
+| Unsupported/invalid TOML   | Explicit parse errors or UNKNOWN, no silent fallback                         |
+| Command rules and hooks    | Their separately documented syntax, ordering, applicability and trust model  |
 
 ## Boundaries for RuleWitness
 
