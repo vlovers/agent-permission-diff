@@ -26,12 +26,18 @@ export function readPolicy(repository: string, ref: string): Policy {
   const unsafe: { file: string; fingerprint: string }[] = [];
   const parent = gitEntry(repository, revision, ".claude");
   if (parent && (parent.mode !== "040000" || parent.type !== "tree"))
-    unsafe.push({ file: ".claude", fingerprint: parent.mode + " " + parent.type + " " + parent.oid });
+    unsafe.push({
+      file: ".claude",
+      fingerprint: parent.mode + " " + parent.type + " " + parent.oid,
+    });
   for (const file of SETTINGS_FILES) {
     const entry = gitEntry(repository, revision, file);
     if (!entry) continue;
     if (!["100644", "100755"].includes(entry.mode) || entry.type !== "blob") {
-      unsafe.push({ file, fingerprint: entry.mode + " " + entry.type + " " + entry.oid });
+      unsafe.push({
+        file,
+        fingerprint: entry.mode + " " + entry.type + " " + entry.oid,
+      });
       continue;
     }
     files[file] = readOnlyGit(repository, ["show", `${revision}:${file}`]);
