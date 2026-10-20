@@ -258,7 +258,12 @@ test("synthetic provider: replay catches cross-snapshot stateful mutations", () 
     },
   };
   assert.throws(
-    () => compareModelSnapshots(unstable, { before: known("ask") }, { after: known("allow") }),
+    () =>
+      compareModelSnapshots(
+        unstable,
+        { before: known("ask") },
+        { after: known("allow") },
+      ),
     /invalid or failed replay/,
   );
 });
