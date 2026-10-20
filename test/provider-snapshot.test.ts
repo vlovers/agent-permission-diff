@@ -15,7 +15,9 @@ import { readTrackedProviderSnapshot } from "../src/provider-snapshot.ts";
 import { readPolicy } from "../src/index.ts";
 
 function repository() {
-  const directory = mkdtempSync(join(tmpdir(), "rulewitness-provider-snapshot-"));
+  const directory = mkdtempSync(
+    join(tmpdir(), "rulewitness-provider-snapshot-"),
+  );
   const env = {
     ...Object.fromEntries(
       Object.entries(process.env).filter(([key]) => !/^GIT_/i.test(key)),
@@ -66,9 +68,12 @@ test("snapshot: exact Git commits distinguish Claude, Codex, mixed and absent", 
   const f = repository();
   try {
     const empty = f.commit();
-    f.write(".claude/settings.json", JSON.stringify({
-      permissions: { allow: ["WebSearch"] },
-    }));
+    f.write(
+      ".claude/settings.json",
+      JSON.stringify({
+        permissions: { allow: ["WebSearch"] },
+      }),
+    );
     const claude = f.commit();
     f.write(".codex/config.toml", 'sandbox_mode = "workspace-write"\n');
     const mixed = f.commit();
@@ -98,9 +103,12 @@ test("snapshot: exact Git commits distinguish Claude, Codex, mixed and absent", 
 test("snapshot: dirty checkout is ignored; neither worktree nor index changes", () => {
   const f = repository();
   try {
-    f.write(".claude/settings.json", JSON.stringify({
-      permissions: { ask: ["WebSearch"] },
-    }));
+    f.write(
+      ".claude/settings.json",
+      JSON.stringify({
+        permissions: { ask: ["WebSearch"] },
+      }),
+    );
     const head = f.commit();
     const index = readFileSync(join(f.directory, ".git/index"));
     f.write(".claude/settings.json", "broken uncommitted JSON");
@@ -122,7 +130,7 @@ test("snapshot: symlinked Codex file and directory are rejected", () => {
   const f = repository();
   try {
     f.write("placeholder", "ordinary");
-    f.write(".codex/config.toml", "sandbox_mode = \"read-only\"");
+    f.write(".codex/config.toml", 'sandbox_mode = "read-only"');
     const base = f.commit();
     assert.equal(
       readTrackedProviderSnapshot(f.directory, base).selection.kind,
