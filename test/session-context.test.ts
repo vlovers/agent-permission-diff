@@ -40,10 +40,10 @@ test("context: asserted premises retain conditional configured-rule answers only
 test("context: every missing premise degrades all modeled decisions to UNKNOWN", () => {
   for (const field of Object.keys(full) as (keyof SessionContext)[]) {
     for (const value of field === "projectTrust"
-        ? ["unknown", "untrusted"]
-        : field === "permissionMode"
-          ? ["unknown", "other"]
-          : ["unknown", "present"]) {
+      ? ["unknown", "untrusted"]
+      : field === "permissionMode"
+        ? ["unknown", "other"]
+        : ["unknown", "present"]) {
       const context = { ...full, [field]: value } as SessionContext;
       for (const input of [
         "npm test",
