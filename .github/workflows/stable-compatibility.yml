@@ -41,3 +41,8 @@ jobs:
         run: |
           node test/stable-compatibility-e2e.mjs
           node test/stable-types-compatibility.mjs
+      - name: Temporary format diagnostic
+        if: always()
+        run: |
+          npx prettier --write test/stable-types-compatibility.mjs
+          git diff -- test/stable-types-compatibility.mjs
