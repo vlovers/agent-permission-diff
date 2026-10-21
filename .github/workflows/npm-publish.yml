@@ -60,6 +60,7 @@ jobs:
         run: |
           set -eu
           npm view rulewitness versions --json --registry=https://registry.npmjs.org/ > "$RUNNER_TEMP/rulewitness-versions.json"
+          npm view rulewitness dist-tags --json --registry=https://registry.npmjs.org/ > "$RUNNER_TEMP/rulewitness-tags-before.json"
           node --input-type=module -e '
             import fs from "node:fs";
             const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
@@ -79,3 +80,39 @@ jobs:
             *-*) npm publish --access public --tag next ;;
             *) npm publish --access public --tag latest ;;
           esac
+      - name: Verify published version and registry dist-tags
+        env:
+          REGISTRY_URL: https://registry.npmjs.org/
+        run: |
+          set -eu
+          VERSION="$(node -p 'require("./package.json").version')"
+          case "$VERSION" in
+            *-*) EXPECTED_TAG=next ;;
+            *) EXPECTED_TAG=latest ;;
+          esac
+          export VERSION EXPECTED_TAG
+          # npm registry reads may lag after publish; retries never republish.
+          for attempt in 1 2 3 4 5 6; do
+            if npm view "rulewitness@$VERSION" version --json --registry="$REGISTRY_URL" > "$RUNNER_TEMP/published-version.json" &&
+               npm view rulewitness dist-tags --json --registry="$REGISTRY_URL" > "$RUNNER_TEMP/rulewitness-tags-after.json" &&
+               node --input-type=module -e '
+                 import fs from "node:fs";
+                 const temp = process.env.RUNNER_TEMP;
+                 const version = process.env.VERSION;
+                 const expectedTag = process.env.EXPECTED_TAG;
+                 const published = JSON.parse(fs.readFileSync(temp + "/published-version.json", "utf8"));
+                 const before = JSON.parse(fs.readFileSync(temp + "/rulewitness-tags-before.json", "utf8"));
+                 const after = JSON.parse(fs.readFileSync(temp + "/rulewitness-tags-after.json", "utf8"));
+                 if (published !== version || !after || after[expectedTag] !== version) process.exit(1);
+                 if (expectedTag === "next" && before.latest !== after.latest) {
+                   console.error("Prerelease unexpectedly changed npm latest tag"); process.exit(1);
+                 }
+               '; then
+              echo "Verified rulewitness@$VERSION on npm dist-tag $EXPECTED_TAG"
+              exit 0
+            fi
+            echo "npm registry has not converged (attempt $attempt/6)"
+            sleep 10
+          done
+          echo "Published package could not be verified against npm registry" >&2
+          exit 1
