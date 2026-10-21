@@ -27,9 +27,4 @@ jobs:
       - run: npm run test:package
       - run: node test/release-artifact-integrity.mjs
       - run: npm run format:check
-      - name: Temporary docs formatter diff
-        if: always()
-        run: |
-          npx prettier --write docs/codex-consumer-validation.md
-          git diff -- docs/codex-consumer-validation.md
       - run: node dist/cli.js scan HEAD --json
