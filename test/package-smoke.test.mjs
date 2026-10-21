@@ -276,6 +276,7 @@ test("package: dry-run and actual tarball include only documented runtime and do
   const modules = [
     "assertions",
     "claude-model-adapter",
+    "codex-posture",
     "cli",
     "compare",
     "explain",
