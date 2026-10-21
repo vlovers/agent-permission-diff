@@ -73,6 +73,7 @@ jobs:
           npm test
           npm run build
           npm run test:package
+          node test/release-artifact-integrity.mjs
           npm run format:check
           node dist/cli.js scan HEAD --json
           npm pack --dry-run

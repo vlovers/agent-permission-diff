@@ -25,5 +25,6 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run test:package
+      - run: node test/release-artifact-integrity.mjs
       - run: npm run format:check
       - run: node dist/cli.js scan HEAD --json
