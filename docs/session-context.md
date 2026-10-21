@@ -23,7 +23,7 @@ console.log(result.unresolved); // all three missing premises
 console.log(result.runtimeVerified); // always false
 ```
 
-The caller can explicitly assert `projectTrust: "trusted"`, `permissionMode: "default"` and `externalInfluences: "none"` to obtain the underlying *modeled configured-rule decision* in `contextual`. **That remains conditional and never a verified runtime authorization verdict.** These assertions are not determined from Git and RuleWitness does not verify them.
+The caller can explicitly assert `projectTrust: "trusted"`, `permissionMode: "default"` and `externalInfluences: "none"` to obtain the underlying _modeled configured-rule decision_ in `contextual`. **That remains conditional and never a verified runtime authorization verdict.** These assertions are not determined from Git and RuleWitness does not verify them.
 
 If any premise is not affirmed, `contextual.decision` becomes `UNKNOWN` (including when the rule model reports `DENY`, `ASK`, or `ALLOW`). `modeled` always preserves the replayable configured-rule evaluation, with evidence. For a policy that already evaluates `UNKNOWN`, no context can promote it to a known decision.
 
