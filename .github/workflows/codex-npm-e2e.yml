@@ -2,11 +2,11 @@ name: Codex published-package E2E
 on:
   pull_request:
     paths:
-      - '.github/workflows/codex-npm-e2e.yml'
-      - 'examples/github-actions/codex-posture-pr.yml'
-      - 'docs/github-actions-integration.md'
-      - 'docs/codex-posture-experimental.md'
-      - 'test/codex-npm-e2e.mjs'
+      - ".github/workflows/codex-npm-e2e.yml"
+      - "examples/github-actions/codex-posture-pr.yml"
+      - "docs/github-actions-integration.md"
+      - "docs/codex-posture-experimental.md"
+      - "test/codex-npm-e2e.mjs"
   workflow_dispatch:
 
 permissions:
@@ -28,9 +28,3 @@ jobs:
         run: npm install --global --ignore-scripts --no-audit --no-fund --prefer-online rulewitness@0.4.0-rc.2
       - name: Verify real npm CLI against isolated Git commit fixtures
         run: node test/codex-npm-e2e.mjs
-      - name: Print expected Prettier formatting (diagnostic only)
-        if: always()
-        run: |
-          npm ci --ignore-scripts --no-audit --no-fund
-          npx prettier --write .github/workflows/codex-npm-e2e.yml test/codex-npm-e2e.mjs
-          git diff -- .github/workflows/codex-npm-e2e.yml test/codex-npm-e2e.mjs
