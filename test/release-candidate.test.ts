@@ -37,6 +37,6 @@ test("release candidate: publish trigger is not a PR merge", () => {
   assert.match(workflow, /rulewitness-tags-after\.json/);
   assert.match(workflow, /before\.latest !== after\.latest/);
   assert.match(workflow, /Published package could not be verified/);
-  assert.doesNotMatch(workflow, /if npm view "rulewitness@/);
+  assert.match(workflow, /npm view rulewitness versions --json/);
   assert.doesNotMatch(workflow, /pull_request_target:/);
 });
