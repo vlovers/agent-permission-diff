@@ -4,15 +4,15 @@ Reviewed: 2026-10-21. **Current main package version: `0.4.0-rc.1`**. GitHub [v0
 
 ## Actual scope and limits
 
-| Area | Current repository status | Release interpretation |
-| --- | --- | --- |
-| Claude `scan`, `compare`, `test` | Existing narrow configured-rule model | Preserve JSON report v1, exits 0/1/2/3 and `complete: false` |
-| TypeScript API | Context, source inventory, source-aware evaluation | Caller-supplied assumptions, not runtime authorization |
-| Codex `codex-posture`, `codex-review` | Experimental exact-Git, standard TOML, bounded configured-posture comparisons | **Not** semantic effective-permission comparisons |
-| Git object readers | Verify commit IDs, regular blobs, disallow symlinks/gitlinks, read-only runner | No checkout/fetch/execution of analyzed commands |
-| GitHub Actions example | Published **stable v0.3.0** Claude analyzer only | Do not claim Codex commands work in this installed version |
-| Package | New pinned `smol-toml@1.9.1` runtime dependency | Verify actual offline installation of packed tarball |
-| Release workflow | GitHub Release `published` trigger, npm OIDC, tag/version and main-ancestry guard, postpublish verification | No publish on PR merge |
+| Area                                  | Current repository status                                                                                   | Release interpretation                                       |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Claude `scan`, `compare`, `test`      | Existing narrow configured-rule model                                                                       | Preserve JSON report v1, exits 0/1/2/3 and `complete: false` |
+| TypeScript API                        | Context, source inventory, source-aware evaluation                                                          | Caller-supplied assumptions, not runtime authorization       |
+| Codex `codex-posture`, `codex-review` | Experimental exact-Git, standard TOML, bounded configured-posture comparisons                               | **Not** semantic effective-permission comparisons            |
+| Git object readers                    | Verify commit IDs, regular blobs, disallow symlinks/gitlinks, read-only runner                              | No checkout/fetch/execution of analyzed commands             |
+| GitHub Actions example                | Published **stable v0.3.0** Claude analyzer only                                                            | Do not claim Codex commands work in this installed version   |
+| Package                               | New pinned `smol-toml@1.9.1` runtime dependency                                                             | Verify actual offline installation of packed tarball         |
+| Release workflow                      | GitHub Release `published` trigger, npm OIDC, tag/version and main-ancestry guard, postpublish verification | No publish on PR merge                                       |
 
 ## Required release gates
 
