@@ -91,9 +91,10 @@ export function inspectCodexPosture(content: string): CodexPosture {
       issues.push("Unsupported TOML syntax (line " + (i + 1) + ")");
       continue;
     }
-    const key = section === "sandbox_workspace_write"
-      ? `sandbox_workspace_write.${match[1]!}`
-      : match[1]!;
+    const key =
+      section === "sandbox_workspace_write"
+        ? `sandbox_workspace_write.${match[1]!}`
+        : match[1]!;
     const value = match[2] ?? match[3]!;
     if (seen.has(key)) {
       issues.push("Duplicate TOML key (line " + (i + 1) + ")");
@@ -117,10 +118,11 @@ export function inspectCodexPosture(content: string): CodexPosture {
       issues.push("Unsupported Codex setting value (line " + (i + 1) + ")");
       continue;
     }
-    result.values[key as CodexPostureKey] =
-      key.startsWith("sandbox_workspace_write.")
-        ? value === "true"
-        : (value as CodexPostureValue);
+    result.values[key as CodexPostureKey] = key.startsWith(
+      "sandbox_workspace_write.",
+    )
+      ? value === "true"
+      : (value as CodexPostureValue);
   }
   // Unsupported syntax could affect actual parsing of the file. Do not
   // present a partially parsed policy as a known posture.
