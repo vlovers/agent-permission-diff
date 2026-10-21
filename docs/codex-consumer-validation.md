@@ -9,7 +9,7 @@ Use a new **public, disposable** repository under your own account (or another r
 On the default branch:
 
 1. Copy the exact pinned [Codex posture workflow](../examples/github-actions/codex-posture-pr.yml) to `.github/workflows/codex-posture-pr.yml`. Do not alter the `pull_request` trigger, read-only permissions or installation flags.
-2. Commit this *recognized* baseline `.codex/config.toml`:
+2. Commit this _recognized_ baseline `.codex/config.toml`:
 
    ```toml
    approval_policy = "on-request"
@@ -18,11 +18,11 @@ On the default branch:
 
 3. Open **three independent PRs** from the baseline (rather than stacking them). Preserve each Actions run URL, the base/head commit hashes and the job exit code:
 
-   | PR | Change to `.codex/config.toml` | Expected behavior |
-   | --- | --- | --- |
-   | A — recognized transition | Set `sandbox_mode = "workspace-write"` | Review flags a configured change; job fails intentionally |
-   | B — unsupported input | Keep the baseline fields and append `[profiles.test]` followed by `model = "test"` | Unresolved/unknown review; job fails intentionally |
-   | C — unrelated file | Leave `.codex/config.toml` unchanged, edit a README | No recognized config change; job passes **within the tracked posture model only** |
+   | PR                        | Change to `.codex/config.toml`                                                     | Expected behavior                                                                 |
+   | ------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+   | A — recognized transition | Set `sandbox_mode = "workspace-write"`                                             | Review flags a configured change; job fails intentionally                         |
+   | B — unsupported input     | Keep the baseline fields and append `[profiles.test]` followed by `model = "test"` | Unresolved/unknown review; job fails intentionally                                |
+   | C — unrelated file        | Leave `.codex/config.toml` unchanged, edit a README                                | No recognized config change; job passes **within the tracked posture model only** |
 
 4. Confirm the workflow reports **runtime permission verification not performed** for every case. Inspect `GITHUB_STEP_SUMMARY` for the direction, number of recognized changes and uncertainty. A failed A/B job is the intended conservative outcome, not an Actions infrastructure failure.
 5. For a fork PR, repeat C using an untrusted fork only if repository policy permits it. Check the run uses `pull_request`, read-only `contents: read`, and exposes no secrets. Do not use `pull_request_target`.
