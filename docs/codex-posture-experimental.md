@@ -23,7 +23,7 @@ console.log(review.runtimePermissionDiff); // false
 console.log(review.uncertain); // false only for the tiny parsed subset
 ```
 
-The parser accepts _only_ simple root-level double-quoted string assignments, comments, and blank lines. It recognizes `approval_policy = "on-request" | "never"` and `sandbox_mode = "read-only" | "workspace-write" | "danger-full-access"`, plus boolean `network_access = true | false` inside a single `[sandbox_workspace_write]` table. Any other key, unsupported table, duplicate, unsupported value, complex TOML string or inline structure makes the entire snapshot unresolved: recognized values are suppressed, and `compareCodexPosture` reports `uncertain: true`, never a seemingly certain subset.
+The parser accepts _only_ simple root-level double-quoted string assignments, comments, and blank lines. It recognizes `approval_policy = "on-request" | "never"` and `sandbox_mode = "read-only" | "workspace-write" | "danger-full-access"`, plus boolean `network_access`, `exclude_slash_tmp`, and `exclude_tmpdir_env_var` inside a single `[sandbox_workspace_write]` table. Any other key, unsupported table, duplicate, unsupported value, complex TOML string or inline structure makes the entire snapshot unresolved: recognized values are suppressed, and `compareCodexPosture` reports `uncertain: true`, never a seemingly certain subset.
 
 Unsupported input values are not echoed in diagnostics; 64 KiB input cap, no TOML evaluation, no hook execution, no network access. Neither method reads files or infers config precedence. A caller must supply inert text. This is **not a general TOML parser**.
 
@@ -51,8 +51,10 @@ sandbox_mode = "workspace-write"
 
 [sandbox_workspace_write]
 network_access = false
+exclude_slash_tmp = true
+exclude_tmpdir_env_var = false
 ```
 
-The experimental posture reader records `sandbox_workspace_write.network_access: false` as an explicitly configured Boolean. Changes to this setting are **configuration posture changes only**; the actual network boundary also depends on sandbox mode, higher priority settings and runtime enforcement. Missing `network_access` is not assumed to be either `true` or `false`.
+The experimental posture reader records `sandbox_workspace_write.network_access: false` as an explicitly configured Boolean; the two temporary-root exclusion settings are inventoried and compared in the same manner. Changes to this setting are **configuration posture changes only**; the actual network boundary also depends on sandbox mode, higher priority settings and runtime enforcement. Missing `network_access` is not assumed to be either `true` or `false`.
 
 This intentionally remains a strict TOML subset, not a general parser. Arrays such as `writable_roots`, arbitrary profiles, dotted keys, other tables, and extra fields cause uncertainty for the entire input. No effective permission claim is made.
