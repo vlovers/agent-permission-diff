@@ -65,12 +65,17 @@ test("release history: published rc.2 is not represented as an unpublished candi
 });
 
 test("release publish gate: lockfile root and exact changelog version are required before npm publish", () => {
-  const metadataGate = publish.split("- name: Verify release lockfile and changelog gate")[1]?.split("- name: Ensure npm supports Trusted Publishing")[0];
+  const metadataGate = publish
+    .split("- name: Verify release lockfile and changelog gate")[1]
+    ?.split("- name: Ensure npm supports Trusted Publishing")[0];
   assert.ok(metadataGate);
   assert.match(metadataGate, /lock\.packages\?\.\[""\]/);
   assert.match(metadataGate, /root\?\.version !== pkg\.version/);
   assert.match(metadataGate, /lock\.version !== pkg\.version/);
   assert.match(metadataGate, /CHANGELOG\.md/);
   assert.match(metadataGate, /Missing exact version heading/);
-  assert.ok(publish.indexOf("Verify release lockfile and changelog gate") < publish.indexOf("Publish using npm OIDC"));
+  assert.ok(
+    publish.indexOf("Verify release lockfile and changelog gate") <
+      publish.indexOf("Publish using npm OIDC"),
+  );
 });
