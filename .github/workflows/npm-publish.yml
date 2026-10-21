@@ -43,6 +43,26 @@ jobs:
           test "$(git rev-parse HEAD)" = "$(git rev-list -n 1 "$RELEASE_TAG")"
           git fetch --no-tags origin main
           git merge-base --is-ancestor HEAD origin/main
+      - name: Verify release lockfile and changelog gate
+        run: |
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            const lock = JSON.parse(fs.readFileSync("package-lock.json", "utf8"));
+            const root = lock.packages?.[""];
+            if (pkg.name !== "rulewitness" || lock.name !== pkg.name ||
+                lock.version !== pkg.version || root?.name !== pkg.name ||
+                root?.version !== pkg.version) {
+              console.error("Release metadata mismatch: package.json and lockfile must agree");
+              process.exit(1);
+            }
+            const changelog = fs.readFileSync("CHANGELOG.md", "utf8");
+            const heading = "## " + pkg.version;
+            if (!changelog.split("\n").some(line => line === heading || line.startsWith(heading + " "))) {
+              console.error("Missing exact version heading in CHANGELOG.md");
+              process.exit(1);
+            }
+          '
       - name: Ensure npm supports Trusted Publishing
         run: npm install --global npm@^11
       - name: Install dependencies
