@@ -27,7 +27,7 @@ test("static posture review: prompt policy and network changes are distinct", ()
 });
 test("static posture review: changes in multiple dimensions are not forced into one risk direction", () => {
   const result = reviewCodexPosture(make("read-only", "on-request"), make("workspace-write", "never"));
-  assert.equal(result.direction, "mixed");
+  assert.equal(result.direction, "unknown");
   assert.deepEqual(result.unresolved, ["Workspace network setting changed outside a stable workspace-write mode"]);
 });
 test("static posture review: missing premises and supported unsupported config remain unknown", () => {
