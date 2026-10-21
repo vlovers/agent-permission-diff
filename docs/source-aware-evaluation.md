@@ -20,13 +20,13 @@ console.log(result.runtimeVerified); // always false
 The function returns:
 
 - `modeled`: unchanged configured-rule decision from `evaluate()`.
-- `contextual`: `UNKNOWN` whenever a required session premise or source is uninspected; otherwise the *same conditional modeled decision*, **never an actual runtime authorization verdict**.
+- `contextual`: `UNKNOWN` whenever a required session premise or source is uninspected; otherwise the _same conditional modeled decision_, **never an actual runtime authorization verdict**.
 - `unresolved`: context dimensions that were not asserted.
 - `unresolvedSources`: source layers with `unknown` or `present-uninspected` availability.
 - `inventory`: bounded provenance information, no raw configuration values.
 - `runtimeVerified: false`: invariant even with all asserted premises.
 
-The caller may assert `absent-asserted` for managed/user/session/hooks, but such facts are not verified. Untracked project-local configuration remains `unknown` even when missing from Git. A tracked project file is marked `inspected` only in the *source inventory* sense; there is still no runtime validation or trust proof.
+The caller may assert `absent-asserted` for managed/user/session/hooks, but such facts are not verified. Untracked project-local configuration remains `unknown` even when missing from Git. A tracked project file is marked `inspected` only in the _source inventory_ sense; there is still no runtime validation or trust proof.
 
 This model intentionally fails closed for missing context rather than declaring an effective permission expansion. It never changes `scan`, `compare`, `test`, CLI exit statuses or report JSON v1. Do not use this output as an authorization gate. See [permission-source provenance](permission-source-provenance.md) and [Claude runtime boundaries](claude-runtime-boundaries.md).
 
