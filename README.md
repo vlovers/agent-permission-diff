@@ -18,6 +18,8 @@ This project evolved from AgentPermissionDiff in v0.2. Version v0.3 adds a revie
 
 The **v0.4.0-rc.1 prerelease** is available on [GitHub](https://github.com/vlovers/rulewitness/releases/tag/v0.4.0-rc.1); it adds internal provider architecture and Git snapshot discovery without enabling Codex permission analysis. Stable examples still target v0.3.0. See [release-readiness audit](docs/release-readiness-v0.4.md), [changelog](CHANGELOG.md) and the [Claude runtime boundaries audit](docs/claude-runtime-boundaries.md).
 
+For TypeScript integrations that need to track explicit live-session assumptions without claiming runtime authorization, see the [opt-in session-context evaluator](docs/session-context.md). This is separate from the existing CLI and JSON v1 report contract.
+
 ## Installation and quick start
 
 Requires **Node.js 24** and Git supporting `--no-lazy-fetch` (documented in Git 2.47+). Local macOS is tested; Linux is exercised by CI. Windows execution/symlinks are not validated.
