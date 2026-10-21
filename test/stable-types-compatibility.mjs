@@ -17,7 +17,7 @@ import {
   parsePolicy, scanPolicy, comparePolicies, evaluate, severity,
   formatMarkdown, formatHuman, explainFinding, validateWitness,
   comparisonOutcome, assessComparisonGate, hasUncertainty,
-  parseTestConfig, runPolicyTests, inventoryPermissionSources,
+  parseTestConfig, runPolicyTests,
   type Report, type Decision, type ComparisonGate, type PolicyTestReport,
 } from "rulewitness";
 const policy = parsePolicy("commit", {});
@@ -34,10 +34,11 @@ const policyTests: PolicyTestReport = runPolicyTests(
 );
 void [scan, decision, gate, policyTests, severity, formatMarkdown,
   formatHuman, explainFinding, validateWitness, comparisonOutcome,
-  hasUncertainty, inventoryPermissionSources];
+  hasUncertainty];
 `;
 try {
   writeFileSync(fixture, consumer);
+  let stableExports = [];
   for (const [label, declarations] of [["published-0.3.0", stable], ["candidate", candidate]]) {
     const options = {
       strict: true,
@@ -61,9 +62,9 @@ try {
     assert.ok(moduleSymbol, label + " module symbol missing");
     const names = checker.getExportsOfModule(moduleSymbol).map((symbol) => symbol.getName());
     if (label === "published-0.3.0") {
-      globalThis.__stableExports = names;
+      stableExports = names;
     } else {
-      const missing = globalThis.__stableExports.filter((name) => !names.includes(name));
+      const missing = stableExports.filter((name) => !names.includes(name));
       assert.deepEqual(missing, [], "Removed stable declaration exports");
     }
   }
