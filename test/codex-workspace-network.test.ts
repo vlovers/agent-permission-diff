@@ -44,7 +44,6 @@ test("Codex workspace network: unsupported nested and duplicate keys invalidate 
     "[sandbox_workspace_write]\nnetwork_access=true\nnetwork_access=false",
     '[sandbox_workspace_write]\nnetwork_access=true\nwritable_roots=["/tmp"]',
     '[sandbox_workspace_write]\nnetwork_access=true\n[profiles.local]\nsandbox_mode="read-only"',
-    "sandbox_workspace_write.network_access=true",
     "[sandbox_workspace_write]\nnetwork_access=true\n[sandbox_workspace_write]\nnetwork_access=false",
   ];
   for (const config of unknown) {

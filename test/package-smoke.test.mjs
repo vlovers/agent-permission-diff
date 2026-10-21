@@ -242,6 +242,18 @@ before(() => {
   manifest = JSON.parse(
     npm(["pack", "--pack-destination", temporary, ...options]),
   )[0];
+  // Supply pinned runtime dependencies as local tarballs: consumer installs
+  // remain offline and cannot contact a registry while replaying fixtures.
+  const dependencyTarball = JSON.parse(
+    npm([
+      "pack",
+      join(root, "node_modules/smol-toml"),
+      "--pack-destination",
+      temporary,
+      "--json",
+      "--ignore-scripts",
+    ]),
+  )[0].filename;
   consumer = mkdtempSync(join(tmpdir(), "rulewitness-consumer-"));
   assert.ok(
     !consumer.startsWith(root + "/"),
@@ -261,6 +273,7 @@ before(() => {
       "--package-lock=false",
       "--cache",
       join(temporary, "npm-cache"),
+      join(temporary, dependencyTarball),
       join(temporary, manifest.filename),
     ],
     consumer,
@@ -359,7 +372,7 @@ test("package: installed ESM exports, declarations and executable bin work witho
   assert.equal(pkg.exports["./claude-model-adapter"], undefined);
   assert.ok(existsSync(join(pkgRoot, "dist/provider-adapter.js")));
   assert.ok(existsSync(join(pkgRoot, "dist/permission-sources.js")));
-  assert.deepEqual(pkg.dependencies ?? {}, {});
+  assert.deepEqual(pkg.dependencies ?? {}, { "smol-toml": "1.9.1" });
   assert.ok(!existsSync(join(pkgRoot, "src")));
   assert.ok(read(installed).startsWith("#!/usr/bin/env node\n"));
   const bin = join(consumer, "node_modules/.bin/agent-permission-diff");
