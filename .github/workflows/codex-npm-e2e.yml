@@ -31,9 +31,3 @@ jobs:
         run: |
           node test/codex-npm-e2e.mjs
           node test/codex-consumer-gate-e2e.mjs
-      - name: Temporary formatter diagnostic
-        if: always()
-        run: |
-          npm ci --ignore-scripts --no-audit --no-fund
-          npx prettier --write test/codex-consumer-gate-e2e.mjs
-          git diff -- test/codex-consumer-gate-e2e.mjs
