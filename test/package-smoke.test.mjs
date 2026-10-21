@@ -284,6 +284,7 @@ test("package: dry-run and actual tarball include only documented runtime and do
     "glob",
     "index",
     "policy",
+    "permission-sources",
     "pr-markdown",
     "provider-adapter",
     "provider-discovery",
