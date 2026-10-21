@@ -25,42 +25,29 @@ test("postpublish: prerelease keeps stable latest and targets next", () => {
 });
 
 test("postpublish: stable versions must target latest", () => {
-  const pkg = { ...candidate, version: "0.4.0" };
+  const stable = { ...candidate, version: "0.4.0" };
+  const stableMetadata = { ...metadata, ...stable };
+  const staleTags = { latest: "0.3.0" };
   assert.equal(
-    verifyPublishedPackage(pkg, { latest: "0.4.0" }, { ...metadata, ...pkg })
-      .tag,
+    verifyPublishedPackage(stable, { latest: "0.4.0" }, stableMetadata).tag,
     "latest",
   );
-  assert.throws(() =>
-    verifyPublishedPackage(pkg, { latest: "0.3.0" }, { ...metadata, ...pkg }),
-  );
+  assert.throws(() => verifyPublishedPackage(stable, staleTags, stableMetadata));
 });
 
 test("postpublish: reject registry lag and changed prerelease tags", () => {
+  const latestChanged = { ...tags, latest: candidate.version };
+  const nextChanged = { ...tags, next: "0.4.0-rc.2" };
   assert.throws(() => verifyPublishedPackage(candidate, {}, metadata));
-  assert.throws(() =>
-    verifyPublishedPackage(
-      candidate,
-      { latest: candidate.version, next: candidate.version },
-      metadata,
-    ),
-  );
-  assert.throws(() =>
-    verifyPublishedPackage(candidate, { latest: "0.3.0", next: "0.4.0-rc.2" }, metadata),
-  );
+  assert.throws(() => verifyPublishedPackage(candidate, latestChanged, metadata));
+  assert.throws(() => verifyPublishedPackage(candidate, nextChanged, metadata));
 });
 
 test("postpublish: reject metadata, integrity, and alias mismatch", () => {
-  assert.throws(() =>
-    verifyPublishedPackage(candidate, tags, { ...metadata, version: "0.3.0" }),
-  );
-  assert.throws(() =>
-    verifyPublishedPackage(candidate, tags, { ...metadata, dist: {} }),
-  );
-  assert.throws(() =>
-    verifyPublishedPackage(candidate, tags, {
-      ...metadata,
-      bin: { rulewitness: "dist/cli.js" },
-    }),
-  );
+  const wrongVersion = { ...metadata, version: "0.3.0" };
+  const noIntegrity = { ...metadata, dist: {} };
+  const missingAlias = { ...metadata, bin: { rulewitness: "dist/cli.js" } };
+  assert.throws(() => verifyPublishedPackage(candidate, tags, wrongVersion));
+  assert.throws(() => verifyPublishedPackage(candidate, tags, noIntegrity));
+  assert.throws(() => verifyPublishedPackage(candidate, tags, missingAlias));
 });
