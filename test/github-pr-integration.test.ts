@@ -18,11 +18,17 @@ test("PR integration: read-only fork-compatible checkout and pinned action revis
 });
 
 test("PR integration: only stable published analyzer and exact commit objects", () => {
-  assert.match(text, /npm install --global --ignore-scripts --no-audit --no-fund rulewitness@0\.3\.0/);
+  assert.match(
+    text,
+    /npm install --global --ignore-scripts --no-audit --no-fund rulewitness@0\.3\.0/,
+  );
   assert.match(text, /github\.event\.pull_request\.base\.sha/);
   assert.match(text, /github\.event\.pull_request\.head\.sha/);
   assert.match(text, /git cat-file -e/);
-  assert.match(text, /rulewitness compare "\$BASE_SHA" "\$HEAD_SHA" --pr-markdown --fail-on high/);
+  assert.match(
+    text,
+    /rulewitness compare "\$BASE_SHA" "\$HEAD_SHA" --pr-markdown --fail-on high/,
+  );
   assert.doesNotMatch(text, /git (checkout|fetch|reset|clean)/);
   assert.doesNotMatch(text, /npx (?!\-\-no-install)/);
 });
@@ -32,7 +38,8 @@ test("PR integration: report emitted on known finding, unknown or analysis failu
   assert.match(text, /set \+e/);
   assert.match(text, /code=\$\?/);
   assert.match(text, /exit "\$code"/);
-  for (const code of ["0", "1", "3"]) assert.match(text, new RegExp("^\\s*" + code + "\\)", "m"));
+  for (const code of ["0", "1", "3"])
+    assert.match(text, new RegExp("^\\s*" + code + "\\)", "m"));
   assert.match(text, /review_outcome=uncertain/);
   assert.match(text, /manual review required/);
   assert.match(text, /GITHUB_STEP_SUMMARY/);
