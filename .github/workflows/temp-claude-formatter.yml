@@ -1,0 +1,23 @@
+name: Temporary formatter preview
+on:
+  pull_request:
+    paths:
+      - .github/workflows/temp-claude-formatter.yml
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Preview exact formatting patch
+        run: |
+          npx --no-install prettier --write test/claude-runtime-boundaries.test.ts docs/claude-runtime-boundaries.md README.md docs/roadmap-v0.4.md
+          git diff -- test/claude-runtime-boundaries.test.ts docs/claude-runtime-boundaries.md README.md docs/roadmap-v0.4.md
