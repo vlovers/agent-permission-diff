@@ -118,7 +118,7 @@ export function inspectCodexPosture(content: string): CodexPosture {
       continue;
     }
     result.values[key as CodexPostureKey] =
-      key === "sandbox_workspace_write.network_access"
+      key.startsWith("sandbox_workspace_write.")
         ? value === "true"
         : (value as CodexPostureValue);
   }
