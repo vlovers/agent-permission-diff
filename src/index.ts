@@ -24,4 +24,7 @@ export {
   runPolicyTests,
 } from "./assertions.ts";
 export { evaluateWithContext } from "./session-context.ts";
-export type { SessionContext, ContextualEvaluation } from "./session-context.ts";
+export type {
+  SessionContext,
+  ContextualEvaluation,
+} from "./session-context.ts";
