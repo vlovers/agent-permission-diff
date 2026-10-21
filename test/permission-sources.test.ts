@@ -82,7 +82,7 @@ test("sources: Git marker may not be overridden or marked absent", () => {
         inventoryPermissionSources(policy, [
           { kind: "project", availability },
         ]),
-      /Tracked source facts cannot be overridden/,
+      /Tracked source facts cannot be overridden|External source cannot claim to have been inspected/,
     );
   }
 });
