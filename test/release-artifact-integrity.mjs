@@ -20,28 +20,56 @@ try {
   assert.equal(pkg.name, "rulewitness");
   assert.equal(lock.version, pkg.version);
   assert.equal(lock.packages[""].version, pkg.version);
-  const manifest = JSON.parse(command("npm", [
-    "pack", "--json", "--ignore-scripts", "--pack-destination", temp,
-  ]))[0];
+  const manifest = JSON.parse(
+    command("npm", [
+      "pack",
+      "--json",
+      "--ignore-scripts",
+      "--pack-destination",
+      temp,
+    ]),
+  )[0];
   assert.equal(manifest.name, pkg.name);
   assert.equal(manifest.version, pkg.version);
   const tarball = readFileSync(join(temp, manifest.filename));
-  assert.equal(createHash("sha1").update(tarball).digest("hex"), manifest.shasum);
+  assert.equal(
+    createHash("sha1").update(tarball).digest("hex"),
+    manifest.shasum,
+  );
   assert.equal(
     "sha512-" + createHash("sha512").update(tarball).digest("base64"),
     manifest.integrity,
   );
   const listed = command("tar", ["-tzf", join(temp, manifest.filename)])
-    .trim().split("\n").map((path) => path.replace(/^package\//, "")).sort();
+    .trim()
+    .split("\n")
+    .map((path) => path.replace(/^package\//, ""))
+    .sort();
   const declared = manifest.files.map((file) => file.path).sort();
-  assert.deepEqual(listed, declared, "Tarball entries diverge from npm manifest");
-  const required = ["package.json", "README.md", "LICENSE", "CHANGELOG.md",
-    "dist/index.js", "dist/index.d.ts", "dist/cli.js"];
-  for (const file of required) assert.ok(listed.includes(file), "Missing " + file);
-  assert.ok(!listed.some((path) =>
-    /(?:^|\/)(?:src|test|node_modules|\.git|\.github)(?:\/|$)/.test(path) ||
-    /(?:^|\/)(?:\.env(?:\.|$)|package-lock\.json$)/.test(path)
-  ), "Source/test/private files leaked into tarball");
+  assert.deepEqual(
+    listed,
+    declared,
+    "Tarball entries diverge from npm manifest",
+  );
+  const required = [
+    "package.json",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/cli.js",
+  ];
+  for (const file of required)
+    assert.ok(listed.includes(file), "Missing " + file);
+  assert.ok(
+    !listed.some(
+      (path) =>
+        /(?:^|\/)(?:src|test|node_modules|\.git|\.github)(?:\/|$)/.test(path) ||
+        /(?:^|\/)(?:\.env(?:\.|$)|package-lock\.json$)/.test(path),
+    ),
+    "Source/test/private files leaked into tarball",
+  );
   assert.deepEqual(pkg.exports, {
     ".": { types: "./dist/index.d.ts", import: "./dist/index.js" },
   });
