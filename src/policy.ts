@@ -96,12 +96,18 @@ export function parsePolicy(
     }
     for (const [key, value] of Object.entries(document.permissions)) {
       const pointer = `/permissions/${escapePointer(key)}`;
-      if (
-        key === "defaultMode" &&
-        typeof value === "string" &&
-        ["default", "manual"].includes(value)
-      )
+      if (key === "defaultMode") {
+        // Claude Code documents manual as an alias for default, including in
+        // settings: https://code.claude.com/docs/en/permission-modes#available-modes
+        // Other modes change approval semantics outside this bounded model.
+        if (value !== "default" && value !== "manual")
+          issue(
+            pointer,
+            value,
+            'Unmodeled permissions.defaultMode; only "default" and its "manual" alias are modeled',
+          );
         continue;
+      }
       if (!Object.hasOwn(lists, key)) {
         issue(pointer, value, `Unmodeled permission setting: ${key}`);
         continue;
