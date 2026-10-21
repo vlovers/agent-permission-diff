@@ -9,7 +9,9 @@
 export type CodexPostureKey =
   | "approval_policy"
   | "sandbox_mode"
-  | "sandbox_workspace_write.network_access";
+  | "sandbox_workspace_write.network_access"
+  | "sandbox_workspace_write.exclude_slash_tmp"
+  | "sandbox_workspace_write.exclude_tmpdir_env_var";
 export type CodexPostureValue =
   | "on-request"
   | "never"
@@ -41,11 +43,15 @@ const values: Record<CodexPostureKey, readonly string[]> = {
   approval_policy: ["on-request", "never"],
   sandbox_mode: ["read-only", "workspace-write", "danger-full-access"],
   "sandbox_workspace_write.network_access": ["true", "false"],
+  "sandbox_workspace_write.exclude_slash_tmp": ["true", "false"],
+  "sandbox_workspace_write.exclude_tmpdir_env_var": ["true", "false"],
 };
 const keys = [
   "approval_policy",
   "sandbox_mode",
   "sandbox_workspace_write.network_access",
+  "sandbox_workspace_write.exclude_slash_tmp",
+  "sandbox_workspace_write.exclude_tmpdir_env_var",
 ] as const;
 const MAX_LENGTH = 64 * 1024;
 export function inspectCodexPosture(content: string): CodexPosture {
@@ -104,7 +110,7 @@ export function inspectCodexPosture(content: string): CodexPosture {
     }
     if (
       !values[key as CodexPostureKey].includes(value) ||
-      (key === "sandbox_workspace_write.network_access"
+      (key.startsWith("sandbox_workspace_write.")
         ? match[3] === undefined
         : match[2] === undefined)
     ) {
