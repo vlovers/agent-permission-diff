@@ -896,3 +896,61 @@ console.log("Stable v0.3.0 runtime exports available");`,
     /Stable v0\.3\.0 runtime exports available/,
   );
 });
+
+test("package: stable v0.3.0 TypeScript report and policy contracts compile from installed tarball", () => {
+  writeFileSync(
+    join(consumer, "verify-v03-types.ts"),
+    `import type {
+  Decision, Severity, Evidence, Rule, Issue, Policy, Evaluation,
+  Finding, Explanation, ComparisonOutcome, SeverityThreshold,
+  ComparisonGate, PolicyTestCase, PolicyTestConfig, PolicyAssertion,
+  PolicyTestReport, Report,
+} from "rulewitness";
+type Assert<T extends true> = T;
+type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends
+  (<T>() => T extends B ? 1 : 2) ? true : false;
+type DecisionContract = Assert<Equal<Decision, "ALLOW" | "ASK" | "DENY" | "UNKNOWN">>;
+type SeverityContract = Assert<Equal<Severity, "HIGH" | "MEDIUM" | "LOW" | "INFO">>;
+type OutcomeContract = Assert<Equal<ComparisonOutcome, "modeled-change" | "modeled-no-op" | "uncertain">>;
+type ThresholdContract = Assert<Equal<SeverityThreshold, "high" | "medium" | "low" | "info">>;
+type GateExitContract = Assert<Equal<ComparisonGate["exitCode"], 0 | 1 | 3>>;
+type ReportVersionContract = Assert<Equal<Report["schemaVersion"], 1>>;
+type ReportProviderContract = Assert<Equal<Report["provider"], "claude-code">>;
+type ReportScopeContract = Assert<Equal<Report["scope"], "tracked-project-rule-policy">>;
+type ReportCommandsContract = Assert<Equal<Report["command"], "scan" | "compare">>;
+type TestCompleteContract = Assert<Equal<PolicyTestReport["complete"], false>>;
+type TestStatusContract = Assert<Equal<PolicyAssertion["status"], "passed" | "mismatch" | "unknown">>;
+type FindingKindsContract = Assert<Equal<Finding["kind"], "permission" | "coverage">>;
+type ExplanationCertaintyContract = Assert<Equal<Explanation["certainty"], "modeled" | "uncertain">>;
+type ConfigSchemaContract = Assert<Equal<PolicyTestConfig["schemaVersion"], 1>>;
+type EvidenceContract = Assert<Equal<Evidence, { revision: string; file: string; pointer: string; rule?: string }>>;
+type RuleContract = Assert<Equal<Rule, { tool: string; pattern: string; decision: Exclude<Decision, "UNKNOWN">; evidence: Evidence }>>;
+type IssueContract = Assert<Equal<Issue, { message: string; evidence: Evidence; fingerprint: string; tool: string | null }>>;
+type PolicyContract = Assert<Equal<Policy, { revision: string; rules: Rule[]; issues: Issue[]; files: string[] }>>;
+type EvaluationContract = Assert<Equal<Evaluation, { decision: Decision; reason: string; evidence: Evidence[] }>>;
+type CaseContract = Assert<Equal<PolicyTestCase, { name: string; tool: string; input: string; expected: Decision }>>;
+const evidence: Evidence = { revision: "abc", file: ".claude/settings.json", pointer: "/" };
+const evaluation: Evaluation = { decision: "UNKNOWN", reason: "unmodeled", evidence: [evidence] };
+const report: Report = { schemaVersion: 1, provider: "claude-code", scope: "tracked-project-rule-policy", command: "scan", revisions: [], complete: false, findings: [], policies: [] };
+const testReport: PolicyTestReport = { schemaVersion: 1, provider: "claude-code", scope: "tracked-project-rule-policy", command: "test", revision: "abc", complete: false, passed: false, results: [], issues: [] };
+const gate: ComparisonGate = { threshold: "high", thresholdExceeded: false, uncertain: true, violations: [], exitCode: 3 };
+void evidence; void evaluation; void report; void testReport; void gate;
+`,
+  );
+  execFileSync(
+    process.execPath,
+    [
+      join(root, "node_modules/typescript/bin/tsc"),
+      "--noEmit",
+      "--strict",
+      "--module",
+      "nodenext",
+      "--moduleResolution",
+      "nodenext",
+      "--target",
+      "es2024",
+      "verify-v03-types.ts",
+    ],
+    { cwd: consumer, encoding: "utf8", env },
+  );
+});
