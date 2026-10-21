@@ -44,7 +44,6 @@ All three events were real GitHub `pull_request` runs, checked out an inert gene
 
 **Not tested here:** fork-originated PR, missing/unavailable base/head Git objects on the GitHub runner, npm package digest/provenance, Codex runtime decisions, user/managed settings precedence, and Windows. Do not infer success for these from the A/B/C tests.
 
-
 ### Missing-object negative control — hosted GitHub Actions
 
 On 2026-10-22, [consumer PR #4](https://github.com/vlovers/rulewitness-consumer-e2e/pull/4), head `797f49d3a8bf0bab8e276fdb0d4feea5e0bfd295`, exercised the same `git cat-file -e "${BASE_SHA}^{commit}"` preflight used by the pinned example, with a deliberately unavailable all-zero base SHA. The [negative-control run 39687221024](https://github.com/vlovers/rulewitness-consumer-e2e/actions/runs/39687221024) passed by confirming the missing base is rejected before invoking RuleWitness, and that the real PR head is present. In parallel the [original consumer workflow run 39687220904](https://github.com/vlovers/rulewitness-consumer-e2e/actions/runs/39687220904) passed on unchanged tracked Codex config.
