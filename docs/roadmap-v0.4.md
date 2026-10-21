@@ -1,6 +1,6 @@
 # RuleWitness v0.4 — proposed roadmap
 
-Status: **in progress, unreleased**. See [release readiness](release-readiness-v0.4.md) and [unreleased changelog](../CHANGELOG.md). No v0.4 npm release commitment. Baseline: published v0.3.0. Nothing in this plan expands the existing Claude Code runtime claims. [v0.3 roadmap](roadmap-v0.3.md) is retained as historical release planning.
+Status: **in progress; v0.4.0-rc.1 prerelease published**. See [release readiness](release-readiness-v0.4.md) and [unreleased changelog](../CHANGELOG.md). Stable baseline: v0.3.0; v0.4.0-rc.1 is an opt-in prerelease, not a stable v0.4.0 release. Nothing in this plan expands the existing Claude Code runtime claims. [v0.3 roadmap](roadmap-v0.3.md) is retained as historical release planning.
 
 ## Goal
 
@@ -42,6 +42,10 @@ Select one provider **only if** its documented configuration and precedence sema
 - Improve short documentation and real examples; compare competitor approaches accurately without unsupported differentiation claims.
 - Evaluate optional PR comments separately: no write-token execution of untrusted PR code; preserve redaction and permissions safety.
 - Gather early user feedback before adding more plugins or provider adapters.
+
+## Current compatibility evidence
+
+The [Claude runtime boundaries audit](claude-runtime-boundaries.md) documents why tracked Git rules cannot establish live session trust, external settings precedence or complete effective permission decisions. Regression tests exercise modeled cross-file precedence, deny masking, unsupported hooks and modes, and secret-safe diagnostics. These tests validate the **model**, not Claude Code runtime conformance.
 
 ## Release gate
 
