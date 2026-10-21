@@ -32,7 +32,11 @@ try {
     process.stdout.write(usage + "\n");
   } else {
     const [command, ...rest] = args;
-    if (!["scan", "compare", "test", "codex-posture", "codex-review"].includes(command!))
+    if (
+      !["scan", "compare", "test", "codex-posture", "codex-review"].includes(
+        command!,
+      )
+    )
       throw new Error(usage);
     const refs: string[] = [];
     const options = new Map<string, string>();
