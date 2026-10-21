@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import type { Policy } from "./types.ts";
 
 /**
