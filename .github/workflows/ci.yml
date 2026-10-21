@@ -28,8 +28,3 @@ jobs:
       - run: node test/release-artifact-integrity.mjs
       - run: npm run format:check
       - run: node dist/cli.js scan HEAD --json
-      - name: Temporary formatter diagnostic
-        if: always()
-        run: |
-          npx prettier --write test/release-artifact-integrity.mjs
-          git diff -- test/release-artifact-integrity.mjs
