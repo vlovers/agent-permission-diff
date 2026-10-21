@@ -19,7 +19,7 @@ The report is not automatically posted as a PR comment; this avoids giving untru
 
 The stable analyzer currently published for this workflow is `rulewitness@0.3.0`. The repository's experimental `codex-posture` and `codex-review` commands are **not included in the stable package** and must not be advertised as working in a workflow that installs v0.3.0. **Do not replace the pin with `latest` or a branch source** to gain those commands. Publish and validate a new package version through the release workflow before offering a Codex CI template.
 
-Codex changes in the development branch concern *configured posture*, not effective permissions: an approval or sandbox setting does not prove a concrete command can execute in the live agent. A future released Codex job should use a separately pinned published version, maintain `runtimeVerified: false`, handle `uncertain` independently, and must not be used as the Claude severity gate.
+Codex changes in the development branch concern _configured posture_, not effective permissions: an approval or sandbox setting does not prove a concrete command can execute in the live agent. A future released Codex job should use a separately pinned published version, maintain `runtimeVerified: false`, handle `uncertain` independently, and must not be used as the Claude severity gate.
 
 ## Threat model and maintenance
 
@@ -31,11 +31,11 @@ Codex changes in the development branch concern *configured posture*, not effect
 
 Example outcomes in the Actions summary:
 
-| Analyzer exit | Meaning | CI job |
-| --- | --- | --- |
-| `0` | No configured-rule finding at the gate threshold | Pass |
-| `1` | Known modeled rule transition exceeds threshold | Fail |
-| `2` | Analysis or input error | Fail |
-| `3` | Uncertain gate; manual review needed | Fail |
+| Analyzer exit | Meaning                                          | CI job |
+| ------------- | ------------------------------------------------ | ------ |
+| `0`           | No configured-rule finding at the gate threshold | Pass   |
+| `1`           | Known modeled rule transition exceeds threshold  | Fail   |
+| `2`           | Analysis or input error                          | Fail   |
+| `3`           | Uncertain gate; manual review needed             | Fail   |
 
 This integration remains offline with respect to the inspected Git policy. Installing the published analyzer accesses the npm registry, but analyzed configuration never triggers its own code execution.
