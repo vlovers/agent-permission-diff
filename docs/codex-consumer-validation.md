@@ -1,6 +1,6 @@
 # Validate the Codex PR workflow in an external repository
 
-**Status:** independent real consumer `pull_request` runs **verified 2026-10-22** for scenarios A/B/C in [vlovers/rulewitness-consumer-e2e](https://github.com/vlovers/rulewitness-consumer-e2e). Fork-PR behavior and naturally missing Git objects remain untested; an injected missing-object preflight was verified on GitHub Actions. The published-package Git-fixture E2E inside RuleWitness is separate ([PR #61](https://github.com/vlovers/rulewitness/pull/61)). None of these tests establish live Codex authorization.
+**Status:** independent real consumer `pull_request` runs **verified 2026-10-22** for scenarios A/B/C in [vlovers/rulewitness-consumer-e2e](https://github.com/vlovers/rulewitness-consumer-e2e). A real external fork PR has now passed in GitHub Actions; naturally missing Git objects remain untested, while an injected missing-object preflight was verified. The published-package Git-fixture E2E inside RuleWitness is separate ([PR #61](https://github.com/vlovers/rulewitness/pull/61)). None of these tests establish live Codex authorization.
 
 ## Safe disposable consumer test
 
@@ -49,6 +49,10 @@ All three events were real GitHub `pull_request` runs, checked out an inert gene
 On 2026-10-22, [consumer PR #4](https://github.com/vlovers/rulewitness-consumer-e2e/pull/4), head `797f49d3a8bf0bab8e276fdb0d4feea5e0bfd295`, exercised the same `git cat-file -e "${BASE_SHA}^{commit}"` preflight used by the pinned example, with a deliberately unavailable all-zero base SHA. The [negative-control run 39687221024](https://github.com/vlovers/rulewitness-consumer-e2e/actions/runs/39687221024) passed by confirming the missing base is rejected before invoking RuleWitness, and that the real PR head is present. In parallel the [original consumer workflow run 39687220904](https://github.com/vlovers/rulewitness-consumer-e2e/actions/runs/39687220904) passed on unchanged tracked Codex config.
 
 This is an **injected missing-object preflight check**, not proof of behavior under naturally incomplete checkout/fork history. A fork-originated PR remains untested. Neither workflow executes PR scripts or verifies Codex runtime permissions.
+
+### Real fork-originated PR evidence
+
+On 2026-10-22, [consumer PR #5](https://github.com/vlovers/rulewitness-consumer-e2e/pull/5) originated from `mishakogyt/rulewitness-consumer-e2e` branch `mishakogyt-patch-1`, changing only `README.md` (one addition, one deletion). Base SHA: `ecd7d6f8f8a1130798a91248971c422c1a6e69f3`; head SHA: `6b5d7622eafd75201146224b60fb46119df180cf`. The [first-attempt workflow run 39688355860](https://github.com/vlovers/rulewitness-consumer-e2e/actions/runs/39688355860), `pull_request` event, completed **success**. Job logs explicitly show `GITHUB_TOKEN` `Contents: read`, checkout of `refs/remotes/pull/5/merge`, Node 24 setup, and an `npm install --global --ignore-scripts --no-audit --no-fund rulewitness@0.4.0-rc.2`; the compare step succeeded (exit 0). The separate missing-object job was skipped as designed for this branch. The workflow never executes fork-supplied commands or uses `pull_request_target`. No runtime authorization/precedence or actual Codex sandbox behavior was tested; naturally missing objects remain unverified.
 
 ## Evidence required before claiming real consumer validation
 
