@@ -289,6 +289,7 @@ test("package: dry-run and actual tarball include only documented runtime and do
     "provider-discovery",
     "provider-snapshot",
     "report",
+    "session-context",
     "types",
   ];
   const expected = [
