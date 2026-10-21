@@ -7,6 +7,7 @@ on:
       - "docs/github-actions-integration.md"
       - "docs/codex-posture-experimental.md"
       - "test/codex-npm-e2e.mjs"
+      - "test/codex-consumer-gate-e2e.mjs"
   workflow_dispatch:
 
 permissions:
@@ -27,4 +28,6 @@ jobs:
       - name: Install immutable published candidate without lifecycle scripts
         run: npm install --global --ignore-scripts --no-audit --no-fund --prefer-online rulewitness@0.4.0-rc.2
       - name: Verify real npm CLI against isolated Git commit fixtures
-        run: node test/codex-npm-e2e.mjs
+        run: |
+          node test/codex-npm-e2e.mjs
+          node test/codex-consumer-gate-e2e.mjs
