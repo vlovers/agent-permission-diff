@@ -28,3 +28,15 @@ export type {
   SessionContext,
   ContextualEvaluation,
 } from "./session-context.ts";
+export {
+  inventoryPermissionSources,
+  comparePermissionSources,
+} from "./permission-sources.ts";
+export type {
+  PermissionSourceKind,
+  SourceAvailability,
+  PermissionSource,
+  PermissionSourceInventory,
+  SourceCoverageChange,
+  SourceCoverageComparison,
+} from "./permission-sources.ts";
