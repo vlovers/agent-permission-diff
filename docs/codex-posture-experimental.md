@@ -30,3 +30,15 @@ Unsupported input values are not echoed in diagnostics; 64 KiB input cap, no TOM
 **Unsupported and unverified:** inherited/user/managed settings, project trust, profile resolution, sandbox network/permissions, command rules, granular approval, runtime approvals, effective filesystem/network access, real precedence and all other Codex config fields. `runtimePermissionDiff: false` intentionally refuses to claim runtime authorization even for recognized settings. Compare with [source provenance](permission-source-provenance.md).
 
 The existing Claude Code CLI and JSON report v1 are unchanged. The supported provider for _semantic permission diffs_ remains Claude Code's documented bounded rule model.
+
+## Git revision comparison (experimental CLI)
+
+Run from the repository root with the compared commits already available locally:
+
+```sh
+rulewitness codex-posture HEAD~1 HEAD --json
+```
+
+This command reads only the regular `.codex/config.toml` blob from each exact commit. It does not checkout, fetch, execute the config, follow symlinks, or use Codex. Unsafe tree modes and oversized blobs are rejected. Missing config produces uncertainty. Known changes are limited to the strict two-key parser; unrecognized TOML yields `uncertain: true` and no partial posture transitions. The result always includes `runtimePermissionDiff: false`.
+
+The CLI deliberately offers only `--json` for this experimental command, separate from the existing Claude permission `compare`, `scan`, `test` and `--fail-on` gate. The project trust condition and higher-priority configuration layers are not established from Git history. See [official Codex configuration basics](https://developers.openai.com/zh-Hans/docs/config-file/config-basic).
