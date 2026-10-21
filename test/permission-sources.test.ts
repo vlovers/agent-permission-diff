@@ -151,7 +151,7 @@ test("sources: incompatible inventory input is rejected even from JavaScript", (
   assert.throws(
     () =>
       comparePermissionSources(
-        { ...inventory, schemaVersion: 2 } as typeof inventory,
+        { ...inventory, schemaVersion: 2 } as unknown as typeof inventory,
         inventory,
       ),
     /Invalid permission source inventory/,
