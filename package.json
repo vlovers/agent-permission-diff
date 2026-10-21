@@ -58,5 +58,8 @@
     "cli",
     "policy-testing",
     "static-analysis"
-  ]
+  ],
+  "dependencies": {
+    "smol-toml": "1.9.1"
+  }
 }
