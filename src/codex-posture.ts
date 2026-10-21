@@ -1,9 +1,11 @@
+import { parse as parseToml } from "smol-toml";
+
 /**
  * Experimental Codex project-config posture inventory.
  * NOT a permission evaluator: no inheritance, user/managed settings,
  * trust, MCP, rules or actual command authorization is established.
  *
- * Only a deliberately restricted, unambiguous TOML subset is accepted;
+ * Standard TOML syntax is parsed, but only a bounded semantic subset is accepted;
  * other syntax produces UNKNOWN instead of guessing a value.
  */
 export type CodexPostureKey =
@@ -39,13 +41,16 @@ export interface CodexPostureComparison {
   uncertain: boolean;
   runtimePermissionDiff: false;
 }
-const values: Record<CodexPostureKey, readonly string[]> = {
+const stringValues = {
   approval_policy: ["on-request", "never"],
   sandbox_mode: ["read-only", "workspace-write", "danger-full-access"],
-  "sandbox_workspace_write.network_access": ["true", "false"],
-  "sandbox_workspace_write.exclude_slash_tmp": ["true", "false"],
-  "sandbox_workspace_write.exclude_tmpdir_env_var": ["true", "false"],
-};
+} as const;
+const rootKeys = ["approval_policy", "sandbox_mode"] as const;
+const nestedKeys = [
+  "network_access",
+  "exclude_slash_tmp",
+  "exclude_tmpdir_env_var",
+] as const;
 const keys = [
   "approval_policy",
   "sandbox_mode",
@@ -54,79 +59,64 @@ const keys = [
   "sandbox_workspace_write.exclude_tmpdir_env_var",
 ] as const;
 const MAX_LENGTH = 64 * 1024;
+const isObject = (x: unknown): x is Record<string, unknown> =>
+  x !== null && typeof x === "object" && !Array.isArray(x);
+
 export function inspectCodexPosture(content: string): CodexPosture {
   if (
     typeof content !== "string" ||
     Buffer.byteLength(content, "utf8") > MAX_LENGTH
   )
     throw new Error("Codex config input exceeds safe limit or is not text");
+  const issues: string[] = [];
   const result: CodexPosture = {
     schemaVersion: 1,
     provider: "codex",
     scope: "tracked-project-config-posture",
     complete: false,
     values: {},
-    issues: [],
+    issues,
   };
-  const issues: string[] = [];
-  const seen = new Set<string>();
-  let section: "root" | "sandbox_workspace_write" | "unsupported" = "root";
-  for (const [i, raw] of content.split(/\r?\n/).entries()) {
-    const line = raw.trim();
-    if (!line || line.startsWith("#")) continue;
-    if (line.startsWith("[")) {
-      if (line === "[sandbox_workspace_write]" && section === "root") {
-        section = "sandbox_workspace_write";
-      } else {
-        section = "unsupported";
-        issues.push("Unsupported TOML table (line " + (i + 1) + ")");
-      }
-      continue;
-    }
-    const match =
-      /^([A-Za-z_][A-Za-z_0-9]*)\s*=\s*(?:"([A-Za-z0-9-]+)"|(true|false))(?:\s*#.*)?$/.exec(
-        line,
-      );
-    if (!match) {
-      issues.push("Unsupported TOML syntax (line " + (i + 1) + ")");
-      continue;
-    }
-    const key =
-      section === "sandbox_workspace_write"
-        ? `sandbox_workspace_write.${match[1]!}`
-        : match[1]!;
-    const value = match[2] ?? match[3]!;
-    if (seen.has(key)) {
-      issues.push("Duplicate TOML key (line " + (i + 1) + ")");
-      continue;
-    }
-    seen.add(key);
-    if (section === "unsupported") {
-      issues.push("Nested TOML setting not interpreted (line " + (i + 1) + ")");
-      continue;
-    }
-    if (!keys.includes(key as CodexPostureKey)) {
-      issues.push("Other Codex setting not interpreted (line " + (i + 1) + ")");
-      continue;
-    }
-    if (
-      !values[key as CodexPostureKey].includes(value) ||
-      (key.startsWith("sandbox_workspace_write.")
-        ? match[3] === undefined
-        : match[2] === undefined)
-    ) {
-      issues.push("Unsupported Codex setting value (line " + (i + 1) + ")");
-      continue;
-    }
-    result.values[key as CodexPostureKey] = key.startsWith(
-      "sandbox_workspace_write.",
-    )
-      ? value === "true"
-      : (value as CodexPostureValue);
+  let document: unknown;
+  try {
+    document = parseToml(content);
+  } catch {
+    // Do not expose raw TOML parse errors: they can embed credentials.
+    return { ...result, issues: ["Invalid or unsupported TOML document"] };
   }
-  // Unsupported syntax could affect actual parsing of the file. Do not
-  // present a partially parsed policy as a known posture.
-  if (issues.length) return { ...result, values: {}, issues };
+  if (!isObject(document))
+    return { ...result, issues: ["TOML document is not an object"] };
+
+  for (const [key, value] of Object.entries(document)) {
+    if (key === "sandbox_workspace_write") {
+      if (!isObject(value)) {
+        issues.push("Unsupported sandbox_workspace_write table");
+        continue;
+      }
+      for (const [nestedKey, nestedValue] of Object.entries(value)) {
+        if (!nestedKeys.includes(nestedKey as (typeof nestedKeys)[number])) {
+          issues.push("Unmodeled workspace-write setting");
+        } else if (typeof nestedValue !== "boolean") {
+          issues.push("Workspace-write setting must be a boolean");
+        } else {
+          result.values[
+            `sandbox_workspace_write.${nestedKey}` as CodexPostureKey
+          ] = nestedValue;
+        }
+      }
+    } else if (!rootKeys.includes(key as (typeof rootKeys)[number])) {
+      issues.push("Unmodeled Codex configuration setting");
+    } else if (
+      typeof value !== "string" ||
+      !stringValues[key as (typeof rootKeys)[number]].includes(value as never)
+    ) {
+      issues.push("Unsupported Codex setting value");
+    } else {
+      result.values[key as CodexPostureKey] = value as CodexPostureValue;
+    }
+  }
+  // Never compare a partially understood config as a known posture.
+  if (issues.length) return { ...result, values: {} };
   return result;
 }
 export function compareCodexPosture(
