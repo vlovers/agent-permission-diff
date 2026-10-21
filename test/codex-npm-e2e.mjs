@@ -97,3 +97,4 @@ try {
   }
 } finally {
   rmSync(root, { recursive: true, force: true });
+}
