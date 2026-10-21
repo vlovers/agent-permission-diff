@@ -1,6 +1,6 @@
 # RuleWitness v0.4 — proposed roadmap
 
-Status: **in progress; v0.4.0-rc.2 prerelease published**. See [release readiness](release-readiness-v0.4.md) and [unreleased changelog](../CHANGELOG.md). Stable baseline: v0.3.0; v0.4.0-rc.2 is an opt-in npm `next` prerelease, not stable v0.4.0. Published-package Git fixtures passed in [PR #61](https://github.com/vlovers/rulewitness/pull/61), and the consumer shell-gate E2E passed in [PR #63](https://github.com/vlovers/rulewitness/pull/63); a [real consumer PR validation](codex-consumer-validation.md) remains outstanding. Nothing in this plan expands the existing Claude Code runtime claims. [v0.3 roadmap](roadmap-v0.3.md) is retained as historical release planning.
+Status: **in progress; v0.4.0-rc.2 prerelease published**. See [release readiness](release-readiness-v0.4.md) and [unreleased changelog](../CHANGELOG.md). Stable baseline: v0.3.0; v0.4.0-rc.2 is an opt-in npm `next` prerelease, not stable v0.4.0. Published-package Git fixtures passed in [PR #61](https://github.com/vlovers/rulewitness/pull/61), and the consumer shell-gate E2E passed in [PR #63](https://github.com/vlovers/rulewitness/pull/63); [real consumer A/B/C PR validation](codex-consumer-validation.md) passed expected exit behavior on 2026-10-22; fork and missing-object tests remain outstanding. Nothing in this plan expands the existing Claude Code runtime claims. [v0.3 roadmap](roadmap-v0.3.md) is retained as historical release planning.
 
 ## Goal
 

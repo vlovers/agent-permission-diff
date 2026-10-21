@@ -1,6 +1,6 @@
 # Validate the Codex PR workflow in an external repository
 
-**Status:** procedure only; a successful cross-repository pull-request run has not been recorded. The published-package exact-Git E2E inside RuleWitness is separate ([PR #61](https://github.com/vlovers/rulewitness/pull/61)). Never interpret those fixtures as live Codex authorization.
+**Status:** independent real consumer `pull_request` runs **verified 2026-10-22** for scenarios A/B/C in [vlovers/rulewitness-consumer-e2e](https://github.com/vlovers/rulewitness-consumer-e2e). Fork-PR behavior and missing-Git-object behavior remain untested in this consumer repository. The published-package Git-fixture E2E inside RuleWitness is separate ([PR #61](https://github.com/vlovers/rulewitness/pull/61)). None of these tests establish live Codex authorization.
 
 ## Safe disposable consumer test
 
@@ -29,6 +29,20 @@ On the default branch:
 6. Verify missing/unavailable commit objects fail rather than getting treated as unchanged; this is a distinct environment failure test, not a permission evaluation.
 
 **Important:** The workflow installs `rulewitness@0.4.0-rc.2` and runs the published CLI against two exact Git commits. It does **not** run the Codex agent, execute commands from `.codex/config.toml`, resolve project trust, consult managed or user settings, or establish effective sandbox/network/approval behavior. The example is experimental and does not replace the stable Claude-specific PR gate.
+
+## Recorded real consumer PR evidence (2026-10-22)
+
+Source repository: [vlovers/rulewitness-consumer-e2e](https://github.com/vlovers/rulewitness-consumer-e2e), public disposable repository without secrets or workflows executing PR code. Base SHA for all three PRs: `2034ac81a8bcc9c6fa11d0b2e9f012e04f05a989`. Workflow: exact copy of [experimental Codex posture review](../examples/github-actions/codex-posture-pr.yml), source blob `6e38b2f5d4bd1ee6dead287852344dde6fc16335`, installed npm `rulewitness@0.4.0-rc.2` with `--ignore-scripts`. GitHub Actions used Node 24 and Git 2.55.0.
+
+| Scenario                      | Consumer PR                                                      | Exact head SHA                             | GitHub Actions run                                                                          | Observed comparison exit | Conclusion                       |
+| ----------------------------- | ---------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------- | ------------------------ | -------------------------------- |
+| A — recognized sandbox change | [#1](https://github.com/vlovers/rulewitness-consumer-e2e/pull/1) | `21c2d1947640127c39694cadeba53d7cac810469` | [39686038627](https://github.com/vlovers/rulewitness-consumer-e2e/actions/runs/39686038627) | `1`                      | Expected gate failure            |
+| B — unsupported TOML profile  | [#2](https://github.com/vlovers/rulewitness-consumer-e2e/pull/2) | `85a8ba031ab3e783a74b03a9e488bba99abab51f` | [39686040507](https://github.com/vlovers/rulewitness-consumer-e2e/actions/runs/39686040507) | `3`                      | Expected fail-closed uncertainty |
+| C — unrelated Markdown change | [#3](https://github.com/vlovers/rulewitness-consumer-e2e/pull/3) | `34f44beae1a44a6fdb2466331fc0070f577fb31f` | [39686046844](https://github.com/vlovers/rulewitness-consumer-e2e/actions/runs/39686046844) | `0`                      | Expected successful gate         |
+
+All three events were real GitHub `pull_request` runs, checked out an inert generated merge commit, installed the immutable pinned prerelease successfully, and reached the exact-Git comparison step. Log inspection confirmed the exit codes. The workflow writes an Actions summary explicitly stating that runtime permission verification was **not performed**, and configuration precedence/trust/ambient settings were **not established**. Summary contents are specified by the pinned workflow; the Actions job-summary UI itself was not independently extracted for this audit. GitHub Release tag and published tarball contents are not changed by this documentation.
+
+**Not tested here:** fork-originated PR, missing/unavailable base/head Git objects on the GitHub runner, npm package digest/provenance, Codex runtime decisions, user/managed settings precedence, and Windows. Do not infer success for these from the A/B/C tests.
 
 ## Evidence required before claiming real consumer validation
 
