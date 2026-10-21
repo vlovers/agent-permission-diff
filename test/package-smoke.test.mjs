@@ -259,8 +259,8 @@ before(() => {
       "--no-audit",
       "--no-fund",
       "--package-lock=false",
-      "--cache",
-      join(temporary, "npm-cache"),
+      // The independent temporary pack cache cannot contain newly pinned
+      // runtime dependencies. Reuse npm ci\u0027s populated local cache in offline mode.
       join(temporary, manifest.filename),
     ],
     consumer,
