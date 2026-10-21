@@ -15,29 +15,60 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-          # Checkout the GitHub-generated PR merge ref from the base repository.
-          # Its history contains the base and head commits, including for fork PRs.
+          # Never checkout and execute code from the PR head.
       - name: Setup trusted analyzer runtime
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
+          package-manager-cache: false
       - name: Install released RuleWitness
         run: npm install --global --ignore-scripts --no-audit --no-fund rulewitness@0.3.0
       - name: Compare exact commits
+        id: review
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         shell: bash
         run: |
+          set -eu
+          report="$RUNNER_TEMP/rulewitness-report.md"
+          : > "$report"
           git cat-file -e "${BASE_SHA}^{commit}"
           git cat-file -e "${HEAD_SHA}^{commit}"
-          rulewitness compare "$BASE_SHA" "$HEAD_SHA" --pr-markdown --fail-on high > "$RUNNER_TEMP/rulewitness-report.md"
+          set +e
+          rulewitness compare "$BASE_SHA" "$HEAD_SHA" --pr-markdown --fail-on high > "$report"
+          code=$?
+          set -e
+          case "$code" in
+            0)
+              printf '%s\n' 'review_outcome=pass' >> "$GITHUB_OUTPUT"
+              ;;
+            1)
+              printf '%s\n' 'review_outcome=threshold' >> "$GITHUB_OUTPUT"
+              ;;
+            3)
+              printf '%s\n' 'review_outcome=uncertain' >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              printf '%s\n' 'review_outcome=error' >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+          exit "$code"
       - name: Publish report
         if: always()
+        env:
+          REVIEW_OUTCOME: ${{ steps.review.outputs.review_outcome }}
         shell: bash
         run: |
-          if [ -f "$RUNNER_TEMP/rulewitness-report.md" ]; then
+          set -eu
+          case "$REVIEW_OUTCOME" in
+            pass) printf '%s\n' '### RuleWitness: no configured-rule threshold violation' >> "$GITHUB_STEP_SUMMARY" ;;
+            threshold) printf '%s\n' '### RuleWitness: configured-rule threshold violated' >> "$GITHUB_STEP_SUMMARY" ;;
+            uncertain) printf '%s\n' '### RuleWitness: uncertain — manual review required' >> "$GITHUB_STEP_SUMMARY" ;;
+            *) printf '%s\n' '### RuleWitness: analysis did not complete' >> "$GITHUB_STEP_SUMMARY" ;;
+          esac
+          if [ -s "$RUNNER_TEMP/rulewitness-report.md" ]; then
             cat "$RUNNER_TEMP/rulewitness-report.md" >> "$GITHUB_STEP_SUMMARY"
           else
-            printf '%s\n' '### RuleWitness analysis could not complete' 'Inspect the comparison step for a missing Git object or other analysis failure.' >> "$GITHUB_STEP_SUMMARY"
+            printf '%s\n' 'Inspect the comparison step; reports may be missing after invalid refs or input errors.' >> "$GITHUB_STEP_SUMMARY"
           fi
