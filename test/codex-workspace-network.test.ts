@@ -55,3 +55,15 @@ test("Codex workspace network: known false and absent are distinct posture state
     after: false,
   }]);
 });
+
+test("Codex workspace exclusions: both documented flags are compared without runtime claims", () => {
+  const before = inspectCodexPosture('sandbox_mode="workspace-write"\n[sandbox_workspace_write]\nexclude_slash_tmp=false\nexclude_tmpdir_env_var=true');
+  const after = inspectCodexPosture('sandbox_mode="workspace-write"\n[sandbox_workspace_write]\nexclude_slash_tmp=true\nexclude_tmpdir_env_var=false');
+  assert.deepEqual(before.issues, []);
+  assert.deepEqual(after.issues, []);
+  assert.deepEqual(compareCodexPosture(before, after).changes, [
+    { key: "sandbox_workspace_write.exclude_slash_tmp", before: false, after: true },
+    { key: "sandbox_workspace_write.exclude_tmpdir_env_var", before: true, after: false },
+  ]);
+  assert.equal(compareCodexPosture(before, after).runtimePermissionDiff, false);
+});
