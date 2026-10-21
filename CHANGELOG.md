@@ -2,6 +2,27 @@
 
 All notable changes are documented here. Entries marked **Unreleased** describe repository code, not a published npm version.
 
+## 0.4.0-rc.3 — prepared, NOT published
+
+This release candidate packages the changes merged after immutable `0.4.0-rc.2`. It remains an experimental prerelease and does not establish effective runtime permissions for Claude Code or Codex.
+
+### Compatibility and security
+
+- Preserve the v0.3.0 named runtime exports and key TypeScript report/policy contracts through installed-tarball consumer tests.
+- Expand Claude installed-CLI regression coverage for modeled transitions, deny-masked changes, unsupported settings and mixed uncertainty across JSON, Markdown and human output, preserving exits 0/1/3.
+- Verify real npm tarball integrity, file allowlist, executable aliases, declarations, lockfile/changelog release gates and pinned GitHub workflow checks.
+
+### Independent consumer validation
+
+- Run the pinned `0.4.0-rc.2` experimental Codex reviewer in independent GitHub pull requests for configured changes (exit 1), unsupported profiles (exit 3), unchanged configuration (exit 0), and a real read-only external fork PR.
+- Check that deliberately missing Git commit objects are rejected before analysis. Naturally incomplete Git history remains unverified.
+- Record base/head SHAs, Action runs and explicit limitations in `docs/codex-consumer-validation.md`.
+
+### Release process
+
+- Add a read-only npm registry audit confirming the previously published dist-tags and prerelease SHA-512 integrity. **No `rc.3` npm publication, provenance or release tag is claimed here.**
+- `rc.3` requires its own green commit-bound CI, npm pack and registry checks and explicit authorization before publishing to `next`; stable `latest` remains outside this PR.
+
 ## 0.4.0-rc.2 — published 2026-10-21 (npm `next`, experimental)
 
 ### Claude Code review and developer experience

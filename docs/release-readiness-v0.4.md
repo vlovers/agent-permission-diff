@@ -1,6 +1,6 @@
 # RuleWitness v0.4 — release readiness (source audit)
 
-Reviewed: 2026-10-21. **Published prerelease:** `v0.4.0-rc.2` / npm `next` (`rulewitness@0.4.0-rc.2`); **stable `latest`: `0.3.0`**. PR #60 fixed read-only postpublish propagation checks and introduced the experimental Codex consumer workflow. PR #61 verified the published package against isolated exact-Git fixtures in Actions, while PR #63 exercised the consumer shell gate against the pinned published CLI (exit 0/1/3). These changes landed **after** the immutable rc.2 npm package and must not be described as rc.2 tarball contents. [Real consumer PR validation](codex-consumer-validation.md) confirmed A/B/C with exit 1/3/0 in GitHub Actions on 2026-10-22; fork PR was verified via a real external source and read-only Actions token in consumer PR #5; naturally missing-object scenarios remain untested (injected guard checked in consumer PR #4). This is not a stable release approval.
+Reviewed: 2026-10-22. **Source release candidate prepared: `0.4.0-rc.3` (not published; no tag)**. **Published prerelease:** `v0.4.0-rc.2` / npm `next` (`rulewitness@0.4.0-rc.2`); **stable `latest`: `0.3.0`**. PR #60 fixed read-only postpublish propagation checks and introduced the experimental Codex consumer workflow. PR #61 verified the published package against isolated exact-Git fixtures in Actions, while PR #63 exercised the consumer shell gate against the pinned published CLI (exit 0/1/3). These changes landed **after** the immutable rc.2 npm package and must not be described as rc.2 tarball contents. [Real consumer PR validation](codex-consumer-validation.md) confirmed A/B/C with exit 1/3/0 in GitHub Actions on 2026-10-22; fork PR was verified via a real external source and read-only Actions token in consumer PR #5; naturally missing-object scenarios remain untested (injected guard checked in consumer PR #4). This is not a stable release approval.
 
 ## Actual scope and limits
 
@@ -38,4 +38,4 @@ Reviewed: 2026-10-21. **Published prerelease:** `v0.4.0-rc.2` / npm `next` (`rul
 
 ## Decision
 
-**No publishing from this documentation PR.** `rc.2` is already published and immutable. Do not create a new tag, GitHub Release, or change npm `latest`/`next` without separate authorization and fresh final checks.
+**No publishing from the rc.3 preparation PR.** `rc.2` is already published and immutable. Do not create a new tag, GitHub Release, or change npm `latest`/`next` without separate authorization and fresh final checks.
