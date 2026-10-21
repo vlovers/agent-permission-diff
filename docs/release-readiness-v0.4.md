@@ -1,6 +1,6 @@
 # RuleWitness v0.4 — release readiness (source audit)
 
-Reviewed: 2026-10-21. **Candidate branch package version: `0.4.0-rc.2`**; currently published main release: `v0.4.0-rc.1`. GitHub [v0.4.0-rc.1](https://github.com/vlovers/rulewitness/releases/tag/v0.4.0-rc.1) was published on 2026-10-20. Its published npm status must be checked at the registry for a release decision; GitHub Release publication alone does not establish npm propagation. The code merged **after** that tag is staged for rc.2 and must not be published under an already-used version.
+Reviewed: 2026-10-21. **Published prerelease:** `v0.4.0-rc.2` / npm `next` (`rulewitness@0.4.0-rc.2`); **stable `latest`: `0.3.0`**. PR #60 fixed read-only postpublish propagation checks and introduced the experimental Codex consumer workflow. PR #61 verified the published package against isolated exact-Git fixtures in Actions. These changes landed **after** the immutable rc.2 npm package and must not be described as rc.2 tarball contents. [Real consumer PR validation](codex-consumer-validation.md) has not been performed; this is not a stable release approval.
 
 ## Actual scope and limits
 
@@ -16,7 +16,7 @@ Reviewed: 2026-10-21. **Candidate branch package version: `0.4.0-rc.2`**; curren
 
 ## Required release gates
 
-- [x] Stage distinct version `0.4.0-rc.2` in package metadata and tests. Registry availability and maintainer approval remain pending.
+- [x] Confirm immutable `0.4.0-rc.2` publication and independent npm registry verification. Do not republish that version; no stable `0.4.0` approval follows.
 - [ ] Check latest `main`, all open issues/PRs, complete GitHub CI, and any unresolved vulnerabilities.
 - [ ] Verify `npm view rulewitness versions --json`, `dist-tags` and intended release version against registry (no cache).
 - [ ] Confirm `package.json`, lockfile root package, changelog and Git release tag agree.
@@ -28,14 +28,14 @@ Reviewed: 2026-10-21. **Candidate branch package version: `0.4.0-rc.2`**; curren
 - [ ] Review immutable GitHub Action pins, release tag equality, main ancestry, OIDC permissions and postpublish verification.
 - [ ] Obtain explicit maintainer decision, then create the tag/GitHub Release; verify npm provenance, installed bytes and dist-tags afterwards.
 
-## Blocking issues
+## Remaining blockers for a stable v0.4.0 decision
 
-1. The candidate branch proposes `0.4.0-rc.2`, but publication is still blocked until a fresh npm-registry preflight, final CI on the release commit and an explicit maintainer decision.
-2. The source code's experimental Codex posture review is **not** effective command authorization, and cannot be called a production Codex permissions provider.
-3. The public v0.3.0 Action example cannot run Codex commands. A new npm version and tested integration are prerequisites.
-4. Full runtime conformance with Claude Code and Codex, especially ambient policies and Windows, is not established.
-5. A tagged-release verification run against the **future** release commit has not occurred.
+1. Revalidate registry metadata, package contents, exact proposed stable commit, GitHub CI and all security boundaries before any new stable tag.
+2. Codex posture comparison is **not** effective command authorization or production Codex permission analysis; runtime precedence and project trust remain unresolved.
+3. Real consumer-repository pull-request validation for the [experimental Codex workflow](codex-consumer-validation.md) has **not** been recorded, even though the published-package E2E Git fixture passed.
+4. Claude/Codex runtime conformance, external managed/user settings and Windows coverage remain unverified.
+5. The next release requires its own package version, changelog, tarball audit, maintainer authorization, and postpublish verification.
 
 ## Decision
 
-**No publishing from this PR.** This PR stages the rc.2 version bump and release materials only. Do not create a tag, GitHub Release or change npm `latest`/`next` without separate authorization and final checks.
+**No publishing from this documentation PR.** `rc.2` is already published and immutable. Do not create a new tag, GitHub Release, or change npm `latest`/`next` without separate authorization and fresh final checks.
