@@ -2,7 +2,27 @@
 
 All notable changes are documented here. Entries marked **Unreleased** describe repository code, not a published npm version.
 
-## 0.4.0-rc.1 — candidate only (not published)
+## Unreleased — changes after v0.4.0-rc.1
+
+### Claude Code review and developer experience
+
+- Added explicit session-context evaluation, permission-source provenance inventory and source-aware conservative evaluation; these opt-in TypeScript APIs do not establish live authorization.
+- Hardened project trust, unsupported permission-mode and precedence coverage, with regression tests for `UNKNOWN` and secret-safe diagnostics.
+- Hardened fork-compatible GitHub PR Actions reporting, preserving distinct threshold (`1`), analysis error (`2`) and uncertainty (`3`) exit outcomes.
+
+### Experimental Codex configured posture
+
+- Added opt-in Codex posture inspection/review APIs and `codex-posture` / `codex-review` commands comparing exact local Git revisions.
+- Replaced the restrictive handwritten TOML syntax parser with pinned `smol-toml`; unmodeled settings still force conservative uncertainty.
+- Added tracked Git blob safety checks and experimental configured sandbox, approval and workspace flags. **Not effective Codex permissions**, with `runtimeVerified: false` and `runtimePermissionDiff: false`.
+- Extended disposable Git and installed-package tests; documented native trust, managed/user settings, profile and runtime limitations.
+
+### Release preparation
+
+- Existing package.json version `0.4.0-rc.1` is **already published**, so these Unreleased changes must not be published under that version.
+- Next release requires a new approved version, matching lockfile, green CI, exact package inspection and explicit GitHub Release decision.
+
+## 0.4.0-rc.1 — published 2026-10-20
 
 ### Internal architecture
 
@@ -24,7 +44,7 @@ All notable changes are documented here. Entries marked **Unreleased** describe 
 - Published public CLI and TypeScript API still target the documented **Claude Code subset only**.
 - JSON schema v1, default CLI behavior, and severity/exit gate semantics remain unchanged.
 - These changes do **not** demonstrate parity with Claude Code's complete runtime authorization, or native Codex conformance.
-- The source branch has a prerelease version bump to 0.4.0-rc.1. No tag, GitHub Release, or npm publication has been performed.
+- The `v0.4.0-rc.1` GitHub Release was published on 2026-10-20. Its original RC scope predates the later Unreleased Codex posture and session-context changes.
 
 ## 0.3.0
 

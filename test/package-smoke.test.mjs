@@ -790,3 +790,59 @@ test("package: mixed high findings and uncertainty retain both structured gate f
     /thresholdExceeded=true; uncertain=true; exitCode=3/,
   );
 });
+
+test("package: installed Codex posture and review commands report configured changes only", () => {
+  const codex = repository("codex-packed", [
+    {
+      ".codex/config.toml":
+        'approval_policy = "on-request"\nsandbox_mode = "read-only"\n',
+    },
+    {
+      ".codex/config.toml":
+        'approval_policy = "never"\nsandbox_mode = "danger-full-access"\n',
+    },
+  ]);
+  const posture = JSON.parse(
+    successful(codex, ["codex-posture", codex.before, codex.after, "--json"]),
+  );
+  assert.equal(posture.provider, "codex");
+  assert.equal(posture.uncertain, false);
+  assert.equal(posture.runtimePermissionDiff, false);
+  assert.deepEqual(posture.posture.changes, [
+    { key: "approval_policy", before: "on-request", after: "never" },
+    {
+      key: "sandbox_mode",
+      before: "read-only",
+      after: "danger-full-access",
+    },
+  ]);
+  const review = JSON.parse(
+    successful(codex, ["codex-review", codex.before, codex.after, "--json"]),
+  );
+  assert.equal(review.review.direction, "mixed");
+  assert.equal(review.review.runtimeVerified, false);
+  assert.equal(review.review.runtimePermissionDiff, false);
+
+  const unsupported = repository("codex-packed-unknown", [
+    {
+      ".codex/config.toml":
+        'approval_policy = "never"\nsandbox_mode = "read-only"',
+    },
+    {
+      ".codex/config.toml":
+        'approval_policy = "never"\nsandbox_mode = "danger-full-access"\n[profiles.production]\napproval_policy = "never"',
+    },
+  ]);
+  const unknown = JSON.parse(
+    successful(unsupported, [
+      "codex-review",
+      unsupported.before,
+      unsupported.after,
+      "--json",
+    ]),
+  );
+  assert.equal(unknown.review.direction, "unknown");
+  assert.equal(unknown.comparison.uncertain, true);
+  assert.equal(unknown.review.runtimeVerified, false);
+  assert.deepEqual(unknown.comparison.posture.changes, []);
+});
