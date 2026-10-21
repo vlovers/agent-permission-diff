@@ -26,21 +26,21 @@ test("postpublish: prerelease keeps stable latest and targets next", () => {
 
 test("postpublish: stable versions must target latest", () => {
   const stable = { ...candidate, version: "0.4.0" };
-  const stableMetadata = { ...metadata, ...stable };
+  const stableMeta = { ...metadata, ...stable };
   const staleTags = { latest: "0.3.0" };
   assert.equal(
-    verifyPublishedPackage(stable, { latest: "0.4.0" }, stableMetadata).tag,
+    verifyPublishedPackage(stable, { latest: "0.4.0" }, stableMeta).tag,
     "latest",
   );
-  assert.throws(() => verifyPublishedPackage(stable, staleTags, stableMetadata));
+  assert.throws(() => verifyPublishedPackage(stable, staleTags, stableMeta));
 });
 
 test("postpublish: reject registry lag and changed prerelease tags", () => {
-  const latestChanged = { ...tags, latest: candidate.version };
-  const nextChanged = { ...tags, next: "0.4.0-rc.2" };
+  const latestTags = { ...tags, latest: candidate.version };
+  const nextTags = { ...tags, next: "0.4.0-rc.2" };
   assert.throws(() => verifyPublishedPackage(candidate, {}, metadata));
-  assert.throws(() => verifyPublishedPackage(candidate, latestChanged, metadata));
-  assert.throws(() => verifyPublishedPackage(candidate, nextChanged, metadata));
+  assert.throws(() => verifyPublishedPackage(candidate, latestTags, metadata));
+  assert.throws(() => verifyPublishedPackage(candidate, nextTags, metadata));
 });
 
 test("postpublish: reject metadata, integrity, and alias mismatch", () => {
