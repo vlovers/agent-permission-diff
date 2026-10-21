@@ -960,16 +960,15 @@ test("package: Claude comparison decisions and gates agree across JSON, Markdown
     { name: "recognized change", repo: supported, threshold: "high", exit: 1 },
     { name: "masked no-op", repo: masked, threshold: "high", exit: 0 },
     { name: "unsupported settings", repo: unknown, threshold: "high", exit: 3 },
-    { name: "known change plus uncertainty", repo: mixed, threshold: "high", exit: 3 },
+    {
+      name: "known change plus uncertainty",
+      repo: mixed,
+      threshold: "high",
+      exit: 3,
+    },
   ];
   for (const { name, repo, threshold, exit } of scenarios) {
-    const args = [
-      "compare",
-      repo.before,
-      repo.after,
-      "--fail-on",
-      threshold,
-    ];
+    const args = ["compare", repo.before, repo.after, "--fail-on", threshold];
     const json = invoke(repo, [...args, "--json"]);
     const human = invoke(repo, args);
     const markdown = invoke(repo, [...args, "--markdown"]);
@@ -998,7 +997,9 @@ test("package: Claude comparison decisions and gates agree across JSON, Markdown
     assert.ok(
       report.findings.every(
         (finding) =>
-          finding.before.evidence.every((item) => item.revision === repo.before) &&
+          finding.before.evidence.every(
+            (item) => item.revision === repo.before,
+          ) &&
           finding.after.evidence.every((item) => item.revision === repo.after),
       ),
       name + ": evidence revisions",
