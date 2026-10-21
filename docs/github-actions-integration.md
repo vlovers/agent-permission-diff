@@ -44,5 +44,4 @@ This integration remains offline with respect to the inspected Git policy. Insta
 
 The `v0.4.0-rc.2` publish command succeeded on 2026-10-21, but the original workflow exhausted six metadata reads returning `404` before the registry propagated. A later independent `npm view` confirmed `0.4.0-rc.2`, `next: 0.4.0-rc.2`, and the unchanged `latest: 0.3.0`. **Do not rerun `npm publish` for that immutable package version.** The release workflow now allows up to 24 read-only verification attempts, uses `--prefer-online`, and preserves the `latest` tag invariant.
 
-
 The [experimental Codex consumer workflow](../examples/github-actions/codex-posture-pr.yml) was exercised in three real independent [consumer PR runs](codex-consumer-validation.md) (expected exits 1, 3 and 0). It is not a runtime authorization check. Fork-originated PR and missing-object runner behavior remain untested.
