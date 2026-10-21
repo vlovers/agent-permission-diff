@@ -2,6 +2,7 @@
 import {
   comparePolicies,
   compareTrackedCodexPosture,
+  reviewTrackedCodexPosture,
   assessComparisonGate,
   formatHuman,
   formatMarkdown,
@@ -16,7 +17,7 @@ import type { PolicyTestReport, Report, SeverityThreshold } from "./types.ts";
 
 const usage = `Usage: rulewitness scan [REV] [--json|--markdown]
        rulewitness compare BEFORE AFTER [--json|--markdown|--pr-markdown] [--fail-on high|medium|low|info]
-       rulewitness test [--config rulewitness.tests.json] [--rev HEAD] [--json|--markdown]\n       rulewitness codex-posture BEFORE AFTER --json (experimental; NOT effective permission diff)
+       rulewitness test [--config rulewitness.tests.json] [--rev HEAD] [--json|--markdown]\n       rulewitness codex-posture BEFORE AFTER --json (experimental; NOT effective permission diff)\n       rulewitness codex-review BEFORE AFTER --json (experimental configured posture review)
 Run at the Git repository root. Default scan/test revision: HEAD.
 Compatibility bin: agent-permission-diff (same commands and output).
 Exit codes: 0 report/pass; 1 threshold/assertion failure; 2 analysis/usage error; 3 uncertain severity gate.
@@ -31,7 +32,11 @@ try {
     process.stdout.write(usage + "\n");
   } else {
     const [command, ...rest] = args;
-    if (!["scan", "compare", "test", "codex-posture"].includes(command!))
+    if (
+      !["scan", "compare", "test", "codex-posture", "codex-review"].includes(
+        command!,
+      )
+    )
       throw new Error(usage);
     const refs: string[] = [];
     const options = new Map<string, string>();
@@ -66,17 +71,19 @@ try {
       throw new Error("Invalid severity threshold");
     if (format === "pr-markdown" && command !== "compare")
       throw new Error("--pr-markdown applies only to compare");
-    if (command === "codex-posture") {
+    if (command === "codex-posture" || command === "codex-review") {
       if (format !== "json" || refs.length !== 2 || options.size)
         throw new Error(
-          "codex-posture requires BEFORE AFTER --json and no other options",
+          "Codex review requires BEFORE AFTER --json and no other options",
         );
       process.stdout.write(
         JSON.stringify(
-          compareTrackedCodexPosture(process.cwd(), refs[0]!, refs[1]!),
+          command === "codex-review"
+            ? reviewTrackedCodexPosture(process.cwd(), refs[0]!, refs[1]!)
+            : compareTrackedCodexPosture(process.cwd(), refs[0]!, refs[1]!),
           null,
           2,
-        ) + "\\n",
+        ) + "\n",
       );
     } else {
       let report: Report | PolicyTestReport;

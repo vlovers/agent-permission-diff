@@ -52,8 +52,14 @@ export type {
 export {
   readTrackedCodexPosture,
   compareTrackedCodexPosture,
+  reviewTrackedCodexPosture,
 } from "./codex-git.ts";
 export type {
   TrackedCodexPosture,
   TrackedCodexPostureComparison,
 } from "./codex-git.ts";
+export { reviewCodexPosture } from "./codex-posture-review.ts";
+export type {
+  CodexPostureDirection,
+  CodexPostureReview,
+} from "./codex-posture-review.ts";
