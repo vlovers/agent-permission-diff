@@ -22,18 +22,18 @@ Do **not** interpret comparing two commits as comparing two trusted live session
 
 ## What the current parser actually models
 
-| Input | Modeled interpretation | Limit |
-| --- | --- | --- |
-| `.claude/settings.json` tracked regular file | Parse supported project rules | Settings only present in Git revision |
-| `.claude/settings.local.json` tracked regular file | Parse supported local rules | Normally untracked local state is unseen |
-| `permissions.deny` matching Bash/WebSearch | `DENY` | Narrow literal/wildcard syntax only |
-| `permissions.ask` matching Bash/WebSearch | `ASK` | Narrow literal/wildcard syntax only |
-| `permissions.allow` matching Bash/WebSearch | `ALLOW` | Conditional configured-rule match |
-| Explicit `defaultMode: "default"` or `"manual"` | Manual/default analytical model | `manual` is documented as alias |
-| Missing `defaultMode` | Same analytical assumption | Does not establish live session default |
-| Other `defaultMode`, hooks, unrecognized settings | Coverage issue, `UNKNOWN` | No invented behavior |
-| Unmatched Bash | `UNKNOWN` | Built-in approvals and shell transformations unmodeled |
-| Unmatched WebSearch | `ASK` under assumed manual mode | Conditional on the assumed mode |
+| Input                                              | Modeled interpretation          | Limit                                                  |
+| -------------------------------------------------- | ------------------------------- | ------------------------------------------------------ |
+| `.claude/settings.json` tracked regular file       | Parse supported project rules   | Settings only present in Git revision                  |
+| `.claude/settings.local.json` tracked regular file | Parse supported local rules     | Normally untracked local state is unseen               |
+| `permissions.deny` matching Bash/WebSearch         | `DENY`                          | Narrow literal/wildcard syntax only                    |
+| `permissions.ask` matching Bash/WebSearch          | `ASK`                           | Narrow literal/wildcard syntax only                    |
+| `permissions.allow` matching Bash/WebSearch        | `ALLOW`                         | Conditional configured-rule match                      |
+| Explicit `defaultMode: "default"` or `"manual"`    | Manual/default analytical model | `manual` is documented as alias                        |
+| Missing `defaultMode`                              | Same analytical assumption      | Does not establish live session default                |
+| Other `defaultMode`, hooks, unrecognized settings  | Coverage issue, `UNKNOWN`       | No invented behavior                                   |
+| Unmatched Bash                                     | `UNKNOWN`                       | Built-in approvals and shell transformations unmodeled |
+| Unmatched WebSearch                                | `ASK` under assumed manual mode | Conditional on the assumed mode                        |
 
 The supported subset checks `deny > ask > allow` precedence **among parsed rules**. It does not attempt to implement the full runtime permission pipeline (hooks, policy mode, built-in permissions, trust, approvals or hierarchy).
 
