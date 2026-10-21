@@ -43,7 +43,7 @@ test("Codex posture: unchanged, reordered and comments make no posture changes",
 });
 test("Codex posture: unsupported TOML is UNKNOWN and secrets are not echoed", () => {
   for (const raw of [
-    "[sandbox_workspace_write]\nnetwork_access=true",
+    "[sandbox_workspace_write]\nnetwork_access=true\nwritable_roots=[]",
     "approval_policy = { granular = { rules = true } }",
     'approval_policy = "maybe"',
     'approval_policy = "never"\napproval_policy = "on-request"',
