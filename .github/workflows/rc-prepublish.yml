@@ -1,0 +1,76 @@
+name: RC candidate prepublish verification
+on:
+  pull_request:
+    paths:
+      - .github/workflows/rc-prepublish.yml
+      - package.json
+      - package-lock.json
+      - CHANGELOG.md
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Check candidate version, lockfile, changelog and unpublished registry state
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            const lock = JSON.parse(fs.readFileSync("package-lock.json", "utf8"));
+            const change = fs.readFileSync("CHANGELOG.md", "utf8");
+            if (pkg.name !== "rulewitness" || pkg.version !== "0.4.0-rc.3" ||
+              lock.name !== pkg.name || lock.version !== pkg.version ||
+              lock.packages?.[""]?.name !== pkg.name || lock.packages?.[""]?.version !== pkg.version ||
+              !change.split("\n").some(line => line.startsWith("## " + pkg.version + " "))) {
+              throw Error("Candidate metadata is not ready");
+            }
+          '
+          npm view rulewitness versions --json --registry=https://registry.npmjs.org/ --prefer-online --cache="$RUNNER_TEMP/prepublish-cache" > "$RUNNER_TEMP/versions.json"
+          npm view rulewitness dist-tags --json --registry=https://registry.npmjs.org/ --prefer-online --cache="$RUNNER_TEMP/prepublish-cache" > "$RUNNER_TEMP/tags.json"
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const versions = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + "/versions.json", "utf8"));
+            const tags = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + "/tags.json", "utf8"));
+            if (!Array.isArray(versions) || versions.includes("0.4.0-rc.3") ||
+                tags.latest !== "0.3.0" || tags.next !== "0.4.0-rc.2") {
+              throw Error("Registry state changed; re-audit before publishing");
+            }
+            console.log("Unpublished rc.3 verified; stable latest preserved");
+          '
+      - name: Check compiled tarball and isolated installed consumer
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run typecheck
+          npm test
+          npm run build
+          npm run test:package
+          node test/release-artifact-integrity.mjs
+          npm run format:check
+      - name: Record exact prepublish candidate commit
+        env:
+          EVENT: ${{ github.event_name }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" = pull_request ]; then
+            echo "PR candidate head: $HEAD_SHA"
+          else
+            echo "Candidate commit: $(git rev-parse HEAD)"
+          fi
+          echo "This workflow NEVER publishes, tags, or executes analyzed policy commands."
