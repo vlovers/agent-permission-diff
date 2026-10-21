@@ -5,14 +5,10 @@ import type { Policy } from "./types.ts";
  * This type never contains raw untrusted configuration content.
  */
 export type PermissionSourceKind =
-  | "managed"
-  | "user"
-  | "project"
-  | "project-local"
-  | "session"
-  | "hooks";
+  "managed" | "user" | "project" | "project-local" | "session" | "hooks";
 
-export type SourceAvailability = "inspected" | "present-uninspected" | "unknown" | "absent-asserted";
+export type SourceAvailability =
+  "inspected" | "present-uninspected" | "unknown" | "absent-asserted";
 
 export interface PermissionSource {
   kind: PermissionSourceKind;
@@ -109,7 +105,9 @@ export function inventoryPermissionSources(
   ].sort();
   for (const kind of ["project", "project-local"] as const) {
     const file =
-      kind === "project" ? ".claude/settings.json" : ".claude/settings.local.json";
+      kind === "project"
+        ? ".claude/settings.json"
+        : ".claude/settings.local.json";
     const found = trackedFiles.includes(file);
     const provided = facts.get(kind);
     if (provided) {
@@ -141,9 +139,12 @@ function checked(inventory: PermissionSourceInventory): void {
     !kinds.every(
       (kind, i) =>
         inventory.sources[i]?.kind === kind &&
-        ["inspected", "present-uninspected", "unknown", "absent-asserted"].includes(
-          inventory.sources[i]!.availability,
-        ),
+        [
+          "inspected",
+          "present-uninspected",
+          "unknown",
+          "absent-asserted",
+        ].includes(inventory.sources[i]!.availability),
     )
   )
     throw new Error("Invalid permission source inventory");
