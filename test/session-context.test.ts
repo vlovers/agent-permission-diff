@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { comparePolicies, evaluateWithContext, parsePolicy } from "../src/index.ts";
+import {
+  comparePolicies,
+  evaluateWithContext,
+  parsePolicy,
+} from "../src/index.ts";
 import type { SessionContext } from "../src/index.ts";
 
 const p = parsePolicy("HEAD", {
@@ -35,15 +39,17 @@ test("context: asserted premises retain conditional configured-rule answers only
 
 test("context: every missing premise degrades all modeled decisions to UNKNOWN", () => {
   for (const field of Object.keys(full) as (keyof SessionContext)[]) {
-    for (const value of (
-      field === "projectTrust"
+    for (const value of field === "projectTrust"
         ? ["unknown", "untrusted"]
         : field === "permissionMode"
           ? ["unknown", "other"]
-          : ["unknown", "present"]
-    )) {
+          : ["unknown", "present"]) {
       const context = { ...full, [field]: value } as SessionContext;
-      for (const input of ["npm test", "npm run build", "git push origin main"]) {
+      for (const input of [
+        "npm test",
+        "npm run build",
+        "git push origin main",
+      ]) {
         const result = evaluateWithContext(p, "Bash", input, context);
         assert.equal(result.contextual.decision, "UNKNOWN");
         assert.deepEqual(result.unresolved, [field]);
@@ -85,9 +91,15 @@ test("context: unsupported policy stays UNKNOWN even with asserted full context"
 });
 
 test("context: malformed JS input fails closed rather than silently assuming full context", () => {
-  for (const value of [null, {}, { ...full, projectTrust: "yes" }, {
-    ...full, externalInfluences: false,
-  }]) {
+  for (const value of [
+    null,
+    {},
+    { ...full, projectTrust: "yes" },
+    {
+      ...full,
+      externalInfluences: false,
+    },
+  ]) {
     assert.throws(
       () => evaluateWithContext(p, "Bash", "npm test", value as SessionContext),
       /Invalid explicit session context/,
