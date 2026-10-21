@@ -40,3 +40,5 @@ export type {
   SourceCoverageChange,
   SourceCoverageComparison,
 } from "./permission-sources.ts";
+export { evaluateWithSources } from "./source-aware-evaluation.ts";
+export type { SourceAwareEvaluation } from "./source-aware-evaluation.ts";
