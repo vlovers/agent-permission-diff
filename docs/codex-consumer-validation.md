@@ -1,6 +1,6 @@
 # Validate the Codex PR workflow in an external repository
 
-**Status:** independent real consumer `pull_request` runs **verified 2026-10-22** for scenarios A/B/C in [vlovers/rulewitness-consumer-e2e](https://github.com/vlovers/rulewitness-consumer-e2e). Fork-PR behavior and missing-Git-object behavior remain untested in this consumer repository. The published-package Git-fixture E2E inside RuleWitness is separate ([PR #61](https://github.com/vlovers/rulewitness/pull/61)). None of these tests establish live Codex authorization.
+**Status:** independent real consumer `pull_request` runs **verified 2026-10-22** for scenarios A/B/C in [vlovers/rulewitness-consumer-e2e](https://github.com/vlovers/rulewitness-consumer-e2e). Fork-PR behavior and naturally missing Git objects remain untested; an injected missing-object preflight was verified on GitHub Actions. The published-package Git-fixture E2E inside RuleWitness is separate ([PR #61](https://github.com/vlovers/rulewitness/pull/61)). None of these tests establish live Codex authorization.
 
 ## Safe disposable consumer test
 
@@ -43,6 +43,13 @@ Source repository: [vlovers/rulewitness-consumer-e2e](https://github.com/vlovers
 All three events were real GitHub `pull_request` runs, checked out an inert generated merge commit, installed the immutable pinned prerelease successfully, and reached the exact-Git comparison step. Log inspection confirmed the exit codes. The workflow writes an Actions summary explicitly stating that runtime permission verification was **not performed**, and configuration precedence/trust/ambient settings were **not established**. Summary contents are specified by the pinned workflow; the Actions job-summary UI itself was not independently extracted for this audit. GitHub Release tag and published tarball contents are not changed by this documentation.
 
 **Not tested here:** fork-originated PR, missing/unavailable base/head Git objects on the GitHub runner, npm package digest/provenance, Codex runtime decisions, user/managed settings precedence, and Windows. Do not infer success for these from the A/B/C tests.
+
+
+### Missing-object negative control — hosted GitHub Actions
+
+On 2026-10-22, [consumer PR #4](https://github.com/vlovers/rulewitness-consumer-e2e/pull/4), head `797f49d3a8bf0bab8e276fdb0d4feea5e0bfd295`, exercised the same `git cat-file -e "${BASE_SHA}^{commit}"` preflight used by the pinned example, with a deliberately unavailable all-zero base SHA. The [negative-control run 39687221024](https://github.com/vlovers/rulewitness-consumer-e2e/actions/runs/39687221024) passed by confirming the missing base is rejected before invoking RuleWitness, and that the real PR head is present. In parallel the [original consumer workflow run 39687220904](https://github.com/vlovers/rulewitness-consumer-e2e/actions/runs/39687220904) passed on unchanged tracked Codex config.
+
+This is an **injected missing-object preflight check**, not proof of behavior under naturally incomplete checkout/fork history. A fork-originated PR remains untested. Neither workflow executes PR scripts or verifies Codex runtime permissions.
 
 ## Evidence required before claiming real consumer validation
 
