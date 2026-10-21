@@ -703,6 +703,55 @@ test("package: installed severity gates, Markdown and uncertainty use distinct e
   }
 });
 
+test("package: installed defaultMode diagnostics and masked rule changes preserve uncertainty exits", () => {
+  const documents = [
+    { defaultMode: "manual", ask: ["Bash(npm test)", "WebSearch"] },
+    { defaultMode: "auto", ask: ["Bash(npm test)", "WebSearch"] },
+    { defaultMode: "auto", allow: ["Bash(npm test)", "WebSearch"] },
+  ].map((permissions) => ({ ".claude/settings.json": { permissions } }));
+  const repo = repository("default-mode-coverage", documents);
+  const unresolved = git(repo.directory, "rev-parse", "HEAD~1");
+  const scan = JSON.parse(successful(repo, ["scan", unresolved, "--json"]));
+  assert.equal(scan.schemaVersion, 1);
+  assert.equal(scan.complete, false);
+  assert.match(scan.policies[0].issues[0].message, /permissions\.defaultMode/);
+  assert.equal(
+    scan.policies[0].issues[0].evidence.pointer,
+    "/permissions/defaultMode",
+  );
+  assert.ok(scan.findings.every((f) => f.after.decision === "UNKNOWN"));
+  for (const [first, second] of [
+    [repo.before, unresolved],
+    [unresolved, repo.before],
+    [unresolved, repo.after],
+    [repo.after, repo.after],
+  ]) {
+    const args = ["compare", first, second, "--json"];
+    assert.equal(invoke(repo, args).status, 0);
+    const gated = invoke(repo, [...args, "--fail-on", "info"]);
+    assert.equal(gated.status, 3, gated.stderr);
+    const report = JSON.parse(gated.stdout);
+    assert.deepEqual(report.gate, {
+      threshold: "info",
+      thresholdExceeded: false,
+      uncertain: true,
+      violations: [],
+      exitCode: 3,
+    });
+    if (first === unresolved && second === repo.after) {
+      assert.equal(report.findings.length, 2);
+      assert.ok(
+        report.findings.every(
+          (f) =>
+            f.kind === "coverage" &&
+            f.before.decision === "UNKNOWN" &&
+            f.after.decision === "UNKNOWN",
+        ),
+      );
+    }
+  }
+});
+
 test("package: mixed high findings and uncertainty retain both structured gate facts", () => {
   const args = ["compare", mixed.before, mixed.after, "--fail-on", "high"];
   const result = invoke(mixed, [...args, "--json"]);
