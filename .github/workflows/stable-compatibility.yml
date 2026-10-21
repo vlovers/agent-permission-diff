@@ -1,0 +1,40 @@
+name: Stable v0.3 consumer compatibility
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "test/stable-compatibility-e2e.mjs"
+      - ".github/workflows/stable-compatibility.yml"
+      - "package.json"
+      - "package-lock.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Install candidate dependencies without scripts
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Build candidate
+        run: npm run build
+      - name: Install immutable stable baseline without scripts
+        env:
+          RULEWITNESS_STABLE_ROOT: ${{ runner.temp }}/rulewitness-v03
+        run: |
+          mkdir -p "$RULEWITNESS_STABLE_ROOT"
+          npm install --prefix "$RULEWITNESS_STABLE_ROOT" --ignore-scripts --no-audit --no-fund --prefer-online --save=false rulewitness@0.3.0
+      - name: Verify stable API and CLI decisions against candidate
+        env:
+          RULEWITNESS_STABLE_ROOT: ${{ runner.temp }}/rulewitness-v03
+        run: node test/stable-compatibility-e2e.mjs
