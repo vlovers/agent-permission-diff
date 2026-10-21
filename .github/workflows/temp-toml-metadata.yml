@@ -1,0 +1,24 @@
+name: Temporary TOML lock metadata
+on:
+  pull_request:
+    paths:
+      - .github/workflows/temp-toml-metadata.yml
+permissions:
+  contents: read
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: |
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          node -e 'console.log("LOCKMETA:"+JSON.stringify(JSON.parse(require("fs").readFileSync("package-lock.json","utf8")).packages["node_modules/smol-toml"]))'
+          npx --yes prettier@3.9.10 --write src/codex-posture.ts
+          git diff -- src/codex-posture.ts
