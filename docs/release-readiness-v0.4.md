@@ -1,6 +1,6 @@
 # RuleWitness v0.4 — release readiness (source audit)
 
-Reviewed: 2026-10-21. **Current main package version: `0.4.0-rc.1`**. GitHub [v0.4.0-rc.1](https://github.com/vlovers/rulewitness/releases/tag/v0.4.0-rc.1) was published on 2026-10-20. Its published npm status must be checked at the registry for a release decision; GitHub Release publication alone does not establish npm propagation. The code merged **after** that tag is `Unreleased` and must never be republished with an already-used version.
+Reviewed: 2026-10-21. **Candidate branch package version: `0.4.0-rc.2`**; currently published main release: `v0.4.0-rc.1`. GitHub [v0.4.0-rc.1](https://github.com/vlovers/rulewitness/releases/tag/v0.4.0-rc.1) was published on 2026-10-20. Its published npm status must be checked at the registry for a release decision; GitHub Release publication alone does not establish npm propagation. The code merged **after** that tag is staged for rc.2 and must not be published under an already-used version.
 
 ## Actual scope and limits
 
@@ -16,7 +16,7 @@ Reviewed: 2026-10-21. **Current main package version: `0.4.0-rc.1`**. GitHub [v0
 
 ## Required release gates
 
-- [ ] Select a **new unused** release version and separately approve its supported scope. Do not reuse `0.4.0-rc.1`.
+- [x] Stage distinct version `0.4.0-rc.2` in package metadata and tests. Registry availability and maintainer approval remain pending.
 - [ ] Check latest `main`, all open issues/PRs, complete GitHub CI, and any unresolved vulnerabilities.
 - [ ] Verify `npm view rulewitness versions --json`, `dist-tags` and intended release version against registry (no cache).
 - [ ] Confirm `package.json`, lockfile root package, changelog and Git release tag agree.
@@ -30,7 +30,7 @@ Reviewed: 2026-10-21. **Current main package version: `0.4.0-rc.1`**. GitHub [v0
 
 ## Blocking issues
 
-1. Source `main` has unreleased commits while package metadata remains `0.4.0-rc.1`. Any npm publish would collide with the already published candidate and be rejected by the release registry guard.
+1. The candidate branch proposes `0.4.0-rc.2`, but publication is still blocked until a fresh npm-registry preflight, final CI on the release commit and an explicit maintainer decision.
 2. The source code's experimental Codex posture review is **not** effective command authorization, and cannot be called a production Codex permissions provider.
 3. The public v0.3.0 Action example cannot run Codex commands. A new npm version and tested integration are prerequisites.
 4. Full runtime conformance with Claude Code and Codex, especially ambient policies and Windows, is not established.
@@ -38,4 +38,4 @@ Reviewed: 2026-10-21. **Current main package version: `0.4.0-rc.1`**. GitHub [v0
 
 ## Decision
 
-**No publishing from this PR.** Land release-readiness tests and docs without bumping versions, creating tags or changing `latest`/`next`. Only a follow-up explicitly approved release-candidate bump can initiate an end-to-end release process.
+**No publishing from this PR.** This PR stages the rc.2 version bump and release materials only. Do not create a tag, GitHub Release or change npm `latest`/`next` without separate authorization and final checks.
