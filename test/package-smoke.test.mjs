@@ -954,3 +954,57 @@ void evidence; void evaluation; void report; void testReport; void gate;
     { cwd: consumer, encoding: "utf8", env },
   );
 });
+
+test("package: Claude comparison decisions and gates agree across JSON, Markdown and human formats", () => {
+  const scenarios = [
+    { name: "recognized change", repo: supported, threshold: "high", exit: 1 },
+    { name: "masked no-op", repo: masked, threshold: "high", exit: 0 },
+    { name: "unsupported settings", repo: unknown, threshold: "high", exit: 3 },
+    {
+      name: "known change plus uncertainty",
+      repo: mixed,
+      threshold: "high",
+      exit: 3,
+    },
+  ];
+  for (const { name, repo, threshold, exit } of scenarios) {
+    const args = ["compare", repo.before, repo.after, "--fail-on", threshold];
+    const json = invoke(repo, [...args, "--json"]);
+    const human = invoke(repo, args);
+    const markdown = invoke(repo, [...args, "--markdown"]);
+    for (const [format, result] of [
+      ["json", json],
+      ["human", human],
+      ["markdown", markdown],
+    ]) {
+      assert.equal(result.status, exit, name + ": " + format);
+      assert.equal(result.stderr, "", name + ": " + format + " stderr");
+      assert.ok(result.stdout.trim().length > 0, name + ": " + format);
+    }
+    const report = JSON.parse(json.stdout);
+    assert.equal(report.schemaVersion, 1, name);
+    assert.equal(report.provider, "claude-code", name);
+    assert.equal(report.scope, "tracked-project-rule-policy", name);
+    assert.equal(report.complete, false, name);
+    assert.deepEqual(report.revisions, [repo.before, repo.after], name);
+    assert.equal(report.gate.exitCode, exit, name);
+    assert.equal(report.gate.threshold, threshold, name);
+    assert.equal(
+      report.gate.uncertain,
+      report.gate.exitCode === 3,
+      name + ": uncertainty precedence",
+    );
+    assert.ok(
+      report.findings.every(
+        (finding) =>
+          finding.before.evidence.every(
+            (item) => item.revision === repo.before,
+          ) &&
+          finding.after.evidence.every((item) => item.revision === repo.after),
+      ),
+      name + ": evidence revisions",
+    );
+    assert.match(human.stdout, /runtime authorization is not guaranteed/, name);
+    assert.match(markdown.stdout, /runtime/i, name);
+  }
+});
