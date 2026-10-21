@@ -23,7 +23,11 @@ export interface CodexPostureReview {
   runtimeVerified: false;
 }
 
-const SANDBOX_ORDER = ["read-only", "workspace-write", "danger-full-access"] as const;
+const SANDBOX_ORDER = [
+  "read-only",
+  "workspace-write",
+  "danger-full-access",
+] as const;
 
 /**
  * Classify only explicit configured posture transitions; no live authorization,
@@ -48,11 +52,19 @@ export function reviewCodexPosture(
   if (oldSandbox === undefined || newSandbox === undefined) {
     unresolved.push("Sandbox mode not explicit in both revisions");
   } else {
-    const left = SANDBOX_ORDER.indexOf(oldSandbox as (typeof SANDBOX_ORDER)[number]);
-    const right = SANDBOX_ORDER.indexOf(newSandbox as (typeof SANDBOX_ORDER)[number]);
+    const left = SANDBOX_ORDER.indexOf(
+      oldSandbox as (typeof SANDBOX_ORDER)[number],
+    );
+    const right = SANDBOX_ORDER.indexOf(
+      newSandbox as (typeof SANDBOX_ORDER)[number],
+    );
     if (left < 0 || right < 0) unresolved.push("Unrecognized sandbox mode");
     else if (left !== right)
-      signals.push(right > left ? "broader-configured-sandbox" : "narrower-configured-sandbox");
+      signals.push(
+        right > left
+          ? "broader-configured-sandbox"
+          : "narrower-configured-sandbox",
+      );
   }
   if (oldApproval === undefined || newApproval === undefined) {
     unresolved.push("Approval policy not explicit in both revisions");
@@ -72,11 +84,19 @@ export function reviewCodexPosture(
   const newNetwork = after.values[networkKey];
   if (oldSandbox === "workspace-write" && newSandbox === "workspace-write") {
     if (typeof oldNetwork !== "boolean" || typeof newNetwork !== "boolean")
-      unresolved.push("Workspace network setting not explicit in both revisions");
+      unresolved.push(
+        "Workspace network setting not explicit in both revisions",
+      );
     else if (oldNetwork !== newNetwork)
-      signals.push(newNetwork ? "broader-configured-sandbox" : "narrower-configured-sandbox");
+      signals.push(
+        newNetwork
+          ? "broader-configured-sandbox"
+          : "narrower-configured-sandbox",
+      );
   } else if (oldNetwork !== newNetwork) {
-    unresolved.push("Workspace network setting changed outside a stable workspace-write mode");
+    unresolved.push(
+      "Workspace network setting changed outside a stable workspace-write mode",
+    );
   }
 
   // Treat temporary-directory exclusions as coverage-only. Their actual
