@@ -355,6 +355,7 @@ test("package: installed ESM exports, declarations and executable bin work witho
   assert.equal(pkg.exports["./git-reader"], undefined);
   assert.equal(pkg.exports["./claude-model-adapter"], undefined);
   assert.ok(existsSync(join(pkgRoot, "dist/provider-adapter.js")));
+  assert.ok(existsSync(join(pkgRoot, "dist/permission-sources.js")));
   assert.deepEqual(pkg.dependencies ?? {}, {});
   assert.ok(!existsSync(join(pkgRoot, "src")));
   assert.ok(read(installed).startsWith("#!/usr/bin/env node\n"));
@@ -377,7 +378,7 @@ test("package: installed ESM exports, declarations and executable bin work witho
   assert.doesNotMatch(read(join(pkgRoot, "dist/index.js")), /provider-adapter/);
   writeFileSync(
     join(consumer, "verify.mjs"),
-    `import assert from "node:assert/strict"; import * as api from "rulewitness"; for (const name of ["readPolicy","parsePolicy","evaluate","scanPolicy","comparePolicies","formatHuman","severity","formatMarkdown","explainFinding","validateWitness","comparisonOutcome","comparisonExitCode","assessComparisonGate","parseTestConfig","readTestConfig","runPolicyTests","relevantIssues"]) assert.equal(typeof api[name], "function"); const p=api.parsePolicy("r",{}); assert.equal(api.scanPolicy(p).complete,false); const t=api.runPolicyTests(p,api.parseTestConfig(JSON.stringify({schemaVersion:1,cases:[{name:"unknown",tool:"Bash",input:"npm test",expected:"UNKNOWN"}]}))); assert.equal(t.passed,false); console.log("installed exports passed");`,
+    `import assert from "node:assert/strict"; import * as api from "rulewitness"; for (const name of ["readPolicy","parsePolicy","evaluate","scanPolicy","comparePolicies","formatHuman","severity","formatMarkdown","explainFinding","validateWitness","comparisonOutcome","comparisonExitCode","assessComparisonGate","parseTestConfig","readTestConfig","runPolicyTests","relevantIssues"]) assert.equal(typeof api[name], "function"); const p=api.parsePolicy("r",{}); assert.equal(api.scanPolicy(p).complete,false); assert.equal(typeof api.inventoryPermissionSources,"function"); assert.equal(typeof api.comparePermissionSources,"function"); const source=api.inventoryPermissionSources(p); assert.equal(source.runtimeVerified,false); assert.equal(api.comparePermissionSources(source,source).runtimeEquivalent,false); const t=api.runPolicyTests(p,api.parseTestConfig(JSON.stringify({schemaVersion:1,cases:[{name:"unknown",tool:"Bash",input:"npm test",expected:"UNKNOWN"}]}))); assert.equal(t.passed,false); console.log("installed exports passed");`,
   );
   assert.match(
     execFileSync(process.execPath, ["verify.mjs"], {
