@@ -28,9 +28,3 @@ jobs:
         run: npm install --global --ignore-scripts --no-audit --no-fund --prefer-online rulewitness@0.4.0-rc.2
       - name: Verify real npm CLI against isolated Git commit fixtures
         run: node test/codex-npm-e2e.mjs
-      - name: Temporary Markdown formatting diagnostic
-        if: always()
-        run: |
-          npm ci --ignore-scripts --no-audit --no-fund
-          npx prettier --write docs/codex-consumer-validation.md
-          git diff -- docs/codex-consumer-validation.md
