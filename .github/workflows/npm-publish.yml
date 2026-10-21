@@ -91,10 +91,12 @@ jobs:
             *) EXPECTED_TAG=latest ;;
           esac
           export VERSION EXPECTED_TAG
-          # npm registry reads may lag after publish; retries never republish.
-          for attempt in 1 2 3 4 5 6; do
-            if npm view "rulewitness@$VERSION" version --json --registry="$REGISTRY_URL" > "$RUNNER_TEMP/published-version.json" &&
-               npm view rulewitness dist-tags --json --registry="$REGISTRY_URL" > "$RUNNER_TEMP/rulewitness-tags-after.json" &&
+          # Registry metadata propagation exceeded one minute for rc.2.
+          # Retry read-only verification for up to four minutes; NEVER republish.
+          # Isolate npm view cache so stale 404s cannot persist across attempts.
+          for attempt in $(seq 1 24); do
+            if npm view "rulewitness@$VERSION" version --json --registry="$REGISTRY_URL" --cache="$RUNNER_TEMP/npm-verification-cache" --prefer-online > "$RUNNER_TEMP/published-version.json" &&
+               npm view rulewitness dist-tags --json --registry="$REGISTRY_URL" --cache="$RUNNER_TEMP/npm-verification-cache" --prefer-online > "$RUNNER_TEMP/rulewitness-tags-after.json" &&
                node --input-type=module -e '
                  import fs from "node:fs";
                  const temp = process.env.RUNNER_TEMP;
@@ -111,7 +113,7 @@ jobs:
               echo "Verified rulewitness@$VERSION on npm dist-tag $EXPECTED_TAG"
               exit 0
             fi
-            echo "npm registry has not converged (attempt $attempt/6)"
+            echo "npm registry has not converged (attempt $attempt/24)"
             sleep 10
           done
           echo "Published package could not be verified against npm registry" >&2
