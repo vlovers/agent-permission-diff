@@ -20,6 +20,8 @@ The **v0.4.0-rc.1 prerelease** is available on [GitHub](https://github.com/vlove
 
 For TypeScript integrations that need to track explicit live-session assumptions without claiming runtime authorization, see the [opt-in session-context evaluator](docs/session-context.md). For reproducible source provenance and inspection of changes in _which configuration layers are known_, see the [permission-source inventory API](docs/permission-source-provenance.md) and the [conservative source-aware evaluator](docs/source-aware-evaluation.md). This inventory never computes live precedence or proves effective permissions. This is separate from the existing CLI and JSON v1 report contract.
 
+An [experimental Codex project-config posture inventory](docs/codex-posture-experimental.md) is available for opt-in TypeScript consumers. It is **not** Codex effective permission analysis and does not alter Claude Code CLI behavior.
+
 ## Installation and quick start
 
 Requires **Node.js 24** and Git supporting `--no-lazy-fetch` (documented in Git 2.47+). Local macOS is tested; Linux is exercised by CI. Windows execution/symlinks are not validated.
