@@ -30,8 +30,10 @@ export interface ContextualEvaluation {
 
 const causes: Record<keyof SessionContext, string> = {
   projectTrust: "Project trust is not established for the inspected session",
-  permissionMode: "The live permission mode is not established as default/manual",
-  externalInfluences: "External settings, hooks or runtime approvals are unresolved",
+  permissionMode:
+    "The live permission mode is not established as default/manual",
+  externalInfluences:
+    "External settings, hooks or runtime approvals are unresolved",
 };
 
 export function evaluateWithContext(
@@ -50,11 +52,13 @@ export function evaluateWithContext(
     throw new Error("Invalid explicit session context");
   }
   const modeled = evaluate(policy, tool, input);
-  const unresolved = ([
-    ["projectTrust", context.projectTrust !== "trusted"],
-    ["permissionMode", context.permissionMode !== "default"],
-    ["externalInfluences", context.externalInfluences !== "none"],
-  ] as const)
+  const unresolved = (
+    [
+      ["projectTrust", context.projectTrust !== "trusted"],
+      ["permissionMode", context.permissionMode !== "default"],
+      ["externalInfluences", context.externalInfluences !== "none"],
+    ] as const
+  )
     .filter(([, unresolved]) => unresolved)
     .map(([name]) => name);
   if (unresolved.length === 0)
