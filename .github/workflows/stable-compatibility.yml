@@ -4,6 +4,7 @@ on:
     paths:
       - "src/**"
       - "test/stable-compatibility-e2e.mjs"
+      - "test/stable-types-compatibility.mjs"
       - ".github/workflows/stable-compatibility.yml"
       - "package.json"
       - "package-lock.json"
@@ -37,4 +38,6 @@ jobs:
       - name: Verify stable API and CLI decisions against candidate
         env:
           RULEWITNESS_STABLE_ROOT: ${{ runner.temp }}/rulewitness-v03
-        run: node test/stable-compatibility-e2e.mjs
+        run: |
+          node test/stable-compatibility-e2e.mjs
+          node test/stable-types-compatibility.mjs
