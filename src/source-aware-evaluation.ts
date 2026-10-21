@@ -5,7 +5,10 @@ import type {
   PermissionSourceInventory,
   PermissionSourceKind,
 } from "./permission-sources.ts";
-import type { ContextualEvaluation, SessionContext } from "./session-context.ts";
+import type {
+  ContextualEvaluation,
+  SessionContext,
+} from "./session-context.ts";
 import type { Evaluation, Policy } from "./types.ts";
 
 /**
@@ -43,17 +46,20 @@ export function evaluateWithSources(
     throw new Error("Invalid explicit session context");
 
   const modeled = evaluate(policy, tool, input);
-  const unresolved = ([
-    ["projectTrust", context.projectTrust !== "trusted"],
-    ["permissionMode", context.permissionMode !== "default"],
-    ["externalInfluences", context.externalInfluences !== "none"],
-  ] as const)
+  const unresolved = (
+    [
+      ["projectTrust", context.projectTrust !== "trusted"],
+      ["permissionMode", context.permissionMode !== "default"],
+      ["externalInfluences", context.externalInfluences !== "none"],
+    ] as const
+  )
     .filter(([, missing]) => missing)
     .map(([key]) => key);
   const unresolvedSources = inventory.sources
-    .filter((source) =>
-      source.availability === "unknown" ||
-      source.availability === "present-uninspected",
+    .filter(
+      (source) =>
+        source.availability === "unknown" ||
+        source.availability === "present-uninspected",
     )
     .map((source) => source.kind);
 
@@ -75,7 +81,9 @@ export function evaluateWithSources(
   if (unresolved.includes("externalInfluences"))
     parts.push("External influences are not ruled out");
   if (unresolvedSources.length)
-    parts.push("Uninspected permission sources: " + unresolvedSources.join(", "));
+    parts.push(
+      "Uninspected permission sources: " + unresolvedSources.join(", "),
+    );
   const contextual: Evaluation = {
     decision: "UNKNOWN",
     reason: parts.join("; "),
