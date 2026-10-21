@@ -16,7 +16,7 @@ test("release candidate: package and lockfile agree on name and version", () => 
   assert.equal(root.name, pkg.name);
   assert.equal(lock.version, pkg.version);
   assert.equal(root.version, pkg.version);
-  assert.match(String(pkg.version), /^0\.4\.0-rc\.1$/);
+  assert.match(String(pkg.version), /^0\.4\.0-rc\.2$/);
 });
 
 test("release candidate: publish trigger is not a PR merge", () => {

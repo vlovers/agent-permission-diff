@@ -2,7 +2,7 @@
 
 All notable changes are documented here. Entries marked **Unreleased** describe repository code, not a published npm version.
 
-## Unreleased — changes after v0.4.0-rc.1
+## 0.4.0-rc.2 — release candidate (not published)
 
 ### Claude Code review and developer experience
 
@@ -19,8 +19,8 @@ All notable changes are documented here. Entries marked **Unreleased** describe 
 
 ### Release preparation
 
-- Existing package.json version `0.4.0-rc.1` is **already published**, so these Unreleased changes must not be published under that version.
-- Next release requires a new approved version, matching lockfile, green CI, exact package inspection and explicit GitHub Release decision.
+- The v0.4.0-rc.1 version has already been used. This release candidate uses the separate v0.4.0-rc.2 version, pending registry verification and explicit maintainer authorization.
+- Publishing requires a matching lockfile, green CI, exact package inspection and a separate explicit GitHub Release decision.
 
 ## 0.4.0-rc.1 — published 2026-10-20
 
