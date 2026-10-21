@@ -22,6 +22,8 @@ For TypeScript integrations that need to track explicit live-session assumptions
 
 An [experimental Codex project-config posture inventory](docs/codex-posture-experimental.md) is available for opt-in TypeScript consumers. It is **not** Codex effective permission analysis and does not alter Claude Code CLI behavior.
 
+For pull-request automation, see the [fork-safe GitHub Actions integration](docs/github-actions-integration.md). Its currently runnable template uses the published stable Claude Code analyzer; experimental Codex review commands are not yet published in that stable package.
+
 ## Installation and quick start
 
 Requires **Node.js 24** and Git supporting `--no-lazy-fetch` (documented in Git 2.47+). Local macOS is tested; Linux is exercised by CI. Windows execution/symlinks are not validated.
