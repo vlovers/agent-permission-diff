@@ -1,3 +1,5 @@
+import { reviewCodexPosture } from "./codex-posture-review.ts";
+import type { CodexPostureReview } from "./codex-posture-review.ts";
 import { gitEntry, readOnlyGit } from "./git-reader.ts";
 import { compareCodexPosture, inspectCodexPosture } from "./codex-posture.ts";
 import type { CodexPosture, CodexPostureComparison } from "./codex-posture.ts";
@@ -102,4 +104,18 @@ export function compareTrackedCodexPosture(
     uncertain: posture.uncertain || !before.present || !after.present,
     runtimePermissionDiff: false,
   };
+}
+
+/** Add a conservative, conditional posture review to an exact-Git comparison. */
+export function reviewTrackedCodexPosture(
+  repository: string,
+  beforeRef: string,
+  afterRef: string,
+): { comparison: TrackedCodexPostureComparison; review: CodexPostureReview } {
+  const comparison = compareTrackedCodexPosture(repository, beforeRef, afterRef);
+  const review = reviewCodexPosture(
+    comparison.before.posture,
+    comparison.after.posture,
+  );
+  return { comparison, review };
 }
