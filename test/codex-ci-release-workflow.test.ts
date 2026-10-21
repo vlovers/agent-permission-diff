@@ -52,3 +52,14 @@ test("Codex CI example: unverified runtime and unknown must never silently pass"
   assert.match(codex, /if \(changed > 0\) process\.exit\(1\)/);
   assert.match(codex, /GITHUB_STEP_SUMMARY/);
 });
+
+test("release history: published rc.2 is not represented as an unpublished candidate", () => {
+  const changelog = readFileSync("CHANGELOG.md", "utf8");
+  const notes = readFileSync("docs/release-v0.4.0-rc.2.md", "utf8");
+  const readiness = readFileSync("docs/release-readiness-v0.4.md", "utf8");
+  assert.match(changelog, /## 0\\.4\\.0-rc\\.2 — published 2026-10-21/);
+  assert.match(notes, /Status: published on 2026-10-21/);
+  assert.doesNotMatch(notes, /Status: candidate only\\. Not published/);
+  assert.match(readiness, /immutable rc\\.2/);
+  assert.match(notes, /never republish the immutable rc\\.2 package/);
+});
