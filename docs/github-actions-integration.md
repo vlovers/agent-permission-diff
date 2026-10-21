@@ -17,9 +17,9 @@ The report is not automatically posted as a PR comment; this avoids giving untru
 
 ## Version boundaries
 
-The stable analyzer currently published for this workflow is `rulewitness@0.3.0`. The repository's experimental `codex-posture` and `codex-review` commands are **not included in the stable package** and must not be advertised as working in a workflow that installs v0.3.0. **Do not replace the pin with `latest` or a branch source** to gain those commands. Publish and validate a new package version through the release workflow before offering a Codex CI template.
+The existing Claude workflow deliberately installs stable `rulewitness@0.3.0`. Experimental `codex-posture` and `codex-review` commands were published in `rulewitness@0.4.0-rc.2` on npm `next`. **They do not exist in stable v0.3.0.** Never use the unpinned `latest` tag or execute PR-branch code to gain those commands.
 
-Codex changes in the development branch concern _configured posture_, not effective permissions: an approval or sandbox setting does not prove a concrete command can execute in the live agent. A future released Codex job should use a separately pinned published version, maintain `runtimeVerified: false`, handle `uncertain` independently, and must not be used as the Claude severity gate.
+Codex changes in the development branch concern _configured posture_, not effective permissions: an approval or sandbox setting does not prove a concrete command can execute in the live agent. Use the [standalone Codex configured-posture PR example](../examples/github-actions/codex-posture-pr.yml) for an explicitly pinned `rulewitness@0.4.0-rc.2` job. This is an experimental and **separate** check: it requires `runtimeVerified: false`, fails on uncertainty and flagged changes, and is not a Claude severity gate. Copy it into the target repository's `.github/workflows/` directory; do not enable it automatically in RuleWitness itself.
 
 ## Threat model and maintenance
 
@@ -39,3 +39,7 @@ Example outcomes in the Actions summary:
 | `3`           | Uncertain gate; manual review needed             | Fail   |
 
 This integration remains offline with respect to the inspected Git policy. Installing the published analyzer accesses the npm registry, but analyzed configuration never triggers its own code execution.
+
+## npm publication verification
+
+The `v0.4.0-rc.2` publish command succeeded on 2026-10-21, but the original workflow exhausted six metadata reads returning `404` before the registry propagated. A later independent `npm view` confirmed `0.4.0-rc.2`, `next: 0.4.0-rc.2`, and the unchanged `latest: 0.3.0`. **Do not rerun `npm publish` for that immutable package version.** The release workflow now allows up to 24 read-only verification attempts, uses `--prefer-online`, and preserves the `latest` tag invariant.
