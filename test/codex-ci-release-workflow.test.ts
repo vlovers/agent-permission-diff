@@ -3,10 +3,15 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const publish = readFileSync(".github/workflows/npm-publish.yml", "utf8");
-const codex = readFileSync("examples/github-actions/codex-posture-pr.yml", "utf8");
+const codex = readFileSync(
+  "examples/github-actions/codex-posture-pr.yml",
+  "utf8",
+);
 
 test("postpublish: retries reads only, preserving OIDC and prerelease tags", () => {
-  const verification = publish.split("- name: Verify published version and registry dist-tags")[1];
+  const verification = publish.split(
+    "- name: Verify published version and registry dist-tags",
+  )[1];
   assert.ok(verification);
   assert.match(verification, /seq 1 24/);
   assert.match(verification, /--prefer-online/);
@@ -26,7 +31,10 @@ test("Codex CI example: fork-safe trusted package and no checkout head execution
   assert.match(codex, /persist-credentials: false/);
   assert.match(codex, /fetch-depth: 0/);
   assert.match(codex, /setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1/);
-  assert.match(codex, /npm install --global --ignore-scripts --no-audit --no-fund rulewitness@0\.4\.0-rc\.2/);
+  assert.match(
+    codex,
+    /npm install --global --ignore-scripts --no-audit --no-fund rulewitness@0\.4\.0-rc\.2/,
+  );
   assert.match(codex, /github\.event\.pull_request\.base\.sha/);
   assert.match(codex, /github\.event\.pull_request\.head\.sha/);
   assert.match(codex, /git cat-file -e/);
