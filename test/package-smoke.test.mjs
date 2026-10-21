@@ -846,3 +846,53 @@ test("package: installed Codex posture and review commands report configured cha
   assert.equal(unknown.review.runtimeVerified, false);
   assert.deepEqual(unknown.comparison.posture.changes, []);
 });
+
+test("package: stable v0.3.0 public runtime exports remain available to installed consumers", () => {
+  // Snapshot from the v0.3.0 src/index.ts public export declarations.
+  // Additive experimental exports do not change this backwards compatibility gate.
+  const baseline = [
+    "parsePolicy",
+    "evaluate",
+    "relevantIssues",
+    "SETTINGS_FILES",
+    "readPolicy",
+    "comparePolicies",
+    "scanPolicy",
+    "severity",
+    "formatHuman",
+    "formatMarkdown",
+    "formatPullRequestMarkdown",
+    "explainFinding",
+    "validateWitness",
+    "comparisonOutcome",
+    "comparisonExitCode",
+    "assessComparisonGate",
+    "hasUncertainty",
+    "LIMITATIONS",
+    "parseTestConfig",
+    "readTestConfig",
+    "runPolicyTests",
+  ];
+  writeFileSync(
+    join(consumer, "verify-v03-exports.mjs"),
+    `import * as api from "rulewitness";
+const expected = ${JSON.stringify(baseline)};
+const missing = expected.filter((name) => !Object.hasOwn(api, name));
+if (missing.length) {
+  console.error("Removed v0.3.0 public exports: " + missing.join(", "));
+  process.exit(1);
+}
+for (const name of expected.filter((name) => !["SETTINGS_FILES", "LIMITATIONS"].includes(name))) {
+  if (typeof api[name] !== "function") throw new Error("Changed callable export: " + name);
+}
+console.log("Stable v0.3.0 runtime exports available");`,
+  );
+  assert.match(
+    execFileSync(process.execPath, ["verify-v03-exports.mjs"], {
+      cwd: consumer,
+      encoding: "utf8",
+      env,
+    }),
+    /Stable v0\.3\.0 runtime exports available/,
+  );
+});
