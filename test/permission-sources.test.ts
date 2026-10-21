@@ -44,7 +44,8 @@ test("sources: absence in Git does not prove absence in the live session", () =>
     "unknown",
   );
   assert.equal(
-    inventory.sources.find((item) => item.kind === "project-local")?.availability,
+    inventory.sources.find((item) => item.kind === "project-local")
+      ?.availability,
     "unknown",
   );
   assert.equal(inventory.runtimeVerified, false);
@@ -57,7 +58,10 @@ test("sources: external caller facts remain explicit, bounded and deterministic"
     { kind: "hooks", availability: "unknown" },
   ];
   const a = inventoryPermissionSources(p({ [shared]: settings }), facts);
-  const b = inventoryPermissionSources(p({ [shared]: settings }), [...facts].reverse());
+  const b = inventoryPermissionSources(
+    p({ [shared]: settings }),
+    [...facts].reverse(),
+  );
   assert.deepEqual(a, b);
   assert.equal(
     a.sources.find((item) => item.kind === "managed")?.availability,
@@ -79,9 +83,7 @@ test("sources: Git marker may not be overridden or marked absent", () => {
   ] as const) {
     assert.throws(
       () =>
-        inventoryPermissionSources(policy, [
-          { kind: "project", availability },
-        ]),
+        inventoryPermissionSources(policy, [{ kind: "project", availability }]),
       /Tracked source facts cannot be overridden|External source cannot claim to have been inspected/,
     );
   }
@@ -98,8 +100,7 @@ test("sources: reject malformed, duplicate, and unbounded facts without leaking 
   ];
   for (const value of invalid) {
     assert.throws(
-      () =>
-        inventoryPermissionSources(policy, [value as PermissionSource]),
+      () => inventoryPermissionSources(policy, [value as PermissionSource]),
       /Invalid|External source/,
     );
   }
