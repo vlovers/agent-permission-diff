@@ -1,0 +1,69 @@
+name: RuleWitness experimental Codex posture review
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  codex-posture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout generated pull-request merge commit (inert evidence only)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Setup Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Install published experimental reviewer (no PR scripts)
+        run: npm install --global --ignore-scripts --no-audit --no-fund rulewitness@0.4.0-rc.2
+      - name: Compare exact Git commits (configured posture only)
+        id: codex
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          set -eu
+          git cat-file -e "${BASE_SHA}^{commit}"
+          git cat-file -e "${HEAD_SHA}^{commit}"
+          rulewitness codex-review "$BASE_SHA" "$HEAD_SHA" --json > "$RUNNER_TEMP/codex-posture.json"
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const report = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + "/codex-posture.json", "utf8"));
+            if (report.review?.runtimeVerified !== false ||
+                report.review?.runtimePermissionDiff !== false ||
+                report.comparison?.runtimePermissionDiff !== false) {
+              console.error("Unexpected Codex runtime-permission claim");
+              process.exit(2);
+            }
+            const direction = report.review.direction;
+            const changed = report.comparison.posture.changes.length;
+            const unknown = report.comparison.uncertain || report.review.unresolved.length > 0 ||
+              direction === "unknown";
+            const outcomes = new Set([
+              "broader-configured-sandbox", "narrower-configured-sandbox",
+              "fewer-approval-prompts", "more-approval-prompts", "mixed", "unchanged", "unknown",
+            ]);
+            if (!outcomes.has(direction)) process.exit(2);
+            const summary = [
+              "### RuleWitness Codex configured-posture review",
+              "Direction: " + direction,
+              "Recognized setting transitions: " + changed,
+              "Runtime permission verification: **not performed**",
+              "Configuration precedence, trust and ambient settings: **not established**",
+            ];
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary.join("\n") + "\n");
+            if (unknown) process.exit(3);
+            if (changed > 0) process.exit(1);
+          '
+      - name: Summarize incomplete analysis
+        if: failure()
+        shell: bash
+        run: |
+          printf '%s\n' 'Codex posture review flagged a modeled configuration change, uncertainty or an analysis failure. See the review step.' >> "$GITHUB_STEP_SUMMARY"
