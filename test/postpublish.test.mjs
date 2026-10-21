@@ -39,7 +39,11 @@ test("postpublish: stable versions must target latest", () => {
 test("postpublish: reject registry lag and changed prerelease tags", () => {
   assert.throws(() => verifyPublishedPackage(candidate, {}, metadata));
   assert.throws(() =>
-    verifyPublishedPackage(candidate, { latest: candidate.version, next: candidate.version }, metadata),
+    verifyPublishedPackage(
+      candidate,
+      { latest: candidate.version, next: candidate.version },
+      metadata,
+    ),
   );
   assert.throws(() =>
     verifyPublishedPackage(candidate, { latest: "0.3.0", next: "0.4.0-rc.2" }, metadata),
