@@ -1,0 +1,57 @@
+name: Read-only npm release audit
+on:
+  pull_request:
+    paths:
+      - .github/workflows/read-only-release-audit.yml
+      - package.json
+      - package-lock.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  registry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Read npm registry metadata without publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          registry=https://registry.npmjs.org/
+          npm view rulewitness versions --json --registry="$registry" --prefer-online --cache="$RUNNER_TEMP/release-audit-cache" > "$RUNNER_TEMP/versions.json"
+          npm view rulewitness dist-tags --json --registry="$registry" --prefer-online --cache="$RUNNER_TEMP/release-audit-cache" > "$RUNNER_TEMP/tags.json"
+          npm view rulewitness@0.4.0-rc.2 dist.integrity --json --registry="$registry" --prefer-online --cache="$RUNNER_TEMP/release-audit-cache" > "$RUNNER_TEMP/rc-integrity.json"
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const path = process.env.RUNNER_TEMP;
+            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            const lock = JSON.parse(fs.readFileSync("package-lock.json", "utf8"));
+            const versions = JSON.parse(fs.readFileSync(path + "/versions.json", "utf8"));
+            const tags = JSON.parse(fs.readFileSync(path + "/tags.json", "utf8"));
+            const integrity = JSON.parse(fs.readFileSync(path + "/rc-integrity.json", "utf8"));
+            if (pkg.name !== "rulewitness" || lock.name !== pkg.name ||
+                lock.version !== pkg.version || lock.packages?.[""]?.name !== pkg.name ||
+                lock.packages?.[""]?.version !== pkg.version) throw Error("Package/lockfile disagreement");
+            if (!Array.isArray(versions) || !versions.includes("0.3.0") ||
+                !versions.includes("0.4.0-rc.2") || versions.includes("0.4.0")) {
+              throw Error("Unexpected published version set or stable 0.4.0 already exists");
+            }
+            if (tags.latest !== "0.3.0" || tags.next !== "0.4.0-rc.2") {
+              throw Error("Unexpected npm latest/next dist-tags");
+            }
+            if (typeof integrity !== "string" || !integrity.startsWith("sha512-")) {
+              throw Error("Missing prerelease npm integrity");
+            }
+            console.log("Registry audit PASS: latest=" + tags.latest + ", next=" + tags.next);
+            console.log("Published 0.4.0: no; source candidate: " + pkg.version);
+            console.log("rc.2 immutable integrity: " + integrity);
+          '
