@@ -242,6 +242,18 @@ before(() => {
   manifest = JSON.parse(
     npm(["pack", "--pack-destination", temporary, ...options]),
   )[0];
+  // Supply pinned runtime dependencies as local tarballs: consumer installs
+  // remain offline and cannot contact a registry while replaying fixtures.
+  const dependencyTarball = JSON.parse(
+    npm([
+      "pack",
+      join(root, "node_modules/smol-toml"),
+      "--pack-destination",
+      temporary,
+      "--json",
+      "--ignore-scripts",
+    ]),
+  )[0].filename;
   consumer = mkdtempSync(join(tmpdir(), "rulewitness-consumer-"));
   assert.ok(
     !consumer.startsWith(root + "/"),
@@ -259,8 +271,9 @@ before(() => {
       "--no-audit",
       "--no-fund",
       "--package-lock=false",
-      // The independent temporary pack cache cannot contain newly pinned
-      // runtime dependencies. Reuse npm ci\u0027s populated local cache in offline mode.
+      "--cache",
+      join(temporary, "npm-cache"),
+      join(temporary, dependencyTarball),
       join(temporary, manifest.filename),
     ],
     consumer,
