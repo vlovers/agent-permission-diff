@@ -824,7 +824,10 @@ test("package: installed Codex posture and review commands report configured cha
   assert.equal(review.review.runtimePermissionDiff, false);
 
   const unsupported = repository("codex-packed-unknown", [
-    { ".codex/config.toml": 'approval_policy = "never"\nsandbox_mode = "read-only"' },
+    {
+      ".codex/config.toml":
+        'approval_policy = "never"\nsandbox_mode = "read-only"',
+    },
     {
       ".codex/config.toml":
         'approval_policy = "never"\nsandbox_mode = "danger-full-access"\n[profiles.production]\napproval_policy = "never"',
