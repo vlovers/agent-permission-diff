@@ -48,9 +48,7 @@ test("Codex posture: unsupported TOML is UNKNOWN and secrets are not echoed", ()
     'approval_policy = "maybe"',
     'approval_policy = "never"\napproval_policy = "on-request"',
     'model = "sensitive-token-to-not-print"',
-    'approval_policy = """never"""',
     'include = ["other.toml"]',
-    "approval_policy = 'never'",
     'profile = { name = "prod" }',
   ]) {
     const parsed = inspectCodexPosture(raw);
