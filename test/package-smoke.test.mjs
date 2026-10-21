@@ -1003,7 +1003,7 @@ test("package: Claude comparison decisions and gates agree across JSON, Markdown
       ),
       name + ": evidence revisions",
     );
-    assert.match(human.stdout, /runtime behavior remains unverified/, name);
+    assert.match(human.stdout, /runtime authorization is not guaranteed/, name);
     assert.match(markdown.stdout, /runtime/i, name);
   }
 });
