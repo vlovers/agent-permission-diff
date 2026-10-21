@@ -1,0 +1,30 @@
+name: Codex published-package E2E
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/codex-npm-e2e.yml"
+      - "examples/github-actions/codex-posture-pr.yml"
+      - "docs/github-actions-integration.md"
+      - "docs/codex-posture-experimental.md"
+      - "test/codex-npm-e2e.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  published-codex-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Install immutable published candidate without lifecycle scripts
+        run: npm install --global --ignore-scripts --no-audit --no-fund --prefer-online rulewitness@0.4.0-rc.2
+      - name: Verify real npm CLI against isolated Git commit fixtures
+        run: node test/codex-npm-e2e.mjs
