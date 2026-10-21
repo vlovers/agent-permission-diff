@@ -6,13 +6,18 @@
  * Only a deliberately restricted, unambiguous TOML subset is accepted;
  * other syntax produces UNKNOWN instead of guessing a value.
  */
-export type CodexPostureKey = "approval_policy" | "sandbox_mode";
+export type CodexPostureKey =
+  | "approval_policy"
+  | "sandbox_mode"
+  | "sandbox_workspace_write.network_access";
 export type CodexPostureValue =
   | "on-request"
   | "never"
   | "read-only"
   | "workspace-write"
-  | "danger-full-access";
+  | "danger-full-access"
+  | true
+  | false;
 export interface CodexPosture {
   schemaVersion: 1;
   provider: "codex";
@@ -35,8 +40,13 @@ export interface CodexPostureComparison {
 const values: Record<CodexPostureKey, readonly string[]> = {
   approval_policy: ["on-request", "never"],
   sandbox_mode: ["read-only", "workspace-write", "danger-full-access"],
+  "sandbox_workspace_write.network_access": ["true", "false"],
 };
-const keys = ["approval_policy", "sandbox_mode"] as const;
+const keys = [
+  "approval_policy",
+  "sandbox_mode",
+  "sandbox_workspace_write.network_access",
+] as const;
 const MAX_LENGTH = 64 * 1024;
 export function inspectCodexPosture(content: string): CodexPosture {
   if (
@@ -54,31 +64,37 @@ export function inspectCodexPosture(content: string): CodexPosture {
   };
   const issues: string[] = [];
   const seen = new Set<string>();
-  let table = false;
+  let section: "root" | "sandbox_workspace_write" | "unsupported" = "root";
   for (const [i, raw] of content.split(/\r?\n/).entries()) {
     const line = raw.trim();
     if (!line || line.startsWith("#")) continue;
     if (line.startsWith("[")) {
-      table = true;
-      issues.push("TOML tables not interpreted (line " + (i + 1) + ")");
+      if (line === "[sandbox_workspace_write]" && section === "root") {
+        section = "sandbox_workspace_write";
+      } else {
+        section = "unsupported";
+        issues.push("Unsupported TOML table (line " + (i + 1) + ")");
+      }
       continue;
     }
     const match =
-      /^([A-Za-z_][A-Za-z_0-9]*)\s*=\s*"([A-Za-z0-9-]+)"(?:\s*#.*)?$/.exec(
+      /^([A-Za-z_][A-Za-z_0-9]*)\s*=\s*(?:"([A-Za-z0-9-]+)"|(true|false))(?:\s*#.*)?$/.exec(
         line,
       );
     if (!match) {
       issues.push("Unsupported TOML syntax (line " + (i + 1) + ")");
       continue;
     }
-    const key = match[1]!,
-      value = match[2]!;
+    const key = section === "sandbox_workspace_write"
+      ? `sandbox_workspace_write.${match[1]!}`
+      : match[1]!;
+    const value = match[2] ?? match[3]!;
     if (seen.has(key)) {
       issues.push("Duplicate TOML key (line " + (i + 1) + ")");
       continue;
     }
     seen.add(key);
-    if (table) {
+    if (section === "unsupported") {
       issues.push("Nested TOML setting not interpreted (line " + (i + 1) + ")");
       continue;
     }
@@ -86,11 +102,19 @@ export function inspectCodexPosture(content: string): CodexPosture {
       issues.push("Other Codex setting not interpreted (line " + (i + 1) + ")");
       continue;
     }
-    if (!values[key as CodexPostureKey].includes(value)) {
+    if (
+      !values[key as CodexPostureKey].includes(value) ||
+      (key === "sandbox_workspace_write.network_access"
+        ? match[3] === undefined
+        : match[2] === undefined)
+    ) {
       issues.push("Unsupported Codex setting value (line " + (i + 1) + ")");
       continue;
     }
-    result.values[key as CodexPostureKey] = value as CodexPostureValue;
+    result.values[key as CodexPostureKey] =
+      key === "sandbox_workspace_write.network_access"
+        ? value === "true"
+        : (value as CodexPostureValue);
   }
   // Unsupported syntax could affect actual parsing of the file. Do not
   // present a partially parsed policy as a known posture.
