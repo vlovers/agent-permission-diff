@@ -1,0 +1,41 @@
+# Review AI agent configuration changes in GitHub pull requests
+
+RuleWitness runs on **Git objects**, not the checked-out working tree. The supported stable GitHub Action integration uses the publicly released `rulewitness@0.3.0` and audits the bounded Claude Code permission-rule model.
+
+## Copy-paste integration for Claude Code
+
+Copy the repository's audited [workflow](../.github/workflows/rulewitness-pr.yml) to `.github/workflows/rulewitness-pr.yml` in the target project. It works on `pull_request` including fork PRs, provided the GitHub-created merge ref and both commit objects are available. Required permissions are `contents: read`; no secret or write-capable token is necessary.
+
+The workflow:
+
+1. Checks out the generated PR merge commit with history and `persist-credentials: false`.
+2. Installs the **trusted published analyzer** without install scripts (never `npm ci` or `npm run` from PR source).
+3. Uses `github.event.pull_request.base.sha` and `head.sha` through environment variables, verifies both Git commit objects and compares them without fetching.
+4. Writes Markdown to the job summary on success, known HIGH rule transition, or uncertainty. The check fails on both known HIGH transitions (exit 1) and the conservative uncertainty gate (exit 3). Parse/usage failures exit 2.
+
+The report is not automatically posted as a PR comment; this avoids giving untrusted fork PR workflows write permissions. Review the Actions summary instead. If you change the threshold, `high|medium|low|info` are the documented options for `--fail-on`. Do not replace the workflow trigger with `pull_request_target` or execute scripts from the PR head.
+
+## Version boundaries
+
+The stable analyzer currently published for this workflow is `rulewitness@0.3.0`. The repository's experimental `codex-posture` and `codex-review` commands are **not included in the stable package** and must not be advertised as working in a workflow that installs v0.3.0. **Do not replace the pin with `latest` or a branch source** to gain those commands. Publish and validate a new package version through the release workflow before offering a Codex CI template.
+
+Codex changes in the development branch concern _configured posture_, not effective permissions: an approval or sandbox setting does not prove a concrete command can execute in the live agent. A future released Codex job should use a separately pinned published version, maintain `runtimeVerified: false`, handle `uncertain` independently, and must not be used as the Claude severity gate.
+
+## Threat model and maintenance
+
+- PR-controlled configuration is inert evidence, never executed or evaluated.
+- No `pull_request_target`, branch-name interpolation in Bash, write tokens, Git hooks, checkout of head to execute scripts, remote Git fetching, or npm lifecycle scripts.
+- Even a successful configured-rule review does **not** prove unchanged effective permissions: untracked, user and managed settings, trust and runtime approvals remain outside the model.
+- If Git objects are missing, the job fails analysis rather than silently skipping changes.
+- Test changes to this workflow in this repository and retain the pinned action SHAs. Review the pinned npm package contents for future upgrades.
+
+Example outcomes in the Actions summary:
+
+| Analyzer exit | Meaning                                          | CI job |
+| ------------- | ------------------------------------------------ | ------ |
+| `0`           | No configured-rule finding at the gate threshold | Pass   |
+| `1`           | Known modeled rule transition exceeds threshold  | Fail   |
+| `2`           | Analysis or input error                          | Fail   |
+| `3`           | Uncertain gate; manual review needed             | Fail   |
+
+This integration remains offline with respect to the inspected Git policy. Installing the published analyzer accesses the npm registry, but analyzed configuration never triggers its own code execution.
