@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { verifyPublishedPackage } from "../scripts/verify-published-package.mjs";
+import {
+  verifyPublishedPackage,
+} from "../scripts/verify-published-package.mjs";
 
 const candidate = {
   name: "rulewitness",
