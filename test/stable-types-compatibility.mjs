@@ -8,7 +8,10 @@ import ts from "typescript";
 
 const stablePrefix = process.env.RULEWITNESS_STABLE_ROOT;
 assert.ok(stablePrefix, "Missing stable install prefix");
-const stable = resolve(stablePrefix, "node_modules/rulewitness/dist/index.d.ts");
+const stable = resolve(
+  stablePrefix,
+  "node_modules/rulewitness/dist/index.d.ts",
+);
 const candidate = resolve("dist/index.d.ts");
 const folder = mkdtempSync(join(tmpdir(), "rulewitness-ts-compat-"));
 const fixture = join(folder, "consumer.ts");
@@ -39,7 +42,10 @@ void [scan, decision, gate, policyTests, severity, formatMarkdown,
 try {
   writeFileSync(fixture, consumer);
   let stableExports = [];
-  for (const [label, declarations] of [["published-0.3.0", stable], ["candidate", candidate]]) {
+  for (const [label, declarations] of [
+    ["published-0.3.0", stable],
+    ["candidate", candidate],
+  ]) {
     const options = {
       strict: true,
       noEmit: true,
@@ -53,14 +59,18 @@ try {
     };
     const program = ts.createProgram([fixture], options);
     const diagnostics = ts.getPreEmitDiagnostics(program);
-    const errors = diagnostics.map((d) => ts.flattenDiagnosticMessageText(d.messageText, "\n"));
+    const errors = diagnostics.map((d) =>
+      ts.flattenDiagnosticMessageText(d.messageText, "\n"),
+    );
     assert.deepEqual(errors, [], label + " declaration errors");
     const source = program.getSourceFile(declarations);
     assert.ok(source, label + " declaration entrypoint missing");
     const checker = program.getTypeChecker();
     const moduleSymbol = checker.getSymbolAtLocation(source);
     assert.ok(moduleSymbol, label + " module symbol missing");
-    const names = checker.getExportsOfModule(moduleSymbol).map((symbol) => symbol.getName());
+    const names = checker
+      .getExportsOfModule(moduleSymbol)
+      .map((symbol) => symbol.getName());
     if (label === "published-0.3.0") {
       stableExports = names;
     } else {
