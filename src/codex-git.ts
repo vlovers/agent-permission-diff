@@ -1,8 +1,5 @@
 import { gitEntry, readOnlyGit } from "./git-reader.ts";
-import {
-  compareCodexPosture,
-  inspectCodexPosture,
-} from "./codex-posture.ts";
+import { compareCodexPosture, inspectCodexPosture } from "./codex-posture.ts";
 import type { CodexPosture, CodexPostureComparison } from "./codex-posture.ts";
 
 export interface TrackedCodexPosture {
@@ -34,7 +31,12 @@ export function readTrackedCodexPosture(
   repository: string,
   ref: string,
 ): TrackedCodexPosture {
-  if (!ref || ref.startsWith("-") || ref.length > 1024 || /[\x00-\x1f]/.test(ref))
+  if (
+    !ref ||
+    ref.startsWith("-") ||
+    ref.length > 1024 ||
+    /[\x00-\x1f]/.test(ref)
+  )
     throw new Error("Invalid Git revision");
   const prefix = readOnlyGit(repository, ["rev-parse", "--show-prefix"]);
   if (prefix !== "\n" && prefix !== "\r\n")
@@ -58,12 +60,18 @@ export function readTrackedCodexPosture(
       present: false,
       posture: {
         ...inspectCodexPosture(""),
-        issues: ["No tracked Codex project configuration; runtime state unknown"],
+        issues: [
+          "No tracked Codex project configuration; runtime state unknown",
+        ],
       },
     };
   if (entry.type !== "blob" || !["100644", "100755"].includes(entry.mode))
     throw new Error("Unsafe Codex configuration: expected regular Git blob");
-  const sizeText = readOnlyGit(repository, ["cat-file", "-s", entry.oid]).trim();
+  const sizeText = readOnlyGit(repository, [
+    "cat-file",
+    "-s",
+    entry.oid,
+  ]).trim();
   const size = Number(sizeText);
   if (!Number.isSafeInteger(size) || size < 0 || size > MAX_CONFIG_BYTES)
     throw new Error("Codex configuration exceeds 64 KiB limit");
