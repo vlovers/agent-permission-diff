@@ -135,8 +135,14 @@ test("Codex Git: unsupported TOML stays uncertain without leaking raw values", (
 test("Codex Git: static review is conditional and does not change checkout", () => {
   const root = repository();
   try {
-    const a = commit(root, 'approval_policy="on-request"\nsandbox_mode="read-only"');
-    const b = commit(root, 'approval_policy="on-request"\nsandbox_mode="danger-full-access"');
+    const a = commit(
+      root,
+      'approval_policy="on-request"\nsandbox_mode="read-only"',
+    );
+    const b = commit(
+      root,
+      'approval_policy="on-request"\nsandbox_mode="danger-full-access"',
+    );
     const result = reviewTrackedCodexPosture(root, a, b);
     assert.equal(result.review.direction, "broader-configured-sandbox");
     assert.equal(result.review.runtimeVerified, false);
