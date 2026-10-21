@@ -38,8 +38,3 @@ jobs:
         env:
           RULEWITNESS_STABLE_ROOT: ${{ runner.temp }}/rulewitness-v03
         run: node test/stable-compatibility-e2e.mjs
-      - name: Temporary formatter diagnostics
-        if: always()
-        run: |
-          npx prettier --write test/stable-compatibility-e2e.mjs .github/workflows/stable-compatibility.yml
-          git diff -- test/stable-compatibility-e2e.mjs .github/workflows/stable-compatibility.yml
