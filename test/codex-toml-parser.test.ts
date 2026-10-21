@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { inspectCodexPosture, compareCodexPosture } from "../src/codex-posture.ts";
+import {
+  inspectCodexPosture,
+  compareCodexPosture,
+} from "../src/codex-posture.ts";
 
 test("standards TOML: quotes, dotted keys, comments and reordered tables are semantically equivalent", () => {
   const first = inspectCodexPosture(
@@ -20,7 +23,7 @@ test("standards TOML: unsupported profile and security-relevant fields block con
   for (const raw of [
     '[profiles.production]\napproval_policy = "never"',
     '[sandbox_workspace_write]\nwritable_roots = ["/home"]',
-    'approval_policy = { granular = { rules = true } }',
+    "approval_policy = { granular = { rules = true } }",
     'model = "secret-should-never-echo"\napproval_policy = "never"',
   ]) {
     const snapshot = inspectCodexPosture(raw);
@@ -34,7 +37,7 @@ test("standards TOML: unsupported profile and security-relevant fields block con
 test("standards TOML: duplicate tables and duplicate assignments fail closed", () => {
   for (const raw of [
     'sandbox_mode="read-only"\nsandbox_mode="workspace-write"',
-    '[sandbox_workspace_write]\nnetwork_access=true\n[sandbox_workspace_write]\nnetwork_access=false',
+    "[sandbox_workspace_write]\nnetwork_access=true\n[sandbox_workspace_write]\nnetwork_access=false",
   ]) {
     const snapshot = inspectCodexPosture(raw);
     assert.ok(snapshot.issues.length);
