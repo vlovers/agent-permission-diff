@@ -290,6 +290,7 @@ test("package: dry-run and actual tarball include only documented runtime and do
     "assertions",
     "claude-model-adapter",
     "codex-posture",
+    "codex-posture-review",
     "codex-git",
     "cli",
     "compare",
