@@ -112,7 +112,11 @@ export function reviewTrackedCodexPosture(
   beforeRef: string,
   afterRef: string,
 ): { comparison: TrackedCodexPostureComparison; review: CodexPostureReview } {
-  const comparison = compareTrackedCodexPosture(repository, beforeRef, afterRef);
+  const comparison = compareTrackedCodexPosture(
+    repository,
+    beforeRef,
+    afterRef,
+  );
   const review = reviewCodexPosture(
     comparison.before.posture,
     comparison.after.posture,
