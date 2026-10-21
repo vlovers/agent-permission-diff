@@ -2,7 +2,7 @@
 
 All notable changes are documented here. Entries marked **Unreleased** describe repository code, not a published npm version.
 
-## 0.4.0-rc.2 — release candidate (not published)
+## 0.4.0-rc.2 — published 2026-10-21 (npm `next`, experimental)
 
 ### Claude Code review and developer experience
 
@@ -19,8 +19,9 @@ All notable changes are documented here. Entries marked **Unreleased** describe 
 
 ### Release preparation
 
-- The v0.4.0-rc.1 version has already been used. This release candidate uses the separate v0.4.0-rc.2 version, pending registry verification and explicit maintainer authorization.
-- Publishing requires a matching lockfile, green CI, exact package inspection and a separate explicit GitHub Release decision.
+- Published `0.4.0-rc.2` as a separate immutable npm prerelease under `next`, preserving stable `latest: 0.3.0`; publication was independently verified on 2026-10-21.
+- The original postpublication registry verification exceeded its short retry window. Subsequent PR #60 hardened the read-only verification loop; PRs #61–#63 added published-package and consumer shell-gate CI tests. **None of those postpublication changes are in the rc.2 tarball.**
+- Future stable publication requires a new version, matching lockfile, green CI, package audit and explicit maintainer approval.
 
 ## 0.4.0-rc.1 — published 2026-10-20
 

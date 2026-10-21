@@ -1,6 +1,6 @@
 # RuleWitness v0.4 — release readiness (source audit)
 
-Reviewed: 2026-10-21. **Published prerelease:** `v0.4.0-rc.2` / npm `next` (`rulewitness@0.4.0-rc.2`); **stable `latest`: `0.3.0`**. PR #60 fixed read-only postpublish propagation checks and introduced the experimental Codex consumer workflow. PR #61 verified the published package against isolated exact-Git fixtures in Actions. These changes landed **after** the immutable rc.2 npm package and must not be described as rc.2 tarball contents. [Real consumer PR validation](codex-consumer-validation.md) has not been performed; this is not a stable release approval.
+Reviewed: 2026-10-21. **Published prerelease:** `v0.4.0-rc.2` / npm `next` (`rulewitness@0.4.0-rc.2`); **stable `latest`: `0.3.0`**. PR #60 fixed read-only postpublish propagation checks and introduced the experimental Codex consumer workflow. PR #61 verified the published package against isolated exact-Git fixtures in Actions, while PR #63 exercised the consumer shell gate against the pinned published CLI (exit 0/1/3). These changes landed **after** the immutable rc.2 npm package and must not be described as rc.2 tarball contents. [Real consumer PR validation](codex-consumer-validation.md) has not been performed; this is not a stable release approval.
 
 ## Actual scope and limits
 
@@ -32,7 +32,7 @@ Reviewed: 2026-10-21. **Published prerelease:** `v0.4.0-rc.2` / npm `next` (`rul
 
 1. Revalidate registry metadata, package contents, exact proposed stable commit, GitHub CI and all security boundaries before any new stable tag.
 2. Codex posture comparison is **not** effective command authorization or production Codex permission analysis; runtime precedence and project trust remain unresolved.
-3. Real consumer-repository pull-request validation for the [experimental Codex workflow](codex-consumer-validation.md) has **not** been recorded, even though the published-package E2E Git fixture passed.
+3. Real consumer-repository pull-request validation for the [experimental Codex workflow](codex-consumer-validation.md) has **not** been recorded, even though the published-package Git fixture and shell-gate E2E passed.
 4. Claude/Codex runtime conformance, external managed/user settings and Windows coverage remain unverified.
 5. The next release requires its own package version, changelog, tarball audit, maintainer authorization, and postpublish verification.
 

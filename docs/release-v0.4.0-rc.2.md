@@ -1,6 +1,6 @@
-# RuleWitness v0.4.0-rc.2 — proposed release notes
+# RuleWitness v0.4.0-rc.2 — historical prerelease notes
 
-**Status: candidate only. Not published.** This file is a maintainer review artifact, not a release announcement. Publish only after the exact release commit passes the checks in [release readiness](release-readiness-v0.4.md) and a separate explicit release decision.
+**Status: published on 2026-10-21 as an experimental npm `next` prerelease.** Stable `latest` remained `0.3.0` at the confirmed postpublication verification. This page preserves the original release-candidate scope; later PRs #60–#63 are changes to `main`, not part of the immutable rc.2 tarball. The GitHub Release description was originally drafted before publication and must not be used as evidence of the current registry state.
 
 ## Highlights
 
@@ -9,7 +9,7 @@
 - Security: Git objects are inspected without checkout or executing referenced commands/hooks; uncertainty is explicit for unsupported configs, trust, ambient settings and runtime context.
 - CI/DX: installed-package regression coverage for Codex CLI, fork-compatible Claude PR review summary and clearer release checks.
 
-## Installing after publication is independently verified
+## Installing the published experimental candidate
 
 ```sh
 npm install --save-dev rulewitness@0.4.0-rc.2
@@ -17,7 +17,7 @@ npx --no-install rulewitness compare HEAD~1 HEAD --json
 npx --no-install rulewitness codex-review HEAD~1 HEAD --json
 ```
 
-These commands are **not an instruction to install rc.2 before publication**. The published `0.3.0` stable workflow example remains unchanged until an audited release is available.
+The package was independently verified after publication. Re-check npm registry metadata when making any new release decision. Stable Claude workflow examples continue to use `0.3.0`.
 
 ## Known limitations
 
@@ -26,13 +26,13 @@ These commands are **not an instruction to install rc.2 before publication**. Th
 - Trust, project/user/managed config precedence, Codex profiles, shell/approval behavior and ambient runtime policy are not resolved from Git. Missing or unsupported config must not be interpreted as safe.
 - Windows and full runtime agent conformance have not been established.
 
-## Maintainer release gate (not yet approved)
+## Historical prerelease preparation checklist (completed before publication)
 
-1. Confirm npm registry does **not** already contain `0.4.0-rc.2`; confirm desired `next` and preserved `latest` tags.
+1. Before publication, confirm npm registry did **not** already contain `0.4.0-rc.2`; check intended `next` and preserved `latest` tags. This check must **not** be repeated as a publish instruction now that rc.2 exists.
 2. Verify `package.json`, `package-lock.json`, `CHANGELOG.md`, proposed tag `v0.4.0-rc.2` and exact release commit.
 3. Check CI, permissions review, release-registry preflight, Node 24 typecheck/tests/build/format.
 4. Inspect `npm pack --dry-run --json`, actual tarball paths, exports/declarations, both binaries, dependency inclusion and offline consumer installation.
 5. Verify the npm OIDC trusted publishing workflow's configured publisher, GitHub tag main ancestry and postpublish registry verification.
-6. Obtain maintainer authorization for **tag / GitHub Release / npm publish**. Do not execute any of these from this PR.
+6. Obtain maintainer authorization for **tag / GitHub Release / npm publish**. This was a historical checklist; never republish the immutable rc.2 package.
 
-The `next` dist-tag, not `latest`, is intended by the existing prerelease publishing workflow. Verify the actual registry state again before the release.
+The prerelease used `next`, not `latest`. A **future** release requires a fresh registry check, different version, release-gate audit and separate authorization.
