@@ -42,3 +42,10 @@ export type {
 } from "./permission-sources.ts";
 export { evaluateWithSources } from "./source-aware-evaluation.ts";
 export type { SourceAwareEvaluation } from "./source-aware-evaluation.ts";
+export { inspectCodexPosture, compareCodexPosture } from "./codex-posture.ts";
+export type {
+  CodexPosture,
+  CodexPostureComparison,
+  CodexPostureKey,
+  CodexPostureValue,
+} from "./codex-posture.ts";
