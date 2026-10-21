@@ -7,7 +7,12 @@
  * other syntax produces UNKNOWN instead of guessing a value.
  */
 export type CodexPostureKey = "approval_policy" | "sandbox_mode";
-export type CodexPostureValue = "on-request" | "never" | "read-only" | "workspace-write" | "danger-full-access";
+export type CodexPostureValue =
+  | "on-request"
+  | "never"
+  | "read-only"
+  | "workspace-write"
+  | "danger-full-access";
 export interface CodexPosture {
   schemaVersion: 1;
   provider: "codex";
@@ -34,12 +39,18 @@ const values: Record<CodexPostureKey, readonly string[]> = {
 const keys = ["approval_policy", "sandbox_mode"] as const;
 const MAX_LENGTH = 64 * 1024;
 export function inspectCodexPosture(content: string): CodexPosture {
-  if (typeof content !== "string" || Buffer.byteLength(content, "utf8") > MAX_LENGTH)
+  if (
+    typeof content !== "string" ||
+    Buffer.byteLength(content, "utf8") > MAX_LENGTH
+  )
     throw new Error("Codex config input exceeds safe limit or is not text");
   const result: CodexPosture = {
-    schemaVersion: 1, provider: "codex",
-    scope: "tracked-project-config-posture", complete: false,
-    values: {}, issues: [],
+    schemaVersion: 1,
+    provider: "codex",
+    scope: "tracked-project-config-posture",
+    complete: false,
+    values: {},
+    issues: [],
   };
   const issues: string[] = [];
   const seen = new Set<string>();
@@ -52,12 +63,16 @@ export function inspectCodexPosture(content: string): CodexPosture {
       issues.push("TOML tables not interpreted (line " + (i + 1) + ")");
       continue;
     }
-    const match = /^([A-Za-z_][A-Za-z_0-9]*)\s*=\s*"([A-Za-z0-9-]+)"(?:\s*#.*)?$/.exec(line);
+    const match =
+      /^([A-Za-z_][A-Za-z_0-9]*)\s*=\s*"([A-Za-z0-9-]+)"(?:\s*#.*)?$/.exec(
+        line,
+      );
     if (!match) {
       issues.push("Unsupported TOML syntax (line " + (i + 1) + ")");
       continue;
     }
-    const key = match[1]!, value = match[2]!;
+    const key = match[1]!,
+      value = match[2]!;
     if (seen.has(key)) {
       issues.push("Duplicate TOML key (line " + (i + 1) + ")");
       continue;
@@ -82,14 +97,24 @@ export function inspectCodexPosture(content: string): CodexPosture {
   if (issues.length) return { ...result, values: {}, issues };
   return result;
 }
-export function compareCodexPosture(before: CodexPosture, after: CodexPosture): CodexPostureComparison {
-  if (before.provider !== "codex" || after.provider !== "codex" ||
-      before.schemaVersion !== 1 || after.schemaVersion !== 1)
+export function compareCodexPosture(
+  before: CodexPosture,
+  after: CodexPosture,
+): CodexPostureComparison {
+  if (
+    before.provider !== "codex" ||
+    after.provider !== "codex" ||
+    before.schemaVersion !== 1 ||
+    after.schemaVersion !== 1
+  )
     throw new Error("Expected two Codex posture inventories");
   const uncertain = before.issues.length > 0 || after.issues.length > 0;
-  const changes = uncertain ? [] : keys.flatMap((key) => {
-    const left = before.values[key] ?? null, right = after.values[key] ?? null;
-    return left === right ? [] : [{ key, before: left, after: right }];
-  });
+  const changes = uncertain
+    ? []
+    : keys.flatMap((key) => {
+        const left = before.values[key] ?? null,
+          right = after.values[key] ?? null;
+        return left === right ? [] : [{ key, before: left, after: right }];
+      });
   return { before, after, changes, uncertain, runtimePermissionDiff: false };
 }
