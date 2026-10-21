@@ -1,10 +1,19 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync, symlinkSync } from "node:fs";
+import {
+  mkdtempSync,
+  mkdirSync,
+  rmSync,
+  writeFileSync,
+  symlinkSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import { compareTrackedCodexPosture, readTrackedCodexPosture } from "../src/codex-git.ts";
+import {
+  compareTrackedCodexPosture,
+  readTrackedCodexPosture,
+} from "../src/codex-git.ts";
 
 function git(repo: string, ...args: string[]): string {
   return execFileSync("git", ["-C", repo, ...args], {
@@ -30,8 +39,14 @@ function commit(root: string, content: string): string {
 test("Codex Git: compare exact revisions without changing checkout", () => {
   const root = repository();
   try {
-    const a = commit(root, 'approval_policy = "on-request"\nsandbox_mode = "read-only"\n');
-    const b = commit(root, 'sandbox_mode = "workspace-write"\napproval_policy = "never"\n');
+    const a = commit(
+      root,
+      'approval_policy = "on-request"\nsandbox_mode = "read-only"\n',
+    );
+    const b = commit(
+      root,
+      'sandbox_mode = "workspace-write"\napproval_policy = "never"\n',
+    );
     const result = compareTrackedCodexPosture(root, a, b);
     assert.equal(result.schemaVersion, 1);
     assert.equal(result.uncertain, false);
@@ -72,7 +87,10 @@ test("Codex Git: symlink is rejected, never followed", () => {
     symlinkSync("../secret.txt", join(root, ".codex/config.toml"));
     git(root, "add", ".codex/config.toml");
     git(root, "commit", "-qm", "link");
-    assert.throws(() => readTrackedCodexPosture(root, "HEAD"), /Unsafe Codex configuration/);
+    assert.throws(
+      () => readTrackedCodexPosture(root, "HEAD"),
+      /Unsafe Codex configuration/,
+    );
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -83,8 +101,14 @@ test("Codex Git: oversized blob and invalid refs fail closed", () => {
   try {
     commit(root, "x".repeat(65537));
     assert.throws(() => readTrackedCodexPosture(root, "HEAD"), /64 KiB/);
-    assert.throws(() => readTrackedCodexPosture(root, "--help"), /Invalid Git revision/);
-    assert.throws(() => readTrackedCodexPosture(root, "missing-ref"), /Read-only Git operation failed/);
+    assert.throws(
+      () => readTrackedCodexPosture(root, "--help"),
+      /Invalid Git revision/,
+    );
+    assert.throws(
+      () => readTrackedCodexPosture(root, "missing-ref"),
+      /Read-only Git operation failed/,
+    );
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -94,7 +118,10 @@ test("Codex Git: unsupported TOML stays uncertain without leaking raw values", (
   const root = repository();
   try {
     const a = commit(root, 'approval_policy="on-request"');
-    const b = commit(root, 'model="sensitive-fixture-value"\napproval_policy="never"');
+    const b = commit(
+      root,
+      'model="sensitive-fixture-value"\napproval_policy="never"',
+    );
     const diff = compareTrackedCodexPosture(root, a, b);
     assert.equal(diff.uncertain, true);
     assert.deepEqual(diff.posture.changes, []);
