@@ -22,13 +22,18 @@ test("audit: deny, ask, allow precedence is invariant under list ordering", () =
   for (const permissions of permutations) {
     const policy = create(permissions);
     assert.deepEqual(policy.issues, []);
-    assert.equal(evaluate(policy, "Bash", "git push origin main").decision, "DENY");
+    assert.equal(
+      evaluate(policy, "Bash", "git push origin main").decision,
+      "DENY",
+    );
     assert.equal(evaluate(policy, "Bash", "git status").decision, "ASK");
     assert.equal(evaluate(policy, "Bash", "npm test").decision, "ALLOW");
     assert.equal(scanPolicy(policy).complete, false);
   }
   assert.equal(
-    comparisonOutcome(comparePolicies(create(permutations[0]), create(permutations[1]))),
+    comparisonOutcome(
+      comparePolicies(create(permutations[0]), create(permutations[1])),
+    ),
     "modeled-no-op",
   );
 });
@@ -69,12 +74,17 @@ test("audit: unknown hooks must mask positive grant and retain changed rules as 
   assert.equal(evaluate(after, "Bash", "npm install").decision, "UNKNOWN");
   const report = comparePolicies(before, after);
   assert.equal(comparisonOutcome(report), "uncertain");
-  assert.ok(report.findings.some((f) => f.kind === "coverage" && f.tool === "Bash"));
+  assert.ok(
+    report.findings.some((f) => f.kind === "coverage" && f.tool === "Bash"),
+  );
   assert.equal(assessComparisonGate(report, "high").exitCode, 3);
 });
 
 test("audit: unsupported runtime mode prevents a confident transition", () => {
-  const known = create({ defaultMode: "manual", allow: ["WebSearch"] }, "known");
+  const known = create(
+    { defaultMode: "manual", allow: ["WebSearch"] },
+    "known",
+  );
   const unknown = create(
     { defaultMode: "bypassPermissions", allow: ["WebSearch"] },
     "unknown",
