@@ -1,0 +1,33 @@
+name: Feature request
+description: Propose a scoped RuleWitness improvement
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: "RuleWitness reports static evidence, not proof of runtime-effective permissions. Proposals must preserve uncertainty and incomplete-result semantics."
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and user impact
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and limitations
+      description: Describe supported inputs, unknowns, false-positive risks, and expected incomplete states.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria and tests
+    validations:
+      required: true
