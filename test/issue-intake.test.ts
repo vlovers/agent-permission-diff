@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -10,6 +10,9 @@ const bug = read(".github/ISSUE_TEMPLATE/bug_report.md");
 const task = read(".github/ISSUE_TEMPLATE/engineering_task.md");
 const security = read("SECURITY.md");
 const contributing = read("CONTRIBUTING.md");
+const chooser = read(".github/ISSUE_TEMPLATE/config.yml");
+const feature = read(".github/ISSUE_TEMPLATE/feature_request.yml");
+const triage = read("docs/ISSUE_TRIAGE.md");
 
 function frontmatter(markdown: string): Record<string, string> {
   const match = /^---\n([\s\S]*?)\n---\n/.exec(markdown);
@@ -116,4 +119,70 @@ test("contributor guidance reflects gated publishing", () => {
     contributing,
     /This project has no publishing or deployment automation/,
   );
+});
+
+test("issue chooser points to canonical disclosure guidance", () => {
+  assert.match(chooser, /^blank_issues_enabled: true$/m);
+  assert.match(
+    chooser,
+    /url: https:\/\/github\.com\/vlovers\/rulewitness\/blob\/main\/SECURITY\.md/,
+  );
+  assert.doesNotMatch(chooser, /url: .*\/security\/advisories\/new/);
+  assert.match(chooser, /Do not post sensitive details/i);
+});
+
+test("feature request form has unique fields and explicit uncertainty", () => {
+  assert.match(feature, /^name: Feature request$/m);
+  assert.match(feature, /^description: .+$/m);
+  assert.match(feature, /^title: "feat: "$/m);
+  const ids = [...feature.matchAll(/^\s+id: ([a-z_]+)$/gm)].map(
+    (match) => match[1],
+  );
+  assert.deepEqual(ids, [
+    "problem",
+    "proposal",
+    "boundaries",
+    "acceptance",
+    "compatibility",
+  ]);
+  assert.equal(
+    (feature.match(/^\s+required: true$/gm) ?? []).length,
+    4,
+  );
+  for (const term of [
+    /credentials/i,
+    /runtime authorization/i,
+    /uncertainty/i,
+    /false-positive/i,
+    /installed-consumer/i,
+    /exit codes/i,
+  ]) {
+    assert.match(feature, term);
+  }
+});
+
+test("issue chooser has no duplicate template stems", () => {
+  const files = readdirSync(join(root, ".github/ISSUE_TEMPLATE"));
+  const stems = files
+    .filter((name) => /\.(md|ya?ml)$/.test(name) && name !== "config.yml")
+    .map((name) => name.replace(/\.(md|ya?ml)$/, ""));
+  assert.equal(new Set(stems).size, stems.length);
+  for (const required of ["bug_report", "engineering_task", "feature_request"]) {
+    assert.ok(stems.includes(required), `Missing intake template: ${required}`);
+  }
+});
+
+test("triage guidance keeps evidence, disclosure and release separate", () => {
+  for (const term of [
+    /P0/,
+    /P1/,
+    /P2/,
+    /private reporting/i,
+    /original acceptance criteria/i,
+    /independently reviewed/i,
+    /installed npm/i,
+    /runtime conformance/i,
+  ]) {
+    assert.match(triage, term);
+  }
 });
