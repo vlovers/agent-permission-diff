@@ -16,4 +16,4 @@ Provide base and head SHA, diff, acceptance criteria, relevant README/SECURITY d
 
 Each finding includes severity, file/location, affected invariant, concrete evidence or reproduction, remediation and recommended regression test. Distinguish confirmed defects from speculation.
 
-Block acceptance on high-severity correctness, security, supply-chain and compatibility findings. Medium issues need disposition and follow-up. Independent review does not replace maintainer approval, real installed-package checks or documented runtime-coverage limitations.
+Block acceptance on high-severity correctness, security, supply-chain and compatibility findings. Medium issues need disposition and follow-up. Record reviewer identity, reviewed base/head SHA, CI evidence and disposition of findings in the PR. An AI reviewer (even a different model) does not constitute an authorized GitHub approval. Reassess material changes after the reviewed head SHA; independent review does not replace maintainer approval, real installed-package checks or documented runtime-coverage limitations.
