@@ -105,7 +105,7 @@ test("security boundaries preserve conservative unknown and exit behavior", () =
     /read-only/i,
     /fingerprints/i,
     /not.*runtime permission comparisons/i,
-    /must not.*authorize/i,
+    /must never be used to authorize/i,
   ]) {
     assert.match(security, term);
   }
