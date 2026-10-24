@@ -1,0 +1,45 @@
+name: Feature request
+description: Propose a scoped RuleWitness capability or user-facing improvement
+title: "feat: "
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Do not include credentials, private agent settings, or exploit details.
+        RuleWitness models configured rules and cannot certify runtime authorization.
+        Use the security policy for private vulnerability reports.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and user impact
+      description: Describe a concrete problem rather than a proposed implementation alone.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Desired behavior and scope
+      description: State what is in scope and explicitly out of scope.
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Evidence, unknowns and safety boundaries
+      description: Explain supported inputs, uncertainty, incomplete results and false-positive risks.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria and regression tests
+      description: Include installed-consumer verification if CLI, API or packaging changes.
+    validations:
+      required: true
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Compatibility and release considerations
+      description: Consider JSON schema, exit codes, package consumers and rollback.
+    validations:
+      required: false
