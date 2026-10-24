@@ -1,0 +1,64 @@
+name: Bug report
+description: Report a reproducible RuleWitness defect
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "Do not paste tokens, private configuration, credentials, or sensitive repository contents. Redact examples before submitting."
+  - type: input
+    id: version
+    attributes:
+      label: RuleWitness version or commit
+      placeholder: "npm version or commit SHA"
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Affected surface
+      options:
+        - CLI scan
+        - JSON or Markdown report
+        - Configuration parsing
+        - GitHub integration
+        - Packaging / installation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction
+      description: Use sanitized input and exact commands. Avoid private files.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include exit code and whether the report was incomplete; redact sensitive output.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Node.js version, package manager, and relevant tool versions.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety checks
+      options:
+        - label: I removed secrets and sensitive repository data from the report.
+          required: true
+        - label: I did not interpret an incomplete scan as a complete or safe result.
+          required: true
