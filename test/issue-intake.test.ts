@@ -167,7 +167,11 @@ test("issue chooser has no duplicate template stems", () => {
     .filter((name) => /\.(md|ya?ml)$/.test(name) && name !== "config.yml")
     .map((name) => name.replace(/\.(md|ya?ml)$/, ""));
   assert.equal(new Set(stems).size, stems.length);
-  for (const required of ["bug_report", "engineering_task", "feature_request"]) {
+  for (const required of [
+    "bug_report",
+    "engineering_task",
+    "feature_request",
+  ]) {
     assert.ok(stems.includes(required), `Missing intake template: ${required}`);
   }
 });
@@ -181,7 +185,7 @@ test("triage guidance keeps evidence, disclosure and release separate", () => {
     /original acceptance criteria/i,
     /independently reviewed/i,
     /installed npm/i,
-    /runtime conformance/i,
+    /runtime[- ]conformance/i,
   ]) {
     assert.match(triage, term);
   }
