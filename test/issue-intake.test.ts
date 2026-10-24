@@ -35,7 +35,7 @@ test("both GitHub Issue templates have distinct, usable metadata", () => {
   assert.notEqual(bugMetadata.title, taskMetadata.title);
 });
 
-test("public templates direct vulnerabilities to the canonical security policy", () => {
+test("public intake links to the canonical security policy", () => {
   for (const template of [bug, task]) {
     assert.match(
       template,
@@ -61,7 +61,7 @@ test("bug intake collects reproducible, sanitized CLI evidence", () => {
   }
 });
 
-test("task intake separates review, merge, publication and runtime claims", () => {
+test("task intake separates review, release and runtime claims", () => {
   for (const term of [
     /non-goals/i,
     /independently reviewed/i,
@@ -80,24 +80,21 @@ test("security disclosure links use the current repository", () => {
     security,
     /https:\/\/github\.com\/vlovers\/rulewitness\/security\/advisories\/new/,
   );
-  assert.match(
-    security,
-    /https:\/\/github\.com\/vlovers\/rulewitness\/issues/,
-  );
+  assert.match(security, /https:\/\/github\.com\/vlovers\/rulewitness\/issues/);
   assert.doesNotMatch(
     security,
     /github\.com\/vlovers\/agent-permission-diff\//,
   );
 });
 
-test("security guidance does not mistake a GitHub setting for a guarantee", () => {
+test("security disclosure does not promise GitHub settings", () => {
   assert.match(security, /if the repository currently offers that form/i);
   assert.match(security, /without vulnerability details/i);
   assert.match(security, /no response-time commitment/i);
   assert.match(security, /responsible maintainer/i);
 });
 
-test("security boundaries preserve conservative unknown and exit behavior", () => {
+test("security preserves unknown and exit behavior", () => {
   for (const term of [
     /complete: false/,
     /exit 3/,
@@ -111,7 +108,7 @@ test("security boundaries preserve conservative unknown and exit behavior", () =
   }
 });
 
-test("contributor guidance reflects gated publishing and private intake", () => {
+test("contributor guidance reflects gated publishing", () => {
   assert.match(contributing, /gated npm release workflow/i);
   assert.match(contributing, /separate maintainer authorization/i);
   assert.match(contributing, /SECURITY\.md/);
