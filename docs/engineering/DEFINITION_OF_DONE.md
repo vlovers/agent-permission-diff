@@ -11,7 +11,7 @@ A change is **implemented** when its agreed code/docs and acceptance criteria ex
 - Matcher changes extend the **independent policy oracle**, not just implementation-sharing tests.
 - Exact commands and environment evidence reported: `npm run typecheck`, `npm test`, `npm run build`, `npm run test:package`, `npm run format:check`, and `npm pack --dry-run` when relevant. No invented passing results.
 - Consumer/CI/action changes include isolated published/packed package verification and realistic read-only fork safety where applicable.
-- Independent reviewer checks original diff, test value, security, false negatives and backwards compatibility. Resolve blocking findings.
+- Independent reviewer checks original base-to-head diff, test value, security, false negatives and backwards compatibility. Record reviewer identity, reviewed head SHA and disposition of findings; reassess material changes after review. AI assessment is not an authorized GitHub approval. Resolve blocking findings.
 - README and relevant compatibility/release docs describe verified behavior, not proposals.
 
 Docs-only PRs may justify runtime checks as N/A; check relative links and factual command references. A green CI result does not prove runtime conformance or release approval.
