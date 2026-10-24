@@ -145,10 +145,7 @@ test("feature request form has unique fields and explicit uncertainty", () => {
     "acceptance",
     "compatibility",
   ]);
-  assert.equal(
-    (feature.match(/^\s+required: true$/gm) ?? []).length,
-    4,
-  );
+  assert.equal((feature.match(/^\s+required: true$/gm) ?? []).length, 4);
   for (const term of [
     /credentials/i,
     /runtime authorization/i,
