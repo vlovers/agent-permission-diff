@@ -5,6 +5,11 @@ Applies to this repository. Read the README and relevant local documentation bef
 ## Project boundaries
 RuleWitness is an offline semantic permission-diff CLI/library. Never execute modeled witness commands or treat its modeled ALLOW as runtime authorization. Keep fixtures deterministic and cover changed semantics with regression tests.
 
+## Existing project safeguards
+- Preserve `schemaVersion` compatibility (or explicitly version breaking changes), document severity transitions, and extend the independent policy oracle in `test/independent-witness.test.ts` for matcher changes. Model correctness is not proof of installed-provider conformance.
+- Use Node.js 24 and the project-specific checks from `CONTRIBUTING.md`, including `npm run test:package`, `npm pack --dry-run` and `npm run format:check`. Do not execute analyzed hooks, settings, commands or lifecycle scripts; keep package-consumer tests offline and scripts disabled.
+- No automatic npm publishing or release; publication requires separate explicit authorization.
+
 ## Development protocol
 1. Start from a scoped issue and feature branch. Identify acceptance criteria and affected behavior.
 2. Read existing implementation and tests; avoid unrelated refactors or generated-file churn.
