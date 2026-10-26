@@ -28,6 +28,6 @@ RuleWitness is an offline semantic permission-diff CLI/library. Never execute mo
 ## Definition of Done
 Acceptance criteria met; regression tests and applicable checks green; docs updated; security and operational impact recorded; independent review obtained; no unresolved blocking findings.
 
-See also: [independent review policy](docs/engineering/REVIEW_POLICY.md) and [release checklist](docs/engineering/RELEASE_CHECKLIST.md). These documents supplement this contract and `CONTRIBUTING.md`; they do not authorize npm publication.
+See also: [Definition of Done](docs/engineering/DEFINITION_OF_DONE.md), [independent review policy](docs/engineering/REVIEW_POLICY.md), and [release checklist](docs/engineering/RELEASE_CHECKLIST.md). These documents supplement this contract and `CONTRIBUTING.md`; they do not replace stricter project-specific requirements.
 
 Cross-repository governance tracking: vlovers/ai-office#87. These instructions apply only to this repository.
