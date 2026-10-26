@@ -33,6 +33,8 @@ CI run links and known failures:
 - [ ] Package tests run in isolated consumer fixtures; analyzed third-party lifecycle scripts/hooks/commands were not executed.
 - [ ] No npm publish or release triggered; separate maintainer authorization required.
 
+See [Definition of Done](../docs/engineering/DEFINITION_OF_DONE.md), [independent review policy](../docs/engineering/REVIEW_POLICY.md), and [release checklist](../docs/engineering/RELEASE_CHECKLIST.md).
+
 ## Merge gate
 - [ ] Required checks passed
 - [ ] Independent review obtained (not author self-review)
