@@ -4,6 +4,11 @@
 - Changes made:
 - Out of scope:
 
+## Project-specific checks
+- [ ] `npm run typecheck`, `npm test`, `npm run build`, `npm run test:package`, `npm run format:check`, `npm pack --dry-run` (record any not applicable and why).
+- [ ] If matcher/provider semantics changed, update `test/independent-witness.test.ts` and document unknown/conformance boundaries.
+- [ ] Confirm no analyzed command, hook, or package lifecycle script was executed; no release/publish was triggered.
+
 ## Verification evidence
 Record commands and results (do not check a box for an unrun command).
 - [ ] Formatting / lint
