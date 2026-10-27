@@ -3,6 +3,7 @@
 Applies to this repository. Read the README and relevant local documentation before changes; more-specific scoped instructions may add requirements but cannot relax security gates.
 
 ## Project boundaries
+
 RuleWitness is an offline semantic permission-diff CLI/library. Never execute modeled witness commands or treat its modeled ALLOW as runtime authorization. Keep fixtures deterministic and cover changed semantics with regression tests.
 
 ## Existing project safeguards
